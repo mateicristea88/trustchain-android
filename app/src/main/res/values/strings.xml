@@ -48,6 +48,7 @@
 
     <!-- Menu -->
     <string name="menu_item_1">My Chain</string>
+    <string name="menu_claims">My Claims</string>
     <string name="menu_item_2">Clear Entire Inbox</string>
     <string name="menu_info">Info</string>
     <string name="find_peer">Find peer</string>
@@ -96,4 +97,5 @@
     <string name="export_tokens">Export Tokens</string>
     <string name="funds">Funds</string>
     <string name="transactions">Transactions</string>
+    <string name="title_activity_info_claims_list">My Claims</string>
 </resources>
