@@ -50,6 +50,8 @@ import nl.tudelft.cs4160.trustchain_android.appToApp.connection.messages.Punctur
 import nl.tudelft.cs4160.trustchain_android.appToApp.connection.messages.PunctureRequest;
 import nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper;
 import nl.tudelft.cs4160.trustchain_android.chainExplorer.ChainExplorerActivity;
+import nl.tudelft.cs4160.trustchain_android.claims.AttestClaimsActivity;
+import nl.tudelft.cs4160.trustchain_android.claims.Beam;
 import nl.tudelft.cs4160.trustchain_android.claims.ClaimsListActivity;
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
@@ -115,8 +117,12 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
                 startActivity(chainExplorerActivity);
                 return true;
             case R.id.claims_menu:
-                Intent claimsActivity = new Intent(this, ClaimsListActivity.class);
+                Intent claimsActivity = new Intent(this, Beam.class);
                 startActivity(claimsActivity);
+                return true;
+            case R.id.attest_claims:
+                Intent attestActivity = new Intent(this, AttestClaimsActivity.class);
+                startActivity(attestActivity);
                 return true;
             case R.id.connection_explanation_menu:
                 Intent ConnectionExplanationActivity = new Intent(this, ConnectionExplanationActivity.class);

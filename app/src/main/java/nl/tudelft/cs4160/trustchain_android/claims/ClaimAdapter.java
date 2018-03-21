@@ -22,6 +22,7 @@ import nl.tudelft.cs4160.trustchain_android.SharedPreferences.UserNameStorage;
 import nl.tudelft.cs4160.trustchain_android.Util.ByteArrayConverter;
 import nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper;
 import nl.tudelft.cs4160.trustchain_android.chainExplorer.ChainExplorerActivity;
+import nl.tudelft.cs4160.trustchain_android.chainExplorer.SendClaimActivity;
 import nl.tudelft.cs4160.trustchain_android.color.ChainColor;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 
@@ -189,21 +190,23 @@ class ClaimAdapter extends BaseAdapter {
         View.OnClickListener onClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TextView tv = (TextView) v;
-                String pubKey = tv.getText().toString();
-                if(pubKey.equals("00")) {
-                    showToast("00 is not a valid public key");
-                    return;
-                } else if(ByteArrayConverter.bytesToHexString(chainPubKey).equals(pubKey)) {
-                    showToast("Already showing this public key");
-                    return;
-                }
-
-                Intent intent = new Intent(context, ChainExplorerActivity.class);
-                intent.putExtra(ChainExplorerActivity.BUNDLE_EXTRAS_PUBLIC_KEY,
-                        ByteArrayConverter.hexStringToByteArray(tv.getText().toString()));
-                context.startActivity(intent);
-                ((Activity)context).finish();
+                Intent sendClaimIntent = new Intent(context, SendClaimActivity.class);
+                context.startActivity(sendClaimIntent);
+//                TextView tv = (TextView) v;
+//                String pubKey = tv.getText().toString();
+//                if(pubKey.equals("00")) {
+//                    showToast("00 is not a valid public key");
+//                    return;
+//                } else if(ByteArrayConverter.bytesToHexString(chainPubKey).equals(pubKey)) {
+//                    showToast("Already showing this public key");
+//                    return;
+//                }
+//
+//                Intent intent = new Intent(context, ChainExplorerActivity.class);
+//                intent.putExtra(ChainExplorerActivity.BUNDLE_EXTRAS_PUBLIC_KEY,
+//                        ByteArrayConverter.hexStringToByteArray(tv.getText().toString()));
+//                context.startActivity(intent);
+//                ((Activity)context).finish();
             }
         };
         view.setOnClickListener(onClickListener);

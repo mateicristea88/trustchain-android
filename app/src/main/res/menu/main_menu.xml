@@ -10,6 +10,10 @@
         android:title="@string/menu_claims"
         app:showAsAction="never"/>
     <item
+        android:id="@+id/attest_claims"
+        android:title="@string/attest_claims"
+        app:showAsAction="never"/>
+    <item
         android:id="@+id/connection_explanation_menu"
         android:title="@string/connection_info_text"
         app:showAsAction="never" />
