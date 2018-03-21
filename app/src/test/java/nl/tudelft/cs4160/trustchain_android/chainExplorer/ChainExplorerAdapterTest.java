@@ -6,8 +6,8 @@ import com.google.protobuf.ByteString;
 import java.util.HashMap;
 
 public class ChainExplorerAdapterTest {
-    private static final ByteString PEER_2_PEER = ByteString.copyFromUtf8("peer2peer");
-    private ChainExplorerAdapter adapter = new ChainExplorerAdapter(null, null, new byte[0]);
+//    private static final ByteString PEER_2_PEER = ByteString.copyFromUtf8("peer2peer");
+//    private ChainExplorerAdapter adapter = new ChainExplorerAdapter(null, null, new byte[0]);
 
 /*
     @Test
@@ -20,13 +20,13 @@ public class ChainExplorerAdapterTest {
         assertTrue(adapter.peerList.containsKey(newPeer));
     }
 */
-
-    private static HashMap<ByteString, String> singlePeer() {
-        HashMap<ByteString, String> peers = new HashMap<>();
-        peers.put(PEER_2_PEER, "me");
-
-        return peers;
-    }
+//
+//    private static HashMap<ByteString, String> singlePeer() {
+//        HashMap<ByteString, String> peers = new HashMap<>();
+//        peers.put(PEER_2_PEER, "me");
+//
+//        return peers;
+//    }
 
 /*
     @Test

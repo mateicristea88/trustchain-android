@@ -44,12 +44,10 @@ repositories {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: '*.jar')
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    implementation files('libs/protobuf-java-3.4.1.jar')
     implementation 'com.android.support:appcompat-v7:26.1.0'
     implementation 'me.dm7.barcodescanner:zxing:1.9.8'
     implementation 'com.android.support:design:26.1.0'
@@ -69,4 +67,5 @@ dependencies {
         exclude group: 'com.android.support', module: 'design'
         exclude group: 'com.android.support', module: 'recyclerview-v7'
     }
+    implementation files('libs/bulletproof.jar')
 }

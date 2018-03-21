@@ -7,9 +7,6 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 
-<<<<<<<HEAD
-        =======
-        >>>>>>>29aa341a74003f041d63668cec12d1f42177436b
 
 public class inboxItemTest extends TestCase {
     String userName;
