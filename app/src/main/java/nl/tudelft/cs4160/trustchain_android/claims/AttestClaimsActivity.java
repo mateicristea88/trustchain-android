@@ -23,15 +23,13 @@ import nl.tudelft.cs4160.trustchain_android.R;
 
 public class AttestClaimsActivity extends AppCompatActivity {
 
-    // A File object containing the path to the transferred files
-    private File mParentPath;
-    // Incoming Intent
-    private Intent mIntent;
+    private static final String TAG = AttestClaimsActivity.class.toString();
+    private Intent mIntent; // Incoming Intent
     private NfcAdapter mNfcAdapter;
     private PendingIntent pendingIntent;
     private IntentFilter[] intentFiltersArray;
 
-    TextView textView;
+    private TextView textView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,15 +51,15 @@ public class AttestClaimsActivity extends AppCompatActivity {
         IntentFilter ndef = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
         ndef.addCategory(Intent.CATEGORY_DEFAULT);
 
-        IntentFilter ndef2 = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
-        ndef.addCategory(Intent.CATEGORY_DEFAULT);
+//        IntentFilter ndef2 = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
+//        ndef.addCategory(Intent.CATEGORY_DEFAULT);
 //        try {
 //            ndef.addDataType("application/com.sample.mime");
 //        } catch (IntentFilter.MalformedMimeTypeException e) {
 //            Log.wtf("mimeexception", e);
 //            e.printStackTrace();
 //        }
-        intentFiltersArray = new IntentFilter[] {def, ndef, ndef2};
+        intentFiltersArray = new IntentFilter[] { def , ndef};
 //        handleViewIntent();
     }
 
@@ -94,19 +92,14 @@ public class AttestClaimsActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         // Call this before super.onPause, otherwise an IllegalArgumentException is thrown as well.
-        NfcAdapter.getDefaultAdapter(this).disableForegroundDispatch(this);
+        mNfcAdapter.disableForegroundDispatch(this);
         super.onPause();
-    }
-
-    public static void stopForegroundDispatch(final Activity activity, NfcAdapter adapter) {
-        adapter.disableForegroundDispatch(activity);
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
-              handleIntent(intent);
+        handleIntent(intent);
     }
-
 
     void processIntent(Intent intent) {
         textView = (TextView) findViewById(R.id.textView);
@@ -126,57 +119,6 @@ public class AttestClaimsActivity extends AppCompatActivity {
             processIntent(intent);
         } catch (Exception e) {
             e.printStackTrace();
-        }
-        String action = mIntent.getAction();
-        /*
-         * For ACTION_VIEW, the Activity is being asked to display data.
-         * Get the URI.
-         */
-        //if (TextUtils.equals(action, Intent.ACTION_VIEW)) {
-            // Get the URI from the Intent
-            Uri beamUri = mIntent.getData();
-            Log.e("TAG", "beamdata: " + beamUri);
-            /*
-             * Test for the type of URI, by getting its scheme value
-             */
-            if (TextUtils.equals(beamUri.getScheme(), "file")) {
-                //mParentPath = handleFileUri(beamUri);
-            } else if (TextUtils.equals(
-                    beamUri.getScheme(), "content")) {
-                mParentPath = handleContentUri(beamUri);
-            }
-     //   }
-    }
-
-
-    /*
-     * Called from onNewIntent() for a SINGLE_TOP Activity
-     * or onCreate() for a new Activity. For onNewIntent(),
-     * remember to call setIntent() to store the most
-     * current Intent
-     *
-     */
-    private void handleViewIntent() {
-        // Get the Intent action
-        mIntent = getIntent();
-        String action = mIntent.getAction();
-        /*
-         * For ACTION_VIEW, the Activity is being asked to display data.
-         * Get the URI.
-         */
-        if (TextUtils.equals(action, Intent.ACTION_VIEW)) {
-            // Get the URI from the Intent
-            Uri beamUri = mIntent.getData();
-            Log.e("TAG", "beamdata: " + beamUri);
-            /*
-             * Test for the type of URI, by getting its scheme value
-             */
-            if (TextUtils.equals(beamUri.getScheme(), "file")) {
-                //mParentPath = handleFileUri(beamUri);
-            } else if (TextUtils.equals(
-                    beamUri.getScheme(), "content")) {
-                mParentPath = handleContentUri(beamUri);
-            }
         }
     }
 
@@ -217,14 +159,5 @@ public class AttestClaimsActivity extends AppCompatActivity {
             }
         }
         return null;
-    }
-
-    public String handleFileUri(Uri beamUri) {
-        // Get the path part of the URI
-        String fileName = beamUri.getPath();
-        // Create a File object for this filename
-        File copiedFile = new File(fileName);
-        // Get a string containing the file's parent directory
-        return copiedFile.getParent();
     }
 }

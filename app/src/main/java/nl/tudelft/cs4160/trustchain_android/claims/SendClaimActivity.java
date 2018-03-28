@@ -1,36 +1,32 @@
-package nl.tudelft.cs4160.trustchain_android.chainExplorer;
+package nl.tudelft.cs4160.trustchain_android.claims;
 
-import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.nfc.NdefMessage;
+import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
+import android.nfc.NfcAdapter.CreateNdefMessageCallback;
+import android.nfc.NfcAdapter.OnNdefPushCompleteCallback;
 import android.nfc.NfcEvent;
+import android.nfc.tech.NfcA;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
 
 import nl.tudelft.cs4160.trustchain_android.R;
-import nl.tudelft.cs4160.trustchain_android.main.TrustChainActivity;
 
-public class SendClaimActivity extends AppCompatActivity {
+import static android.nfc.NdefRecord.createMime;
+
+public class SendClaimActivity extends AppCompatActivity implements CreateNdefMessageCallback, OnNdefPushCompleteCallback {
 
     private static final String TAG = SendClaimActivity.class.toString();
     private static final String TITLE = "Send claim";
     NfcAdapter mNfcAdapter;
     // Flag to indicate that Android Beam is available
     boolean mAndroidBeamAvailable  = false;
-    // List of URIs to provide to Android Beam
-    private Uri[] mFileUris = new Uri[10];
-    // Instance that returns available files from this app
-    private FileUriCallback mFileUriCallback;
 
    @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,29 +43,15 @@ public class SendClaimActivity extends AppCompatActivity {
         } else {
             mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         }
-        setTitle(TITLE);
-       /*
-         * Instantiate a new FileUriCallback to handle requests for
-         * URIs
-         */
-//       mFileUriCallback = new FileUriCallback();
-//       // Set the dynamic callback for URI requests.
-//       mNfcAdapter.setBeamPushUrisCallback(mFileUriCallback,this);
-       final Activity thisActivity = this;
-       new Thread(new Runnable() {
-           @Override
-           public void run() {
-               try {
-                   NdefMessage message = new NdefMessage("hello testing".getBytes());
-                   Log.e(TAG, "starting beam send");
-//                   Uri dummydata = Uri.parse("content:///" + "hello testing");
-//                   mNfcAdapter.setBeamPushUris(new Uri[]{ dummydata }, thisActivity);
 
-               } catch (Exception e) {
-                    e.printStackTrace();
-               }
-           }
-       }).start();
+        if (!mNfcAdapter.isNdefPushEnabled()) {
+            Log.e(TAG, "NDEF push not enabled");
+        }
+        setTitle(TITLE);
+        // Register callback
+        mNfcAdapter.setNdefPushMessageCallback(this, this);
+        mNfcAdapter.setOnNdefPushCompleteCallback(this, this);
+//        mNfcAdapter.invokeBeam(this);
    }
 
     private void showNotsupportedMessage() {
@@ -80,7 +62,7 @@ public class SendClaimActivity extends AppCompatActivity {
             builder = new AlertDialog.Builder(this);
         }
         builder.setTitle("NFC not supported")
-                .setMessage("NFC is not supported on this device, claims cannot be sent")
+                .setMessage("NFC or Android Beam is not supported on this device, claims cannot be sent")
                 .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         finish();
@@ -90,22 +72,28 @@ public class SendClaimActivity extends AppCompatActivity {
                 .show();
     }
 
-
-    /**
-     * Callback that Android Beam file transfer calls to get
-     * files to share
-     */
-    private class FileUriCallback implements
-            NfcAdapter.CreateBeamUrisCallback {
-        public FileUriCallback() {
-        }
-
-        /**
-         * Create content URIs as needed to share with another device
-         */
-        @Override
-        public Uri[] createBeamUris(NfcEvent event) {
-            return mFileUris;
-        }
+    @Override
+    public NdefMessage createNdefMessage(NfcEvent event) {
+       Log.e(TAG, getApplicationContext().getPackageName());
+        String text = getIntent().getStringExtra("claim");
+        NdefMessage msg = new NdefMessage(
+                new NdefRecord[] { createMime(
+                        "application/vnd.com.example.android.beam", text.getBytes())
+                        /**
+                         * The Android Application Record (AAR) is commented out. When a device
+                         * receives a push with an AAR in it, the application specified in the AAR
+                         * is guaranteed to run. The AAR overrides the tag dispatch system.
+                         * You can add it back in to guarantee that this
+                         * activity starts when receiving a beamed message. For now, this code
+                         * uses the tag dispatch system.
+                        */
+                        , NdefRecord.createApplicationRecord(getApplicationContext().getPackageName())
+                });
+        return msg;
     }
+
+    @Override
+    public void onNdefPushComplete(NfcEvent nfcEvent) {
+        Log.e(TAG, "Beam transfer complete");
+   }
 }

@@ -1,6 +1,5 @@
 package nl.tudelft.cs4160.trustchain_android.claims;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -12,7 +11,6 @@ import android.widget.Toast;
 
 import com.google.protobuf.ByteString;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -21,8 +19,6 @@ import nl.tudelft.cs4160.trustchain_android.R;
 import nl.tudelft.cs4160.trustchain_android.SharedPreferences.UserNameStorage;
 import nl.tudelft.cs4160.trustchain_android.Util.ByteArrayConverter;
 import nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper;
-import nl.tudelft.cs4160.trustchain_android.chainExplorer.ChainExplorerActivity;
-import nl.tudelft.cs4160.trustchain_android.chainExplorer.SendClaimActivity;
 import nl.tudelft.cs4160.trustchain_android.color.ChainColor;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 
@@ -134,9 +130,9 @@ class ClaimAdapter extends BaseAdapter {
 
         // expanded view
         TextView pubKey = convertView.findViewById(R.id.pub_key);
-        setOnClickListener(pubKey);
+//        setOnClickListener(pubKey);
         TextView linkPubKey = convertView.findViewById(R.id.link_pub_key);
-        setOnClickListener(linkPubKey);
+        setOnClickListener(linkPubKey, block);
         TextView prevHash = convertView.findViewById(R.id.prev_hash);
         TextView signature = convertView.findViewById(R.id.signature);
         TextView expTransaction = convertView.findViewById(R.id.expanded_transaction);
@@ -186,27 +182,21 @@ class ClaimAdapter extends BaseAdapter {
      * On click chain explorer activity.
      * @param view
      */
-    public void setOnClickListener(View view) {
+    public void setOnClickListener(View view, MessageProto.TrustChainBlock block) {
+        ByteString pubKeyByteStr = block.getPublicKey();
+
+        final String peerAlias = getPeerAlias(pubKeyByteStr);
+        final String pubKey = ByteArrayConverter.bytesToHexString(pubKeyByteStr.toByteArray());
+        final String transaction = block.getTransaction().toStringUtf8();
         View.OnClickListener onClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent sendClaimIntent = new Intent(context, SendClaimActivity.class);
+                sendClaimIntent.putExtra("claim", "claim from " + peerAlias +
+                        " \nwith pubKey " + pubKey +
+                        " \ntransaction: " + transaction +
+                        " \nBeam time: " + System.currentTimeMillis());
                 context.startActivity(sendClaimIntent);
-//                TextView tv = (TextView) v;
-//                String pubKey = tv.getText().toString();
-//                if(pubKey.equals("00")) {
-//                    showToast("00 is not a valid public key");
-//                    return;
-//                } else if(ByteArrayConverter.bytesToHexString(chainPubKey).equals(pubKey)) {
-//                    showToast("Already showing this public key");
-//                    return;
-//                }
-//
-//                Intent intent = new Intent(context, ChainExplorerActivity.class);
-//                intent.putExtra(ChainExplorerActivity.BUNDLE_EXTRAS_PUBLIC_KEY,
-//                        ByteArrayConverter.hexStringToByteArray(tv.getText().toString()));
-//                context.startActivity(intent);
-//                ((Activity)context).finish();
             }
         };
         view.setOnClickListener(onClickListener);
