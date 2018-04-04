@@ -43,7 +43,7 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <!--<category android:name="android.intent.category.DEFAULT" />-->
             </intent-filter>
         </activity>
         <activity android:name=".qr.ScanQRActivity" />
@@ -69,8 +69,9 @@
             android:label="Receive claims through beam"
             android:screenOrientation="portrait" >
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.CATEGORY_DEFAULT" />
+                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="application/nl.tudelft.cs4160.trustchain_android" />
             </intent-filter>
         </activity>
     </application>

@@ -2,19 +2,21 @@ package nl.tudelft.cs4160.trustchain_android.claims;
 
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.nfc.NfcAdapter.CreateNdefMessageCallback;
 import android.nfc.NfcAdapter.OnNdefPushCompleteCallback;
 import android.nfc.NfcEvent;
-import android.nfc.tech.NfcA;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewTreeObserver;
+import android.widget.TextView;
 
 import nl.tudelft.cs4160.trustchain_android.R;
 
@@ -28,10 +30,16 @@ public class SendClaimActivity extends AppCompatActivity implements CreateNdefMe
     // Flag to indicate that Android Beam is available
     boolean mAndroidBeamAvailable  = false;
 
+    private TextView sendClaimText;
+
    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.content_send_claim);
+
+        View layout = findViewById(R.id.layout_send_claim);
+        sendClaimText = findViewById(R.id.send_claim_text);
+
         // NFC isn't available on the device
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_NFC)) {
             // NFC isn't supported
@@ -44,15 +52,48 @@ public class SendClaimActivity extends AppCompatActivity implements CreateNdefMe
             mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         }
 
-        if (!mNfcAdapter.isNdefPushEnabled()) {
-            Log.e(TAG, "NDEF push not enabled");
-        }
         setTitle(TITLE);
         // Register callback
         mNfcAdapter.setNdefPushMessageCallback(this, this);
         mNfcAdapter.setOnNdefPushCompleteCallback(this, this);
-//        mNfcAdapter.invokeBeam(this);
+
+        sendClaimText.setText(R.string.sending_claim);
+
+        layout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        invokeBeam();
+                    }
+                }, 1000);
+            }
+        });
    }
+
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//        final Activity thisActivity = this;
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    Thread.sleep(300);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//                boolean success = mNfcAdapter.invokeBeam(thisActivity);
+//                Log.i(TAG, "beam transfer invoke succes: " + success);
+//            }
+//        }).start();
+//    }
+
+    private void invokeBeam() {
+        boolean success = mNfcAdapter.invokeBeam(this);
+        Log.i(TAG, "beam transfer invoke succes: " + success);
+    }
 
     private void showNotsupportedMessage() {
         AlertDialog.Builder builder;
@@ -74,26 +115,29 @@ public class SendClaimActivity extends AppCompatActivity implements CreateNdefMe
 
     @Override
     public NdefMessage createNdefMessage(NfcEvent event) {
-       Log.e(TAG, getApplicationContext().getPackageName());
         String text = getIntent().getStringExtra("claim");
         NdefMessage msg = new NdefMessage(
                 new NdefRecord[] { createMime(
-                        "application/vnd.com.example.android.beam", text.getBytes())
+                        "application/nl.tudelft.cs4160.trustchain_android", text.getBytes())
                         /**
-                         * The Android Application Record (AAR) is commented out. When a device
-                         * receives a push with an AAR in it, the application specified in the AAR
-                         * is guaranteed to run. The AAR overrides the tag dispatch system.
-                         * You can add it back in to guarantee that this
-                         * activity starts when receiving a beamed message. For now, this code
-                         * uses the tag dispatch system.
+                         * Including the AAR guarantees that the specified application runs when it
+                         * receives a push.
+                         * TODO make sure this activity starts to handle the beam message
                         */
                         , NdefRecord.createApplicationRecord(getApplicationContext().getPackageName())
                 });
+        Log.e(TAG, "AAR: " + getApplicationContext().getPackageName());
         return msg;
     }
 
     @Override
     public void onNdefPushComplete(NfcEvent nfcEvent) {
-        Log.e(TAG, "Beam transfer complete");
-   }
+        Log.i(TAG, "Beam transfer complete");
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                sendClaimText.setText(R.string.sending_claim_complete);
+            }
+        });
+    }
 }

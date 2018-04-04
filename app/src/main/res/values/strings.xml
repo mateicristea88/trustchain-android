@@ -98,6 +98,11 @@
     <string name="export_tokens">Export Tokens</string>
     <string name="funds">Funds</string>
     <string name="transactions">Transactions</string>
+
+    <!-- Claims -->
     <string name="title_activity_info_claims_list">My Claims</string>
     <string name="title_activity_send_claim">SendClaimActivity</string>
+    <string name="sending_claim">Sending claim, hold receiver close</string>
+    <string name="sending_claim_complete">Claim was sent successfully</string>
+
 </resources>
