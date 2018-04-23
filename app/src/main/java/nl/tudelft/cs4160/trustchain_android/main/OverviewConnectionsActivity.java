@@ -138,6 +138,15 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
     }
 
     /**
+     * Method that causes a crash of the application when it's called.
+     * Used for testing purposes of the crash recovery system for the bootstrap phone.
+     * @param v
+     */
+    public void crashMe(View v) {
+        throw new NullPointerException();
+    }
+
+    /**
      * Define what should be executed when one of the item in the menu is clicked.
      *
      * @param item the item in the menu.
