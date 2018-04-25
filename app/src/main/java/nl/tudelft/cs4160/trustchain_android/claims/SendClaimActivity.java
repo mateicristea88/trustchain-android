@@ -2,6 +2,7 @@ package nl.tudelft.cs4160.trustchain_android.claims;
 
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
@@ -17,18 +18,17 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import nl.tudelft.cs4160.trustchain_android.R;
 
 import static android.nfc.NdefRecord.createMime;
 
-public class SendClaimActivity extends AppCompatActivity implements CreateNdefMessageCallback, OnNdefPushCompleteCallback {
+public class SendClaimActivity extends AppCompatActivity implements OnNdefPushCompleteCallback, NfcAdapter.CreateBeamUrisCallback {
 
     private static final String TAG = SendClaimActivity.class.toString();
     private static final String TITLE = "Send claim";
     NfcAdapter mNfcAdapter;
-    // Flag to indicate that Android Beam is available
-    boolean mAndroidBeamAvailable  = false;
 
     private TextView sendClaimText;
 
@@ -44,18 +44,18 @@ public class SendClaimActivity extends AppCompatActivity implements CreateNdefMe
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_NFC)) {
             // NFC isn't supported
            showNotsupportedMessage();
-        } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            // Android Beam isn't available.
-            mAndroidBeamAvailable = false;
-            showNotsupportedMessage();
         } else {
             mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+
+            if (!mNfcAdapter.isEnabled()) {
+                Toast.makeText(this, "Please enable NFC via Settings.", Toast.LENGTH_LONG).show();
+            }
         }
 
         setTitle(TITLE);
         // Register callback
-        mNfcAdapter.setNdefPushMessageCallback(this, this);
         mNfcAdapter.setOnNdefPushCompleteCallback(this, this);
+        mNfcAdapter.setNdefPushMessage(createNdefMessage(), this);
 
         sendClaimText.setText(R.string.sending_claim);
 
@@ -67,28 +67,10 @@ public class SendClaimActivity extends AppCompatActivity implements CreateNdefMe
                     public void run() {
                         invokeBeam();
                     }
-                }, 1000);
+                }, 1);
             }
         });
    }
-
-//    @Override
-//    protected void onResume() {
-//        super.onResume();
-//        final Activity thisActivity = this;
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                try {
-//                    Thread.sleep(300);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//                boolean success = mNfcAdapter.invokeBeam(thisActivity);
-//                Log.i(TAG, "beam transfer invoke succes: " + success);
-//            }
-//        }).start();
-//    }
 
     private void invokeBeam() {
         boolean success = mNfcAdapter.invokeBeam(this);
@@ -113,8 +95,7 @@ public class SendClaimActivity extends AppCompatActivity implements CreateNdefMe
                 .show();
     }
 
-    @Override
-    public NdefMessage createNdefMessage(NfcEvent event) {
+    public NdefMessage createNdefMessage() {
         String text = getIntent().getStringExtra("claim");
         NdefMessage msg = new NdefMessage(
                 new NdefRecord[] { createMime(
@@ -122,11 +103,9 @@ public class SendClaimActivity extends AppCompatActivity implements CreateNdefMe
                         /**
                          * Including the AAR guarantees that the specified application runs when it
                          * receives a push.
-                         * TODO make sure this activity starts to handle the beam message
-                        */
+                         */
                         , NdefRecord.createApplicationRecord(getApplicationContext().getPackageName())
                 });
-        Log.e(TAG, "AAR: " + getApplicationContext().getPackageName());
         return msg;
     }
 
@@ -139,5 +118,10 @@ public class SendClaimActivity extends AppCompatActivity implements CreateNdefMe
                 sendClaimText.setText(R.string.sending_claim_complete);
             }
         });
+    }
+
+    @Override
+    public Uri[] createBeamUris(NfcEvent nfcEvent) {
+       return new Uri[0];
     }
 }

@@ -39,7 +39,6 @@ public class ClaimsListActivity extends AppCompatActivity {
     ClaimAdapter adapter;
     ListView claimsList;
 
-
     static final String TAG = "ClaimsListActivity";
     private static final String TITLE = "My claimsList overview";
 
@@ -63,7 +62,6 @@ public class ClaimsListActivity extends AppCompatActivity {
         // Must add the progress bar to the root of the layout
         ViewGroup root = findViewById(android.R.id.content);
         root.addView(progressBar);
-
 
         kp = Key.loadKeys(getApplicationContext());
         init();
@@ -102,8 +100,8 @@ public class ClaimsListActivity extends AppCompatActivity {
     private void init() {
         dbHelper = new TrustChainDBHelper(this);
         byte[] publicKey = retrievePublicKey();
-        Log.i(TAG, "Using " + Arrays.toString(publicKey) + " as public key");
         try {
+            //TODO claims
             List<MessageProto.TrustChainBlock> blocks = dbHelper.getBlocks(publicKey, true);
             if(blocks.size() > 0) {
                 String ownPubKey = ByteArrayConverter.byteStringToString(blocks.get(0).getPublicKey());

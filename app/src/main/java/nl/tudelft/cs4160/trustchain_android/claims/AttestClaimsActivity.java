@@ -41,24 +41,12 @@ public class AttestClaimsActivity extends AppCompatActivity {
         def.addCategory(Intent.CATEGORY_DEFAULT);
 
         try {
-            def.addDataType("application/com.sample.mime/string");
+            def.addDataType("application/nl.tudelft.cs4160.trustchain_android");
         } catch (IntentFilter.MalformedMimeTypeException e) {
             e.printStackTrace();
         }
-//
-//        IntentFilter ndef = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
-//        ndef.addCategory(Intent.CATEGORY_DEFAULT);
-//
-//        IntentFilter ndef2 = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
-//        ndef.addCategory(Intent.CATEGORY_DEFAULT);
-//        try {
-//            ndef.addDataType("application/com.sample.mime");
-//        } catch (IntentFilter.MalformedMimeTypeException e) {
-//            Log.wtf("mimeexception", e);
-//            e.printStackTrace();
-//        }
+
         intentFiltersArray = new IntentFilter[] { def };
-//        handleViewIntent();
     }
 
     @Override
