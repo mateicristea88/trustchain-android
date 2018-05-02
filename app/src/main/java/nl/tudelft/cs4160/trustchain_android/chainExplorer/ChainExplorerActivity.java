@@ -3,6 +3,7 @@ package nl.tudelft.cs4160.trustchain_android.chainExplorer;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -119,8 +120,11 @@ public class ChainExplorerActivity extends AppCompatActivity {
                 adapter = new ChainExplorerAdapter(this, blocks,
                         kp.getPublicKeyPair().toBytes(), publicKeyPair);
                 blocksList.setAdapter(adapter);
-            } else{
-                // ToDo display empty chain
+            } else {
+                Snackbar.make(blocksList,
+                        "No blocks available", Snackbar.LENGTH_SHORT)
+                        .show();
+
             }
         } catch (Exception e) {
             e.printStackTrace();
