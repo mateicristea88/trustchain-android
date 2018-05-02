@@ -16,11 +16,12 @@ import java.util.HashMap;
 import java.util.List;
 
 import nl.tudelft.cs4160.trustchain_android.R;
-import nl.tudelft.cs4160.trustchain_android.SharedPreferences.UserNameStorage;
-import nl.tudelft.cs4160.trustchain_android.Util.ByteArrayConverter;
 import nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper;
-import nl.tudelft.cs4160.trustchain_android.color.ChainColor;
+import nl.tudelft.cs4160.trustchain_android.chainExplorer.ChainColor;
+import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
+import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
+import nl.tudelft.cs4160.trustchain_android.util.ByteArrayConverter;
 
 /**
  * Created by jonathan on 3/7/18.
@@ -54,7 +55,7 @@ class ClaimAdapter extends BaseAdapter {
     }
 
     private String retrievePeerName(byte[] key) {
-        String name = UserNameStorage.getPeerByPublicKey(context, key);
+        String name = UserNameStorage.getPeerByPublicKey(context, new PublicKeyPair(key));
         if(name == null) {
             return PEER_NAME_UNKNOWN;
         }
@@ -126,7 +127,7 @@ class ClaimAdapter extends BaseAdapter {
         seqNum.setText(seqNumStr);
         linkPeer.setText(linkPeerAlias);
         linkSeqNum.setText(linkSeqNumStr);
-        transaction.setText(block.getTransaction().toStringUtf8());
+        transaction.setText(block.getTransaction().getUnformatted().toStringUtf8());
 
         // expanded view
         TextView pubKey = convertView.findViewById(R.id.pub_key);
@@ -142,7 +143,7 @@ class ClaimAdapter extends BaseAdapter {
         prevHash.setText(ByteArrayConverter.bytesToHexString(block.getPreviousHash().toByteArray()));
 
         signature.setText(ByteArrayConverter.bytesToHexString(block.getSignature().toByteArray()));
-        expTransaction.setText(block.getTransaction().toStringUtf8());
+        expTransaction.setText(block.getTransaction().getUnformatted().toStringUtf8());
 
         if (peerAlias.equals("me")) {
             ownChainIndicator.setBackgroundColor(ChainColor.getMyColor(context));
@@ -167,7 +168,7 @@ class ClaimAdapter extends BaseAdapter {
     }
 
     private String checkUserNameStorage(byte[] pubKey) {
-        String name = UserNameStorage.getPeerByPublicKey(context, pubKey);
+        String name = UserNameStorage.getPeerByPublicKey(context, new PublicKeyPair(pubKey));
         if(name == null) {
             return "peer " + (peerList.size()-1);
         }
@@ -187,7 +188,7 @@ class ClaimAdapter extends BaseAdapter {
 
         final String peerAlias = getPeerAlias(pubKeyByteStr);
         final String pubKey = ByteArrayConverter.bytesToHexString(pubKeyByteStr.toByteArray());
-        final String transaction = block.getTransaction().toStringUtf8();
+        final String transaction = block.getTransaction().getUnformatted().toStringUtf8();
         View.OnClickListener onClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {

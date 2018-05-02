@@ -19,18 +19,17 @@ import android.widget.ProgressBar;
 
 import com.google.protobuf.ByteString;
 
-import java.util.Arrays;
 import java.util.List;
 
 import nl.tudelft.cs4160.trustchain_android.R;
-import nl.tudelft.cs4160.trustchain_android.SharedPreferences.UserNameStorage;
-import nl.tudelft.cs4160.trustchain_android.Util.ByteArrayConverter;
-import nl.tudelft.cs4160.trustchain_android.chainExplorer.ChainExplorerAdapter;
+import nl.tudelft.cs4160.trustchain_android.chainExplorer.ChainExplorerInfoActivity;
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
-import nl.tudelft.cs4160.trustchain_android.database.TrustChainDBHelper;
-import nl.tudelft.cs4160.trustchain_android.main.ChainExplorerInfoActivity;
+import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
+import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
+import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
+import nl.tudelft.cs4160.trustchain_android.util.ByteArrayConverter;
 
 import static android.view.Gravity.CENTER;
 
@@ -102,7 +101,7 @@ public class ClaimsListActivity extends AppCompatActivity {
         byte[] publicKey = retrievePublicKey();
         try {
             //TODO claims
-            List<MessageProto.TrustChainBlock> blocks = dbHelper.getBlocks(publicKey, true);
+            List<MessageProto.TrustChainBlock.Claim> blocks = dbHelper.getBlocks(publicKey, true);
             if(blocks.size() > 0) {
                 String ownPubKey = ByteArrayConverter.byteStringToString(blocks.get(0).getPublicKey());
                 String firstPubKey = ByteArrayConverter.byteStringToString(ByteString.copyFrom(publicKey));
@@ -110,7 +109,7 @@ public class ClaimsListActivity extends AppCompatActivity {
                     this.setTitle(TITLE);
                 } else {
                     this.setTitle("Chain of " + UserNameStorage.getPeerByPublicKey(this,
-                            ByteArrayConverter.byteStringToString(blocks.get(0).getPublicKey())));
+                            new PublicKeyPair(blocks.get(0).getPublicKey().toByteArray())));
                 }
                 adapter = new ClaimAdapter(this, blocks,
                         kp.getPublicKeyPair().toBytes(), publicKey);

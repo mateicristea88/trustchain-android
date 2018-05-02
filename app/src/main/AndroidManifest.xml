@@ -17,7 +17,7 @@
     
     <uses-feature
       android:name="android.hardware.nfc"
-      ndroid:required="false" />
+      android:required="false" />
 
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
