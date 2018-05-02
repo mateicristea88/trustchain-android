@@ -3,6 +3,7 @@ package nl.tudelft.cs4160.trustchain_android.block;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Timestamp;
 
 import org.libsodium.jni.Sodium;
 
@@ -58,8 +59,16 @@ public class TrustChainBlockHelper {
      */
     public static MessageProto.TrustChainBlock createBlock(byte[] transaction, TrustChainDBHelper dbHelper,
                                                          byte[] mypubk, MessageProto.TrustChainBlock linkedBlock,
-                                                         byte[] linkpubk) {
+                                                         byte[] linkpubk, boolean isClaim) {
         MessageProto.TrustChainBlock latestBlock = dbHelper.getLatestBlock(mypubk);
+
+        if (isClaim) {
+            MessageProto.TrustChainBlock.Claim.Builder claimBuilder = MessageProto.TrustChainBlock.Claim.newBuilder();
+            claimBuilder.setName(ByteString.copyFrom("claim".getBytes()));
+            claimBuilder.setTimestamp(Timestamp.getDefaultInstance());
+            claimBuilder.setProofFormat(ByteString.copyFrom(transaction));
+            claimBuilder.setValidityTerm();
+        }
 
         MessageProto.TrustChainBlock.Builder builder = MessageProto.TrustChainBlock.newBuilder();
         if(linkedBlock != null) {

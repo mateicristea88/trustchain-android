@@ -40,7 +40,7 @@ class ClaimAdapter extends BaseAdapter {
     private byte[] chainPubKey;
     private byte[] myPubKey;
 
-    public ClaimAdapter(Context context, List<MessageProto.TrustChainBlock> blocksList, byte[] myPubKey,
+    public ClaimAdapter(Context context, List<MessageProto.TrustChainBlock.Claim> claimsList, byte[] myPubKey,
                                 byte[] chainPubKey) {
         this.context = context;
         this.blocksList = blocksList;

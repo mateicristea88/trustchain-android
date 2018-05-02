@@ -343,6 +343,23 @@ public class TrustChainDBHelper extends SQLiteOpenHelper {
     }
 
     /**
+     * Get blocks containing a claim
+     * @param publicKey block with this key are returned
+     * @param inLinked if true and the public key is in the linkedKey also return block
+     * @return
+     */
+    public List<MessageProto.TrustChainBlock.Claim> getClaims(byte[] publicKey, boolean inLinked) {
+        List<MessageProto.TrustChainBlock> allBlocks = getAllBlocks();
+        List<MessageProto.TrustChainBlock.Claim> res = new ArrayList<>();
+
+        for (MessageProto.TrustChainBlock block : allBlocks) {
+            // TODO filter on own claims
+            res.add(block.getTransaction().getClaim());
+        }
+        return res;
+    }
+
+    /**
      * Searches the database for the blocks from the given sequence number to some limit and returns
      * a list of these blocks.
      * When no limit is given the default limit of 100 is used.

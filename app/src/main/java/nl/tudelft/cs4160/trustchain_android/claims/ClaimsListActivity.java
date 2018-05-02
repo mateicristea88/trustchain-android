@@ -100,21 +100,21 @@ public class ClaimsListActivity extends AppCompatActivity {
         dbHelper = new TrustChainDBHelper(this);
         byte[] publicKey = retrievePublicKey();
         try {
-            //TODO claims
-            List<MessageProto.TrustChainBlock.Claim> blocks = dbHelper.getBlocks(publicKey, true);
-            if(blocks.size() > 0) {
-                String ownPubKey = ByteArrayConverter.byteStringToString(blocks.get(0).getPublicKey());
+            // TODO claims
+            List<MessageProto.TrustChainBlock.Claim> claims = dbHelper.getClaims(publicKey, true);
+            if(claims.size() > 0) {
+                String ownPubKey = ByteArrayConverter.byteStringToString(ByteString.copyFrom(publicKey));
                 String firstPubKey = ByteArrayConverter.byteStringToString(ByteString.copyFrom(publicKey));
                 if (ownPubKey.equals(firstPubKey)){
                     this.setTitle(TITLE);
                 } else {
                     this.setTitle("Chain of " + UserNameStorage.getPeerByPublicKey(this,
-                            new PublicKeyPair(blocks.get(0).getPublicKey().toByteArray())));
+                            new PublicKeyPair(publicKey)));
                 }
-                adapter = new ClaimAdapter(this, blocks,
-                        kp.getPublicKeyPair().toBytes(), publicKey);
+                adapter = new ClaimAdapter(this, claims,
+                        publicKey, publicKey);
                 claimsList.setAdapter(adapter);
-            } else{
+            } else {
                 // ToDo display empty chain
             }
         } catch (Exception e) {
