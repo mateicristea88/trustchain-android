@@ -66,8 +66,8 @@ public class TrustChainBlockHelper {
             MessageProto.TrustChainBlock.Claim.Builder claimBuilder = MessageProto.TrustChainBlock.Claim.newBuilder();
             claimBuilder.setName(ByteString.copyFrom("claim".getBytes()));
             claimBuilder.setTimestamp(Timestamp.getDefaultInstance());
-            claimBuilder.setProofFormat(ByteString.copyFrom(transaction));
-            claimBuilder.setValidityTerm();
+            claimBuilder.setProofFormat(ByteString.copyFromUtf8("1"));
+            claimBuilder.setValidityTerm(0);
         }
 
         MessageProto.TrustChainBlock.Builder builder = MessageProto.TrustChainBlock.newBuilder();

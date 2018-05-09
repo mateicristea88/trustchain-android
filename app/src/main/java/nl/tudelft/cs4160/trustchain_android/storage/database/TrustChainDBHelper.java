@@ -348,14 +348,22 @@ public class TrustChainDBHelper extends SQLiteOpenHelper {
      * @param inLinked if true and the public key is in the linkedKey also return block
      * @return
      */
-    public List<MessageProto.TrustChainBlock.Claim> getClaims(byte[] publicKey, boolean inLinked) {
+    public List<MessageProto.TrustChainBlock> getClaimBlocks(byte[] publicKey, boolean inLinked) {
         List<MessageProto.TrustChainBlock> allBlocks = getAllBlocks();
-        List<MessageProto.TrustChainBlock.Claim> res = new ArrayList<>();
-
+        List<MessageProto.TrustChainBlock> res = new ArrayList<>();
         for (MessageProto.TrustChainBlock block : allBlocks) {
-            // TODO filter on own claims
-            res.add(block.getTransaction().getClaim());
+            if (Arrays.equals(publicKey, block.getPublicKey().toByteArray())) {
+                res.add(block);
+            }else if(inLinked && Arrays.equals(publicKey, block.getLinkPublicKey().toByteArray()) ){
+                res.add(block);
+            }
         }
+//        for (MessageProto.TrustChainBlock block : allBlocks) {
+//            // TODO filter on own claims
+//            if (block.getTransaction().getClaim() != null) {
+//                res.add(block);
+//            }
+//        }
         return res;
     }
 

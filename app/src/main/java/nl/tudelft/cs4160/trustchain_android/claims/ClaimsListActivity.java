@@ -66,12 +66,10 @@ public class ClaimsListActivity extends AppCompatActivity {
         init();
     }
 
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.chainexplorer_menu, menu);
+        inflater.inflate(R.menu.claimexplorer_menu, menu);
         return true;
     }
 
@@ -80,6 +78,10 @@ public class ClaimsListActivity extends AppCompatActivity {
             case R.id.info:
                 Intent chainExplorerInfoActivity = new Intent(this, ChainExplorerInfoActivity.class);
                 startActivity(chainExplorerInfoActivity);
+                return true;
+            case R.id.createclaim:
+                Intent createClaimActivity = new Intent(this, ChainExplorerInfoActivity.class);
+                startActivity(createClaimActivity);
                 return true;
             default:
                 return true;
@@ -101,8 +103,8 @@ public class ClaimsListActivity extends AppCompatActivity {
         byte[] publicKey = retrievePublicKey();
         try {
             // TODO claims
-            List<MessageProto.TrustChainBlock.Claim> claims = dbHelper.getClaims(publicKey, true);
-            if(claims.size() > 0) {
+            List<MessageProto.TrustChainBlock> claimBlocks = dbHelper.getClaimBlocks(publicKey, true);
+            if(claimBlocks.size() > 0) {
                 String ownPubKey = ByteArrayConverter.byteStringToString(ByteString.copyFrom(publicKey));
                 String firstPubKey = ByteArrayConverter.byteStringToString(ByteString.copyFrom(publicKey));
                 if (ownPubKey.equals(firstPubKey)){
@@ -111,7 +113,7 @@ public class ClaimsListActivity extends AppCompatActivity {
                     this.setTitle("Chain of " + UserNameStorage.getPeerByPublicKey(this,
                             new PublicKeyPair(publicKey)));
                 }
-                adapter = new ClaimAdapter(this, claims,
+                adapter = new ClaimAdapter(this, claimBlocks,
                         publicKey, publicKey);
                 claimsList.setAdapter(adapter);
             } else {

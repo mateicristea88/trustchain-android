@@ -157,5 +157,7 @@
     <string name="title_activity_send_claim">SendClaimActivity</string>
     <string name="sending_claim">Sending claim, hold receiver close</string>
     <string name="sending_claim_complete">Claim was sent successfully</string>
+    <string name="create_claim">Create claim</string>
+    <string name="is_claim_checkbox_text">Is Claim</string>
 
 </resources>

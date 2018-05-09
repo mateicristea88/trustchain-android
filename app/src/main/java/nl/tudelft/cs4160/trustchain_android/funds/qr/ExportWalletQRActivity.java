@@ -116,7 +116,8 @@ public class ExportWalletQRActivity extends AppCompatActivity {
                             dbHelper,
                             keyPairOfA.getPublicKeyPair().toBytes(),
                             null,
-                            keyPairOfC.getPublicKeyPair().toBytes()
+                            keyPairOfC.getPublicKeyPair().toBytes(),
+                            false
                     );
             blockAtoC = TrustChainBlockHelper.sign(blockAtoC, keyPairOfA.getSigningKey());
 
@@ -126,7 +127,9 @@ public class ExportWalletQRActivity extends AppCompatActivity {
                             dbHelper,
                             keyPairOfC.getPublicKeyPair().toBytes(),
                             blockAtoC,
-                            keyPairOfA.getPublicKeyPair().toBytes()
+                            keyPairOfA.getPublicKeyPair().toBytes(),
+                            false
+
                     );
             blockCtoA = TrustChainBlockHelper.sign(blockCtoA, keyPairOfC.getSigningKey());
 

@@ -84,6 +84,12 @@
                 android:layout_height="wrap_content" />
         </android.widget.ScrollView>
 
+        <CheckBox
+            android:id="@+id/is_claim_checkbox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/is_claim_checkbox_text" />
+
         <android.support.v7.widget.RecyclerView
             android:id="@+id/mutualBlocksRecyclerView"
             android:layout_width="match_parent"

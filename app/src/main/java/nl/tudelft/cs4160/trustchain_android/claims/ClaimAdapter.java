@@ -29,7 +29,7 @@ import nl.tudelft.cs4160.trustchain_android.util.ByteArrayConverter;
 
 class ClaimAdapter extends BaseAdapter {
 
-    static final String TAG = "ChainExplorerAdapter";
+    static final String TAG = "ClaimAdapter";
 
     private final static String PEER_NAME_UNKNOWN = "unkown";
 
@@ -40,10 +40,10 @@ class ClaimAdapter extends BaseAdapter {
     private byte[] chainPubKey;
     private byte[] myPubKey;
 
-    public ClaimAdapter(Context context, List<MessageProto.TrustChainBlock.Claim> claimsList, byte[] myPubKey,
+    public ClaimAdapter(Context context, List<MessageProto.TrustChainBlock> claimsList, byte[] myPubKey,
                                 byte[] chainPubKey) {
         this.context = context;
-        this.blocksList = blocksList;
+        this.blocksList = claimsList;
         this.chainPubKey = chainPubKey;
         this.myPubKey = myPubKey;
         // put my public key in the peerList
@@ -96,7 +96,12 @@ class ClaimAdapter extends BaseAdapter {
         ByteString pubKeyByteStr = block.getPublicKey();
         ByteString linkPubKeyByteStr = block.getLinkPublicKey();
         String peerAlias = getPeerAlias(pubKeyByteStr);
-        String linkPeerAlias = getPeerAlias(linkPubKeyByteStr);
+        String linkPeerAlias;
+        try {
+            linkPeerAlias = getPeerAlias(linkPubKeyByteStr);
+        } catch (Exception e) {
+            linkPeerAlias = "ERROR";
+        }
 
         // Check if the sequence numbers are 0, which would mean that they are unknown
         String seqNumStr;

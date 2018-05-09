@@ -21,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import nl.tudelft.cs4160.trustchain_android.R;
+import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 
 import static android.nfc.NdefRecord.createMime;
 
@@ -96,14 +97,12 @@ public class SendClaimActivity extends AppCompatActivity implements OnNdefPushCo
     }
 
     public NdefMessage createNdefMessage() {
-        String text = getIntent().getStringExtra("claim");
+        MessageProto.TrustChainBlock block = (MessageProto.TrustChainBlock) getIntent().getSerializableExtra("claimBlock");
         NdefMessage msg = new NdefMessage(
                 new NdefRecord[] { createMime(
-                        "application/nl.tudelft.cs4160.trustchain_android", text.getBytes())
-                        /**
-                         * Including the AAR guarantees that the specified application runs when it
-                         * receives a push.
-                         */
+                        "application/nl.tudelft.cs4160.trustchain_android", block.toByteArray())
+                         // Including the AAR guarantees that the specified application runs when it
+                         // receives a push.
                         , NdefRecord.createApplicationRecord(getApplicationContext().getPackageName())
                 });
         return msg;
@@ -111,7 +110,7 @@ public class SendClaimActivity extends AppCompatActivity implements OnNdefPushCo
 
     @Override
     public void onNdefPushComplete(NfcEvent nfcEvent) {
-        Log.i(TAG, "Beam transfer complete");
+        Log.d(TAG, "Beam transfer complete");
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
