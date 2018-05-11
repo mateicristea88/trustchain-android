@@ -12,7 +12,12 @@ import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+
 import nl.tudelft.cs4160.trustchain_android.R;
+import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class AttestClaimsActivity extends AppCompatActivity {
 
@@ -68,18 +73,28 @@ public class AttestClaimsActivity extends AppCompatActivity {
 
     @Override
     protected void onNewIntent(Intent intent) {
-        Log.e(TAG, "TAG RECEIVED");
+        Log.d(TAG, "Tag received");
         processIntent(intent);
     }
 
     void processIntent(Intent intent) {
-        textView = (TextView) findViewById(R.id.textView);
+        textView = findViewById(R.id.textView);
         Parcelable[] rawMsgs = intent.getParcelableArrayExtra(
                 NfcAdapter.EXTRA_NDEF_MESSAGES);
         // only one message sent during the beam
         NdefMessage msg = (NdefMessage) rawMsgs[0];
         // record 0 contains the MIME type, record 1 is the AAR, if present
-        String s = new String(msg.getRecords()[0].getPayload());
-        textView.setText(s);
+        byte[] payload = msg.getRecords()[0].getPayload();
+        MessageProto.TrustChainBlock block;
+        try {
+            block = MessageProto.TrustChainBlock.newBuilder().mergeFrom(payload).build();
+        } catch (InvalidProtocolBufferException e) {
+            e.printStackTrace();
+            Log.e(TAG, "Could not parse received block!");
+            return;
+        }
+        String claimText = new String(block.getTransaction().getClaim().getName().toByteArray(), UTF_8) + "\n" +
+                new String(block.getTransaction().getUnformatted().toByteArray(), UTF_8);
+        textView.setText(claimText);
     }
 }

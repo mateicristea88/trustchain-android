@@ -216,12 +216,11 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
      * Also note that whatever goes wrong we will never get a valid full block, so the integrity of
      * the network is not compromised due to not using dispersy.
      */
-
     public void onClickSend(View view) throws UnsupportedEncodingException {
         byte[] publicKey = Key.loadKeys(this).getPublicKeyPair().toBytes();
         byte[] transactionData = messageEditText.getText().toString().getBytes("UTF-8");
         final MessageProto.TrustChainBlock block = createBlock(transactionData, DBHelper, publicKey,
-                null, inboxItemOtherPeer.getPublicKeyPair().toBytes(), isClaimCheckbox.isActivated());
+                null, inboxItemOtherPeer.getPublicKeyPair().toBytes(), isClaimCheckbox.isChecked());
         final MessageProto.TrustChainBlock signedBlock = TrustChainBlockHelper.sign(block, Key.loadKeys(getApplicationContext()).getSigningKey());
 
         messageEditText.setText("");
@@ -231,7 +230,9 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
         // insert the half block in your own chain
         new TrustChainDBHelper(this).insertInDB(signedBlock);
 
-        if (isClaimCheckbox.isActivated()) {
+        if (isClaimCheckbox.isChecked()) {
+            // If the created block contains a claim do not send it over the network.
+            // Instead, start SendClaimActivity to transmit it through Beam.
             Intent claimIntent = new Intent(this, SendClaimActivity.class);
             claimIntent.putExtra("claimBlock", signedBlock);
             startActivity(claimIntent);
