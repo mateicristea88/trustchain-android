@@ -2,11 +2,11 @@ package nl.tudelft.cs4160.trustchain_android.claims;
 
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
-import android.nfc.NfcAdapter.CreateNdefMessageCallback;
 import android.nfc.NfcAdapter.OnNdefPushCompleteCallback;
 import android.nfc.NfcEvent;
 import android.os.Build;
@@ -14,16 +14,25 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+
 import nl.tudelft.cs4160.trustchain_android.R;
+import nl.tudelft.cs4160.trustchain_android.funds.qr.QRGenerator;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 
 import static android.nfc.NdefRecord.createMime;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class SendClaimActivity extends AppCompatActivity implements OnNdefPushCompleteCallback, NfcAdapter.CreateBeamUrisCallback {
 
@@ -32,6 +41,7 @@ public class SendClaimActivity extends AppCompatActivity implements OnNdefPushCo
     NfcAdapter mNfcAdapter;
 
     private TextView sendClaimText;
+    private ImageView QRImage;
 
    @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +50,7 @@ public class SendClaimActivity extends AppCompatActivity implements OnNdefPushCo
 
         View layout = findViewById(R.id.layout_send_claim);
         sendClaimText = findViewById(R.id.send_claim_text);
+        QRImage = findViewById(R.id.qr_image);
 
         // NFC isn't available on the device
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_NFC)) {
@@ -63,15 +74,44 @@ public class SendClaimActivity extends AppCompatActivity implements OnNdefPushCo
         layout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        invokeBeam();
-                    }
-                }, 1);
+//                new Handler().postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        invokeBeam();
+//                    }
+//                }, 10);
             }
         });
+
+
+//       QR Code generation -> move out of oncreate!
+//       MultiFormatWriter writer = new MultiFormatWriter();
+//       DisplayMetrics metrics = new DisplayMetrics();
+//       getWindowManager().getDefaultDisplay().getMetrics(metrics);
+//       int size = metrics.widthPixels;
+//
+//       MessageProto.TrustChainBlock block = (MessageProto.TrustChainBlock) getIntent().getSerializableExtra("claimBlock");
+//       try {
+//           Log.e(TAG, block.toByteArray().length + " bytes");
+//           BitMatrix matrix = writer.encode(new String(block.toByteArray(), UTF_8), BarcodeFormat.QR_CODE, size, size);
+//           Bitmap image = QRGenerator.GenerateQRCode(size, matrix);
+//           QRImage.setImageBitmap(image);
+//       } catch (WriterException e) {
+//           e.printStackTrace();
+//       }
+
    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        findViewById(R.id.layout_send_claim).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                invokeBeam();
+            }
+        }, 100);
+    }
 
     private void invokeBeam() {
         boolean success = mNfcAdapter.invokeBeam(this);

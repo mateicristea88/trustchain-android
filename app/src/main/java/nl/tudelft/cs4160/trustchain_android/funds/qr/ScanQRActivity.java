@@ -38,8 +38,6 @@ public class ScanQRActivity extends AppCompatActivity {
     public static final int PERMISSIONS_REQUEST_CAMERA = 0;
     public static final String TAG = "ScanQRActivity";
 
-
-
     private Vibrator vibrator;
     private ZXingScannerView scannerView;
 
