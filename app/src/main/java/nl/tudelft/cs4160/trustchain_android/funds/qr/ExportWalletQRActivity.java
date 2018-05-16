@@ -2,7 +2,6 @@ package nl.tudelft.cs4160.trustchain_android.funds.qr;
 
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -117,7 +116,7 @@ public class ExportWalletQRActivity extends AppCompatActivity {
                             keyPairOfA.getPublicKeyPair().toBytes(),
                             null,
                             keyPairOfC.getPublicKeyPair().toBytes(),
-                            false
+                            null
                     );
             blockAtoC = TrustChainBlockHelper.sign(blockAtoC, keyPairOfA.getSigningKey());
 
@@ -128,7 +127,7 @@ public class ExportWalletQRActivity extends AppCompatActivity {
                             keyPairOfC.getPublicKeyPair().toBytes(),
                             blockAtoC,
                             keyPairOfA.getPublicKeyPair().toBytes(),
-                            false
+                            null
 
                     );
             blockCtoA = TrustChainBlockHelper.sign(blockCtoA, keyPairOfC.getSigningKey());

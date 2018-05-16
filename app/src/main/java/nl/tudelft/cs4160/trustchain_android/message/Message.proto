@@ -45,6 +45,7 @@ message TrustChainBlock {
         google.protobuf.Timestamp timestamp = 2;
         int32 validity_term = 3;
         bytes proof_format = 4;
+        string payload_type = 5;
     }
 }
 

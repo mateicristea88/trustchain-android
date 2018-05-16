@@ -20,7 +20,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,9 +34,8 @@ import java.util.Arrays;
 
 import nl.tudelft.cs4160.trustchain_android.R;
 import nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper;
-import nl.tudelft.cs4160.trustchain_android.block.ValidationResult;
 import nl.tudelft.cs4160.trustchain_android.chainExplorer.ChainExplorerActivity;
-import nl.tudelft.cs4160.trustchain_android.claims.SendClaimActivity;
+import nl.tudelft.cs4160.trustchain_android.claims.CreateClaimActivity;
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.inbox.InboxItem;
@@ -64,7 +62,6 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
     private TrustChainDBHelper DBHelper;
     TextView statusText;
     EditText messageEditText;
-    CheckBox isClaimCheckbox;
     PeerSummaryActivity thisActivity;
     DualSecret kp;
     TrustChainDBHelper dbHelper;
@@ -130,7 +127,6 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
 
         messageEditText = findViewById(R.id.message_edit_text);
         mRecyclerView = findViewById(R.id.mutualBlocksRecyclerView);
-        isClaimCheckbox = findViewById(R.id.is_claim_checkbox);
 
         dbHelper = new TrustChainDBHelper(this);
         network = Network.getInstance(getApplicationContext());
@@ -220,7 +216,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
         byte[] publicKey = Key.loadKeys(this).getPublicKeyPair().toBytes();
         byte[] transactionData = messageEditText.getText().toString().getBytes("UTF-8");
         final MessageProto.TrustChainBlock block = createBlock(transactionData, DBHelper, publicKey,
-                null, inboxItemOtherPeer.getPublicKeyPair().toBytes(), isClaimCheckbox.isChecked());
+                null, inboxItemOtherPeer.getPublicKeyPair().toBytes(), null);
         final MessageProto.TrustChainBlock signedBlock = TrustChainBlockHelper.sign(block, Key.loadKeys(getApplicationContext()).getSigningKey());
 
         messageEditText.setText("");
@@ -230,28 +226,25 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
         // insert the half block in your own chain
         new TrustChainDBHelper(this).insertInDB(signedBlock);
 
-        if (isClaimCheckbox.isChecked()) {
-            // If the created block contains a claim do not send it over the network.
-            // Instead, start SendClaimActivity to transmit it through Beam.
-            Intent claimIntent = new Intent(this, SendClaimActivity.class);
-            claimIntent.putExtra("claimBlock", signedBlock);
-            startActivity(claimIntent);
-        } else {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        network.sendBlockMessage(inboxItemOtherPeer.getPeerAppToApp(), signedBlock);
-                        Snackbar mySnackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout),"Half block send!", Snackbar.LENGTH_SHORT);
-                        mySnackbar.show();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    network.sendBlockMessage(inboxItemOtherPeer.getPeerAppToApp(), signedBlock);
+                    Snackbar mySnackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout),"Half block send!", Snackbar.LENGTH_SHORT);
+                    mySnackbar.show();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            }).start();
-        }
+            }
+        }).start();
     }
 
+    public void onClickCreateClaim(View view) {
+        Intent claimIntent = new Intent(this, CreateClaimActivity.class);
+        claimIntent.putExtra("peer", inboxItemOtherPeer);
+        startActivity(claimIntent);
+    }
     /**
      * Called when pressing the sign button in a mutual block.
      * This method signs the half block when agreed with the pop-up.
@@ -298,7 +291,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
         DualSecret keyPair = Key.loadKeys(this);
         MessageProto.TrustChainBlock block = createBlock(null, DBHelper,
                 keyPair.getPublicKeyPair().toBytes(),
-                linkedBlock, inboxItemOtherPeer.getPublicKeyPair().toBytes(), false);
+                linkedBlock, inboxItemOtherPeer.getPublicKeyPair().toBytes(), null);
 
         final MessageProto.TrustChainBlock signedBlock = sign(block, keyPair.getSigningKey());
 

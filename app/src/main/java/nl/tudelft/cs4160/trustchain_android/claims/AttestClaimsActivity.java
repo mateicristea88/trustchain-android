@@ -93,8 +93,11 @@ public class AttestClaimsActivity extends AppCompatActivity {
             Log.e(TAG, "Could not parse received block!");
             return;
         }
-        String claimText = new String(block.getTransaction().getClaim().getName().toByteArray(), UTF_8) + "\n" +
-                new String(block.getTransaction().getUnformatted().toByteArray(), UTF_8);
+        String claimText = "name: " + new String(block.getTransaction().getClaim().getName().toByteArray(), UTF_8) + "\n" +
+                "type: " + block.getTransaction().getClaim().getPayloadType() + "\n" +
+                "data: " + new String(block.getTransaction().getUnformatted().toByteArray(), UTF_8);
         textView.setText(claimText);
+
+
     }
 }

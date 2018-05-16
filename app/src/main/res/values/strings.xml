@@ -166,5 +166,8 @@
     <string name="sending_claim_complete">Claim was sent successfully</string>
     <string name="create_claim">Create claim</string>
     <string name="is_claim_checkbox_text">Is Claim</string>
+    <string name="send_claim">Create Claim</string>
+    <string name="choose_file">Choose File</string>
+    <string name="no_file_selected">No File Selected</string>
 
 </resources>

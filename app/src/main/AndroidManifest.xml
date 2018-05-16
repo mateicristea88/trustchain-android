@@ -14,11 +14,10 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.NFC" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    
-    <uses-feature
-      android:name="android.hardware.nfc"
-      android:required="false" />
 
+    <uses-feature
+        android:name="android.hardware.nfc"
+        android:required="false" />
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
 
@@ -47,10 +46,9 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-                <!--<category android:name="android.intent.category.DEFAULT" />-->
+                <!-- <category android:name="android.intent.category.DEFAULT" /> -->
             </intent-filter>
         </activity>
-
         <activity android:name=".funds.qr.ScanQRActivity" />
         <activity android:name=".funds.qr.ExportWalletQRActivity" />
         <activity android:name=".funds.FundsActivity" />
@@ -66,22 +64,23 @@
         <activity android:name=".inbox.InboxActivity" />
         <activity
             android:name=".claims.SendClaimActivity"
-            android:label="@string/title_activity_send_claim">
-
-        </activity>
+            android:label="@string/title_activity_send_claim"></activity>
         <activity
             android:name=".claims.AttestClaimsActivity"
             android:label="Receive claims through beam"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.nfc.action.NDEF_DISCOVERED" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="application/nl.tudelft.cs4160.trustchain_android" />
             </intent-filter>
         </activity>
         <activity android:name=".passport.ocr.camera.CameraActivity" />
         <activity android:name=".passport.ocr.ManualInputActivity" />
         <activity android:name=".passport.nfc.PassportConActivity" />
+        <activity android:name=".claims.CreateClaimActivity"></activity>
     </application>
 
 </manifest>

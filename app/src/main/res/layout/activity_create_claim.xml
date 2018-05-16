@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="10dp"
-    android:id="@+id/myCoordinatorLayout"
-    tools:context="nl.tudelft.cs4160.trustchain_android.peersummary.PeerSummaryActivity">
+    tools:context=".claims.CreateClaimActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -23,38 +22,59 @@
                 android:layout_width="120dp"
                 android:layout_height="35dp"
                 android:background="@color/colorPrimary"
-                android:onClick="onClickViewChain"
                 android:text="@string/view_chain" />
 
         </LinearLayout>
 
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_marginTop="30dp"
-            android:orientation="horizontal">
-
             <EditText
                 android:id="@+id/message_edit_text"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="20dp"
-                android:layout_weight="1"
-                android:hint="Message Text"
+                android:layout_marginTop="20dp"
+                android:inputType="textMultiLine"
+                android:lines="8"
+                android:minLines="6"
+                android:gravity="start"
+                android:hint="Claim Text"
                 android:textColor="@android:color/black"/>
 
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginTop="20dp"
+            >
+
             <Button
-                android:id="@+id/send_button"
+                android:id="@+id/choose_file"
                 style="@style/Widget.AppCompat.Button.Colored"
-                android:layout_width="wrap_content"
+                android:layout_width="150dp"
                 android:layout_height="35dp"
-                android:layout_marginRight="20dp"
                 android:background="@color/colorPrimary"
-                android:onClick="onClickSend"
-                android:text="@string/send" />
+                android:onClick="onClickChooseFile"
+                android:text="@string/choose_file" />
+
+            <TextView
+                android:id="@+id/selected_path"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:singleLine="true"
+                android:ellipsize="start"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:text="@string/no_file_selected"/>
 
         </LinearLayout>
+
+        <Button
+            android:id="@+id/send_button"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="150dp"
+            android:layout_height="35dp"
+            android:layout_marginTop="20dp"
+            android:background="@color/colorPrimary"
+            android:onClick="onClickSend"
+            android:text="@string/send" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -84,21 +104,11 @@
                 android:layout_height="wrap_content" />
         </android.widget.ScrollView>
 
-        <Button
-            android:id="@+id/claim_button"
-            style="@style/Widget.AppCompat.Button.Colored"
-            android:layout_width="150dp"
-            android:layout_height="35dp"
-            android:layout_marginStart="5dp"
-            android:onClick="onClickCreateClaim"
-            android:background="@color/colorPrimary"
-            android:text="@string/send_claim" />
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/mutualBlocksRecyclerView"
+               <android.support.v7.widget.RecyclerView
+            android:id="@+id/claims_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scrollbars="vertical"/>
 
     </LinearLayout>
-</android.support.design.widget.CoordinatorLayout>
+</android.support.constraint.ConstraintLayout>

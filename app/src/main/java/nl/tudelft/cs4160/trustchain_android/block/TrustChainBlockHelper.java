@@ -3,7 +3,6 @@ package nl.tudelft.cs4160.trustchain_android.block;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.google.protobuf.ByteString;
-import com.google.protobuf.Timestamp;
 
 import org.libsodium.jni.Sodium;
 
@@ -55,20 +54,13 @@ public class TrustChainBlockHelper {
      * @param mypubk - the public key of this peer
      * @param linkedBlock - The halfblock that is linked to this to be created half block, can be null
      * @param linkpubk - The public key of the linked peer
+     * @param claim - Clam object is this block contains a claim, null otherwise
      * @return a new half block
      */
     public static MessageProto.TrustChainBlock createBlock(byte[] transaction, TrustChainDBHelper dbHelper,
                                                          byte[] mypubk, MessageProto.TrustChainBlock linkedBlock,
-                                                         byte[] linkpubk, boolean isClaim) {
+                                                         byte[] linkpubk, MessageProto.TrustChainBlock.Claim claim) {
         MessageProto.TrustChainBlock latestBlock = dbHelper.getLatestBlock(mypubk);
-
-        if (isClaim) {
-            MessageProto.TrustChainBlock.Claim.Builder claimBuilder = MessageProto.TrustChainBlock.Claim.newBuilder();
-            claimBuilder.setName(ByteString.copyFromUtf8("claim"));
-            claimBuilder.setTimestamp(Timestamp.getDefaultInstance());
-            claimBuilder.setProofFormat(ByteString.copyFromUtf8("1"));
-            claimBuilder.setValidityTerm(0);
-        }
 
         MessageProto.TrustChainBlock.Builder builder = MessageProto.TrustChainBlock.newBuilder();
         if(linkedBlock != null) {
@@ -76,7 +68,7 @@ public class TrustChainBlockHelper {
                     .setLinkPublicKey(linkedBlock.getPublicKey())
                     .setLinkSequenceNumber(linkedBlock.getSequenceNumber());
         } else {
-            builder.setTransaction(Transaction.newBuilder().setUnformatted(ByteString.copyFrom(transaction)).build())
+            builder.setTransaction(Transaction.newBuilder().setUnformatted(ByteString.copyFrom(transaction)).setClaim(claim).build())
                     .setLinkPublicKey(ByteString.copyFrom(linkpubk))
                     .setLinkSequenceNumber(TrustChainBlockHelper.UNKNOWN_SEQ);
         }
