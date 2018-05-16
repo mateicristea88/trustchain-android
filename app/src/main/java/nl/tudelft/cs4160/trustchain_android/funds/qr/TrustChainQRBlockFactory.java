@@ -20,7 +20,7 @@ import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto.TrustChainBlock.Transaction;
 import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 
-public class TrustChainBlockFactory {
+public class TrustChainQRBlockFactory {
     Moshi moshi = new Moshi.Builder().build();
     JsonAdapter<QRTransaction> transactionAdapter = moshi.adapter(QRTransaction.class);
 

@@ -43,7 +43,7 @@ public class ScanQRActivity extends AppCompatActivity {
     private Vibrator vibrator;
     private ZXingScannerView scannerView;
 
-    private TrustChainBlockFactory trustChainBlockFactory = new TrustChainBlockFactory();
+    private TrustChainQRBlockFactory trustChainQRBlockFactory = new TrustChainQRBlockFactory();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -160,11 +160,11 @@ public class ScanQRActivity extends AppCompatActivity {
 
         DualSecret ownKeyPair = Key.loadKeys(this);
         TrustChainDBHelper helper = new TrustChainDBHelper(this);
-        MessageProto.TrustChainBlock block = trustChainBlockFactory.createBlock(wallet, helper, ownKeyPair);
+        MessageProto.TrustChainBlock block = trustChainQRBlockFactory.createBlock(wallet, helper, ownKeyPair);
 
         try {
 //            TrustChainBlock.validate(block, helper);
-            MessageProto.TrustChainBlock halfblock = trustChainBlockFactory.reconstructTemporaryIdentityHalfBlock(wallet);
+            MessageProto.TrustChainBlock halfblock = trustChainQRBlockFactory.reconstructTemporaryIdentityHalfBlock(wallet);
 
             helper.insertInDB(halfblock);
             helper.insertInDB(block);

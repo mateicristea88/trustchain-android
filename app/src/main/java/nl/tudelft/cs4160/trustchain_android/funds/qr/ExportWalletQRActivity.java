@@ -160,13 +160,9 @@ public class ExportWalletQRActivity extends AppCompatActivity {
             getWindowManager().getDefaultDisplay().getMetrics(metrics);
             int size = metrics.widthPixels;
             BitMatrix matrix = writer.encode(jsonEncoded, BarcodeFormat.QR_CODE, size, size);
-            final Bitmap image = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
 
-            for (int i = 0; i < size; i++) {//width
-                for (int j = 0; j < size; j++) {//height
-                    image.setPixel(i, j, matrix.get(i, j) ? Color.BLACK : Color.WHITE);
-                }
-            }
+            final Bitmap image = QRGenerator.GenerateQRCode(size, matrix);
+
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
