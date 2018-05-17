@@ -23,9 +23,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+
+import java.util.HashMap;
 
 import nl.tudelft.cs4160.trustchain_android.R;
 import nl.tudelft.cs4160.trustchain_android.funds.qr.QRGenerator;
@@ -83,23 +88,24 @@ public class SendClaimActivity extends AppCompatActivity implements OnNdefPushCo
             }
         });
 
+//     QR Code generation -> move out of oncreate!
+       QRCodeWriter writer = new QRCodeWriter();
+       HashMap hints = new HashMap();
+       hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
+       hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
+       DisplayMetrics metrics = new DisplayMetrics();
+       getWindowManager().getDefaultDisplay().getMetrics(metrics);
+       int size = metrics.widthPixels;
 
-//       QR Code generation -> move out of oncreate!
-//       MultiFormatWriter writer = new MultiFormatWriter();
-//       DisplayMetrics metrics = new DisplayMetrics();
-//       getWindowManager().getDefaultDisplay().getMetrics(metrics);
-//       int size = metrics.widthPixels;
-//
-//       MessageProto.TrustChainBlock block = (MessageProto.TrustChainBlock) getIntent().getSerializableExtra("claimBlock");
-//       try {
-//           Log.e(TAG, block.toByteArray().length + " bytes");
-//           BitMatrix matrix = writer.encode(new String(block.toByteArray(), UTF_8), BarcodeFormat.QR_CODE, size, size);
-//           Bitmap image = QRGenerator.GenerateQRCode(size, matrix);
-//           QRImage.setImageBitmap(image);
-//       } catch (WriterException e) {
-//           e.printStackTrace();
-//       }
-
+       MessageProto.TrustChainBlock block = (MessageProto.TrustChainBlock) getIntent().getSerializableExtra("claimBlock");
+       try {
+           Log.e(TAG, block.toByteArray().length + " bytes");
+           BitMatrix matrix = writer.encode(new String(block.toByteArray(), UTF_8), BarcodeFormat.QR_CODE, size, size, hints);
+           Bitmap image = QRGenerator.GenerateQRCode(size, matrix);
+           QRImage.setImageBitmap(image);
+       } catch (WriterException e) {
+           e.printStackTrace();
+       }
    }
 
     @Override

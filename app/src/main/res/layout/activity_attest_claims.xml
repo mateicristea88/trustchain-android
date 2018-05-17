@@ -14,6 +14,7 @@
         style="@style/Widget.AppCompat.Button.Colored"
         android:background="@color/colorPrimary"
         android:text="Sign received claim block"
+        android:onClick="onClickSign"
         android:visibility="gone"
     />
 

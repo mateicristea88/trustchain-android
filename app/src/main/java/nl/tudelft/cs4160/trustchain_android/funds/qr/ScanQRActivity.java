@@ -69,7 +69,6 @@ public class ScanQRActivity extends AppCompatActivity {
                     }
                 };
 
-
                 new AlertDialog.Builder(this).setTitle(R.string.camera_permissions_required)
                         .setMessage(R.string.camera_permisions_required_long)
                         .setNeutralButton(android.R.string.ok, null)

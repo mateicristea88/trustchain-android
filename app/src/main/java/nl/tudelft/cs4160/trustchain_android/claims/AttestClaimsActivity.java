@@ -9,13 +9,19 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import nl.tudelft.cs4160.trustchain_android.R;
+import nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper;
+import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
+import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
+import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -25,8 +31,11 @@ public class AttestClaimsActivity extends AppCompatActivity {
     private NfcAdapter mNfcAdapter;
     private PendingIntent pendingIntent;
     private IntentFilter[] intentFiltersArray;
+    private MessageProto.TrustChainBlock receivedBlock;
 
     private TextView textView;
+    private Button signButton;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +61,8 @@ public class AttestClaimsActivity extends AppCompatActivity {
         }
 
         intentFiltersArray = new IntentFilter[] { def };
+
+        signButton = findViewById(R.id.sign_button);
     }
 
     @Override
@@ -85,19 +96,24 @@ public class AttestClaimsActivity extends AppCompatActivity {
         NdefMessage msg = (NdefMessage) rawMsgs[0];
         // record 0 contains the MIME type, record 1 is the AAR, if present
         byte[] payload = msg.getRecords()[0].getPayload();
-        MessageProto.TrustChainBlock block;
+
         try {
-            block = MessageProto.TrustChainBlock.newBuilder().mergeFrom(payload).build();
+            receivedBlock = MessageProto.TrustChainBlock.newBuilder().mergeFrom(payload).build();
         } catch (InvalidProtocolBufferException e) {
             e.printStackTrace();
             Log.e(TAG, "Could not parse received block!");
             return;
         }
-        String claimText = "name: " + new String(block.getTransaction().getClaim().getName().toByteArray(), UTF_8) + "\n" +
-                "type: " + block.getTransaction().getClaim().getPayloadType() + "\n" +
-                "data: " + new String(block.getTransaction().getUnformatted().toByteArray(), UTF_8);
+        String claimText = "name: " + new String(receivedBlock.getTransaction().getClaim().getName().toByteArray(), UTF_8) + "\n" +
+                "type: " + receivedBlock.getTransaction().getClaim().getPayloadType() + "\n" +
+                "data: " + new String(receivedBlock.getTransaction().getUnformatted().toByteArray(), UTF_8);
         textView.setText(claimText);
+        signButton.setVisibility(View.VISIBLE);
+    }
 
-
+    public void onClickSign(View v) {
+        DualSecret keyPair = Key.loadKeys(this);
+        final MessageProto.TrustChainBlock signedBlock = TrustChainBlockHelper.sign(receivedBlock, keyPair.getSigningKey());
+        new TrustChainDBHelper(this).insertInDB(signedBlock);
     }
 }
