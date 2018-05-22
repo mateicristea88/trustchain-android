@@ -38,34 +38,6 @@
                 android:hint="Claim Text"
                 android:textColor="@android:color/black"/>
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginTop="20dp"
-            >
-
-            <Button
-                android:id="@+id/choose_file"
-                style="@style/Widget.AppCompat.Button.Colored"
-                android:layout_width="150dp"
-                android:layout_height="35dp"
-                android:background="@color/colorPrimary"
-                android:onClick="onClickChooseFile"
-                android:text="@string/choose_file" />
-
-            <TextView
-                android:id="@+id/selected_path"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:singleLine="true"
-                android:ellipsize="start"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:text="@string/no_file_selected"/>
-
-        </LinearLayout>
-
         <Button
             android:id="@+id/send_button"
             style="@style/Widget.AppCompat.Button.Colored"

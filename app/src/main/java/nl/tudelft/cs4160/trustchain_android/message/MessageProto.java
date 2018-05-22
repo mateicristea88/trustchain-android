@@ -3414,16 +3414,6 @@ public final class MessageProto {
        * <code>bytes proof_format = 4;</code>
        */
       com.google.protobuf.ByteString getProofFormat();
-
-      /**
-       * <code>string payload_type = 5;</code>
-       */
-      java.lang.String getPayloadType();
-      /**
-       * <code>string payload_type = 5;</code>
-       */
-      com.google.protobuf.ByteString
-          getPayloadTypeBytes();
     }
     /**
      * Protobuf type {@code message.TrustChainBlock.Claim}
@@ -3441,7 +3431,6 @@ public final class MessageProto {
         name_ = com.google.protobuf.ByteString.EMPTY;
         validityTerm_ = 0;
         proofFormat_ = com.google.protobuf.ByteString.EMPTY;
-        payloadType_ = "";
       }
 
       @java.lang.Override
@@ -3501,12 +3490,6 @@ public final class MessageProto {
               case 34: {
 
                 proofFormat_ = input.readBytes();
-                break;
-              }
-              case 42: {
-                java.lang.String s = input.readStringRequireUtf8();
-
-                payloadType_ = s;
                 break;
               }
             }
@@ -3581,40 +3564,6 @@ public final class MessageProto {
         return proofFormat_;
       }
 
-      public static final int PAYLOAD_TYPE_FIELD_NUMBER = 5;
-      private volatile java.lang.Object payloadType_;
-      /**
-       * <code>string payload_type = 5;</code>
-       */
-      public java.lang.String getPayloadType() {
-        java.lang.Object ref = payloadType_;
-        if (ref instanceof java.lang.String) {
-          return (java.lang.String) ref;
-        } else {
-          com.google.protobuf.ByteString bs = 
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          payloadType_ = s;
-          return s;
-        }
-      }
-      /**
-       * <code>string payload_type = 5;</code>
-       */
-      public com.google.protobuf.ByteString
-          getPayloadTypeBytes() {
-        java.lang.Object ref = payloadType_;
-        if (ref instanceof java.lang.String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          payloadType_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-
       private byte memoizedIsInitialized = -1;
       public final boolean isInitialized() {
         byte isInitialized = memoizedIsInitialized;
@@ -3639,9 +3588,6 @@ public final class MessageProto {
         if (!proofFormat_.isEmpty()) {
           output.writeBytes(4, proofFormat_);
         }
-        if (!getPayloadTypeBytes().isEmpty()) {
-          com.google.protobuf.GeneratedMessageV3.writeString(output, 5, payloadType_);
-        }
         unknownFields.writeTo(output);
       }
 
@@ -3665,9 +3611,6 @@ public final class MessageProto {
         if (!proofFormat_.isEmpty()) {
           size += com.google.protobuf.CodedOutputStream
             .computeBytesSize(4, proofFormat_);
-        }
-        if (!getPayloadTypeBytes().isEmpty()) {
-          size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, payloadType_);
         }
         size += unknownFields.getSerializedSize();
         memoizedSize = size;
@@ -3696,8 +3639,6 @@ public final class MessageProto {
             == other.getValidityTerm());
         result = result && getProofFormat()
             .equals(other.getProofFormat());
-        result = result && getPayloadType()
-            .equals(other.getPayloadType());
         result = result && unknownFields.equals(other.unknownFields);
         return result;
       }
@@ -3719,8 +3660,6 @@ public final class MessageProto {
         hash = (53 * hash) + getValidityTerm();
         hash = (37 * hash) + PROOF_FORMAT_FIELD_NUMBER;
         hash = (53 * hash) + getProofFormat().hashCode();
-        hash = (37 * hash) + PAYLOAD_TYPE_FIELD_NUMBER;
-        hash = (53 * hash) + getPayloadType().hashCode();
         hash = (29 * hash) + unknownFields.hashCode();
         memoizedHashCode = hash;
         return hash;
@@ -3862,8 +3801,6 @@ public final class MessageProto {
 
           proofFormat_ = com.google.protobuf.ByteString.EMPTY;
 
-          payloadType_ = "";
-
           return this;
         }
 
@@ -3894,7 +3831,6 @@ public final class MessageProto {
           }
           result.validityTerm_ = validityTerm_;
           result.proofFormat_ = proofFormat_;
-          result.payloadType_ = payloadType_;
           onBuilt();
           return result;
         }
@@ -3947,10 +3883,6 @@ public final class MessageProto {
           }
           if (other.getProofFormat() != com.google.protobuf.ByteString.EMPTY) {
             setProofFormat(other.getProofFormat());
-          }
-          if (!other.getPayloadType().isEmpty()) {
-            payloadType_ = other.payloadType_;
-            onChanged();
           }
           this.mergeUnknownFields(other.unknownFields);
           onChanged();
@@ -4176,75 +4108,6 @@ public final class MessageProto {
         public Builder clearProofFormat() {
           
           proofFormat_ = getDefaultInstance().getProofFormat();
-          onChanged();
-          return this;
-        }
-
-        private java.lang.Object payloadType_ = "";
-        /**
-         * <code>string payload_type = 5;</code>
-         */
-        public java.lang.String getPayloadType() {
-          java.lang.Object ref = payloadType_;
-          if (!(ref instanceof java.lang.String)) {
-            com.google.protobuf.ByteString bs =
-                (com.google.protobuf.ByteString) ref;
-            java.lang.String s = bs.toStringUtf8();
-            payloadType_ = s;
-            return s;
-          } else {
-            return (java.lang.String) ref;
-          }
-        }
-        /**
-         * <code>string payload_type = 5;</code>
-         */
-        public com.google.protobuf.ByteString
-            getPayloadTypeBytes() {
-          java.lang.Object ref = payloadType_;
-          if (ref instanceof String) {
-            com.google.protobuf.ByteString b = 
-                com.google.protobuf.ByteString.copyFromUtf8(
-                    (java.lang.String) ref);
-            payloadType_ = b;
-            return b;
-          } else {
-            return (com.google.protobuf.ByteString) ref;
-          }
-        }
-        /**
-         * <code>string payload_type = 5;</code>
-         */
-        public Builder setPayloadType(
-            java.lang.String value) {
-          if (value == null) {
-    throw new NullPointerException();
-  }
-  
-          payloadType_ = value;
-          onChanged();
-          return this;
-        }
-        /**
-         * <code>string payload_type = 5;</code>
-         */
-        public Builder clearPayloadType() {
-          
-          payloadType_ = getDefaultInstance().getPayloadType();
-          onChanged();
-          return this;
-        }
-        /**
-         * <code>string payload_type = 5;</code>
-         */
-        public Builder setPayloadTypeBytes(
-            com.google.protobuf.ByteString value) {
-          if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-          
-          payloadType_ = value;
           onChanged();
           return this;
         }
@@ -8580,7 +8443,7 @@ public final class MessageProto {
       "ureRequest\030\004 \001(\0132\030.message.PunctureReque" +
       "st\022\'\n\005block\030\005 \001(\0132\030.message.TrustChainBl" +
       "ock\022+\n\014crawlRequest\030\006 \001(\0132\025.message.Craw" +
-      "lRequest\"\350\003\n\017TrustChainBlock\022\022\n\npublic_k" +
+      "lRequest\"\321\003\n\017TrustChainBlock\022\022\n\npublic_k" +
       "ey\030\001 \001(\014\022\027\n\017sequence_number\030\002 \001(\005\022\027\n\017lin" +
       "k_public_key\030\003 \001(\014\022\034\n\024link_sequence_numb" +
       "er\030\004 \001(\005\022\025\n\rprevious_hash\030\005 \001(\014\022\021\n\tsigna" +
@@ -8589,22 +8452,21 @@ public final class MessageProto {
       "time\030\010 \001(\0132\032.google.protobuf.Timestamp\032Q" +
       "\n\013Transaction\022\023\n\013unformatted\030\001 \001(\014\022-\n\005cl" +
       "aim\030\002 \001(\0132\036.message.TrustChainBlock.Clai" +
-      "m\032\207\001\n\005Claim\022\014\n\004name\030\001 \001(\014\022-\n\ttimestamp\030\002" +
-      " \001(\0132\032.google.protobuf.Timestamp\022\025\n\rvali" +
-      "dity_term\030\003 \001(\005\022\024\n\014proof_format\030\004 \001(\014\022\024\n" +
-      "\014payload_type\030\005 \001(\t\"T\n\014CrawlRequest\022\022\n\np" +
-      "ublic_key\030\001 \001(\014\022!\n\031requested_sequence_nu" +
-      "mber\030\002 \001(\005\022\r\n\005limit\030\003 \001(\005\"H\n\023Introductio" +
-      "nRequest\022\027\n\017connection_type\030\001 \001(\003\022\030\n\020net" +
-      "work_operator\030\002 \001(\t\"\207\001\n\024IntroductionResp" +
-      "onse\022\027\n\017connection_type\030\001 \001(\003\022\030\n\020network" +
-      "_operator\030\002 \001(\t\022\036\n\026internal_source_socke" +
-      "t\030\003 \001(\t\022\017\n\007invitee\030\004 \001(\014\022\013\n\003pex\030\005 \003(\014\" \n" +
-      "\010Puncture\022\024\n\014sourceSocket\030\001 \001(\t\"?\n\017Punct" +
-      "ureRequest\022\025\n\rsource_socket\030\001 \001(\t\022\025\n\rpun" +
-      "cture_peer\030\002 \001(\014B<\n,nl.tudelft.cs4160.tr" +
-      "ustchain_android.messageB\014MessageProtob\006" +
-      "proto3"
+      "m\032q\n\005Claim\022\014\n\004name\030\001 \001(\014\022-\n\ttimestamp\030\002 " +
+      "\001(\0132\032.google.protobuf.Timestamp\022\025\n\rvalid" +
+      "ity_term\030\003 \001(\005\022\024\n\014proof_format\030\004 \001(\014\"T\n\014" +
+      "CrawlRequest\022\022\n\npublic_key\030\001 \001(\014\022!\n\031requ" +
+      "ested_sequence_number\030\002 \001(\005\022\r\n\005limit\030\003 \001" +
+      "(\005\"H\n\023IntroductionRequest\022\027\n\017connection_" +
+      "type\030\001 \001(\003\022\030\n\020network_operator\030\002 \001(\t\"\207\001\n" +
+      "\024IntroductionResponse\022\027\n\017connection_type" +
+      "\030\001 \001(\003\022\030\n\020network_operator\030\002 \001(\t\022\036\n\026inte" +
+      "rnal_source_socket\030\003 \001(\t\022\017\n\007invitee\030\004 \001(" +
+      "\014\022\013\n\003pex\030\005 \003(\014\" \n\010Puncture\022\024\n\014sourceSock" +
+      "et\030\001 \001(\t\"?\n\017PunctureRequest\022\025\n\rsource_so" +
+      "cket\030\001 \001(\t\022\025\n\rpuncture_peer\030\002 \001(\014B<\n,nl." +
+      "tudelft.cs4160.trustchain_android.messag" +
+      "eB\014MessageProtob\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -8648,7 +8510,7 @@ public final class MessageProto {
     internal_static_message_TrustChainBlock_Claim_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_message_TrustChainBlock_Claim_descriptor,
-        new java.lang.String[] { "Name", "Timestamp", "ValidityTerm", "ProofFormat", "PayloadType", });
+        new java.lang.String[] { "Name", "Timestamp", "ValidityTerm", "ProofFormat", });
     internal_static_message_CrawlRequest_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_message_CrawlRequest_fieldAccessorTable = new

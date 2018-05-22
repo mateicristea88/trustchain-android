@@ -105,7 +105,6 @@ public class AttestClaimsActivity extends AppCompatActivity {
             return;
         }
         String claimText = "name: " + new String(receivedBlock.getTransaction().getClaim().getName().toByteArray(), UTF_8) + "\n" +
-                "type: " + receivedBlock.getTransaction().getClaim().getPayloadType() + "\n" +
                 "data: " + new String(receivedBlock.getTransaction().getUnformatted().toByteArray(), UTF_8);
         textView.setText(claimText);
         signButton.setVisibility(View.VISIBLE);
