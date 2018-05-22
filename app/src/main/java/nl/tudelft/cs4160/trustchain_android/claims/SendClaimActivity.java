@@ -19,6 +19,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,22 +46,22 @@ public class SendClaimActivity extends AppCompatActivity implements OnNdefPushCo
     private static final String TITLE = "Send claim";
     NfcAdapter mNfcAdapter;
 
-    private TextView sendClaimText;
     private ImageView QRImage;
+    private ProgressBar QRProgress;
 
-   @Override
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.content_send_claim);
 
         View layout = findViewById(R.id.layout_send_claim);
-        sendClaimText = findViewById(R.id.send_claim_text);
         QRImage = findViewById(R.id.qr_image);
+        QRProgress = findViewById(R.id.qr_progress);
 
         // NFC isn't available on the device
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_NFC)) {
             // NFC isn't supported
-           showNotsupportedMessage();
+            showNotsupportedMessage();
         } else {
             mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
 
@@ -73,55 +74,63 @@ public class SendClaimActivity extends AppCompatActivity implements OnNdefPushCo
         // Register callback
         mNfcAdapter.setOnNdefPushCompleteCallback(this, this);
         mNfcAdapter.setNdefPushMessage(createNdefMessage(), this);
-
-        sendClaimText.setText(R.string.sending_claim);
-
-        layout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-//                new Handler().postDelayed(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        invokeBeam();
-//                    }
-//                }, 10);
-            }
-        });
-
-//     QR Code generation -> move out of oncreate!
-       QRCodeWriter writer = new QRCodeWriter();
-       HashMap hints = new HashMap();
-       hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
-       hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
-       DisplayMetrics metrics = new DisplayMetrics();
-       getWindowManager().getDefaultDisplay().getMetrics(metrics);
-       int size = metrics.widthPixels;
-
-       MessageProto.TrustChainBlock block = (MessageProto.TrustChainBlock) getIntent().getSerializableExtra("claimBlock");
-       try {
-           Log.e(TAG, block.toByteArray().length + " bytes");
-           BitMatrix matrix = writer.encode(new String(block.toByteArray(), UTF_8), BarcodeFormat.QR_CODE, size, size, hints);
-           Bitmap image = QRGenerator.GenerateQRCode(size, matrix);
-           QRImage.setImageBitmap(image);
-       } catch (WriterException e) {
-           e.printStackTrace();
-       }
-   }
+    }
 
     @Override
     protected void onPostResume() {
         super.onPostResume();
-        findViewById(R.id.layout_send_claim).postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                invokeBeam();
-            }
-        }, 100);
+//        findViewById(R.id.layout_send_claim).postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                invokeBeam();
+//            }
+//        }, 100);
     }
 
-    private void invokeBeam() {
+    public void invokeBeam(View v) {
         boolean success = mNfcAdapter.invokeBeam(this);
         Log.i(TAG, "beam transfer invoke succes: " + success);
+    }
+
+    public void showQRCode(View v) {
+        QRProgress.setVisibility(View.VISIBLE);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                QRCodeWriter writer = new QRCodeWriter();
+                HashMap hints = new HashMap();
+                hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
+                hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
+                DisplayMetrics metrics = new DisplayMetrics();
+                getWindowManager().getDefaultDisplay().getMetrics(metrics);
+                int size = metrics.widthPixels;
+
+                MessageProto.TrustChainBlock block = (MessageProto.TrustChainBlock) getIntent().getSerializableExtra("claimBlock");
+
+                Log.e(TAG, block.toByteArray().length + " bytes");
+                try {
+                    BitMatrix matrix = writer.encode(new String(block.toByteArray(), UTF_8), BarcodeFormat.QR_CODE, size, size, hints);
+                    final Bitmap image = QRGenerator.GenerateQRCode(size, matrix);
+                    runOnUiThread(new Runnable() {
+                                      @Override
+                                      public void run() {
+                                          QRImage.setImageBitmap(image);
+                                      }
+                                  }
+                    );
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    runOnUiThread(new Runnable() {
+                                      @Override
+                                      public void run() {
+                                          QRProgress.setVisibility(View.GONE);
+                                      }
+                                  }
+                    );
+                }
+            }
+        }).start();
     }
 
     private void showNotsupportedMessage() {
@@ -145,10 +154,10 @@ public class SendClaimActivity extends AppCompatActivity implements OnNdefPushCo
     public NdefMessage createNdefMessage() {
         MessageProto.TrustChainBlock block = (MessageProto.TrustChainBlock) getIntent().getSerializableExtra("claimBlock");
         NdefMessage msg = new NdefMessage(
-                new NdefRecord[] { createMime(
+                new NdefRecord[]{createMime(
                         "application/nl.tudelft.cs4160.trustchain_android", block.toByteArray())
-                         // Including the AAR guarantees that the specified application runs when it
-                         // receives a push.
+                        // Including the AAR guarantees that the specified application runs when it
+                        // receives a push.
                         , NdefRecord.createApplicationRecord(getApplicationContext().getPackageName())
                 });
         return msg;
@@ -160,13 +169,13 @@ public class SendClaimActivity extends AppCompatActivity implements OnNdefPushCo
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                sendClaimText.setText(R.string.sending_claim_complete);
+//                sendClaimText.setText(R.string.sending_claim_complete);
             }
         });
     }
 
     @Override
     public Uri[] createBeamUris(NfcEvent nfcEvent) {
-       return new Uri[0];
+        return new Uri[0];
     }
 }

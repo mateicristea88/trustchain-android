@@ -9,15 +9,53 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="nl.tudelft.cs4160.trustchain_android.claims.SendClaimActivity"
     tools:showIn="@layout/activity_send_claim">
-
-    <TextView
-        android:id="@+id/send_claim_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
     
-    <ImageView
-        android:id="@+id/qr_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
+        <LinearLayout
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/send_claim_beam"
+                android:onClick="invokeBeam"
+                android:background="@color/colorPrimary"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_margin="5dp"
+                android:padding="5dp"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="Android Beam" />
+
+            <Button
+                android:id="@+id/send_claim_qr"
+                android:onClick="showQRCode"
+                android:background="@color/colorPrimary"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_margin="5dp"
+                android:padding="5dp"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="QR Code" />
+        </LinearLayout>
+        <ProgressBar
+            android:id="@+id/qr_progress"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            />
+
+        <ImageView
+            android:id="@+id/qr_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+
+    </LinearLayout>
 </android.support.constraint.ConstraintLayout>
