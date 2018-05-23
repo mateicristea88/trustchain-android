@@ -11,8 +11,6 @@ import android.widget.EditText;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
 
-import java.io.UnsupportedEncodingException;
-
 import nl.tudelft.cs4160.trustchain_android.R;
 import nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
@@ -20,6 +18,7 @@ import nl.tudelft.cs4160.trustchain_android.inbox.InboxItem;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper.createBlock;
 
 public class CreateClaimActivity extends AppCompatActivity {
@@ -37,9 +36,14 @@ public class CreateClaimActivity extends AppCompatActivity {
         inboxItemOtherPeer = (InboxItem) getIntent().getSerializableExtra("peer");
     }
 
-    public MessageProto.TrustChainBlock createClaimBlock() throws UnsupportedEncodingException {
+    /**
+     * Creates and returns a TrustChainBlock containing a claim consisting of the text in the message field.
+     * Currently sets dummy values for name, proofformat and validity term.
+     * @return TrustChainBlock signed block proposal
+     */
+    public MessageProto.TrustChainBlock createClaimBlock() {
         byte[] publicKey = Key.loadKeys(this).getPublicKeyPair().toBytes();
-        byte[] transactionData = messageEditText.getText().toString().getBytes("UTF-8");
+        byte[] transactionData = messageEditText.getText().toString().getBytes(UTF_8);
 
         MessageProto.TrustChainBlock.Claim.Builder claimBuilder = MessageProto.TrustChainBlock.Claim.newBuilder();
         claimBuilder.setName(ByteString.copyFromUtf8("claim"));
@@ -64,7 +68,12 @@ public class CreateClaimActivity extends AppCompatActivity {
         return signedBlock;
     }
 
-    public void onClickSend(View view) throws UnsupportedEncodingException {
+    /**
+     * Called when the user presses the Send button.
+     * Creates the new block, inserts it in the database and starts the sending activity.
+     * @param view unused
+     */
+    public void onClickSend(View view) {
         MessageProto.TrustChainBlock signedBlock = createClaimBlock();
         if (signedBlock == null) {
             return;

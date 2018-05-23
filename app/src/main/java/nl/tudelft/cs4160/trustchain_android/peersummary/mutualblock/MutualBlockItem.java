@@ -26,7 +26,6 @@ public class MutualBlockItem {
         this.transaction = block.getTransaction().getUnformatted().toStringUtf8();
         this.validationResult = validationResult;
         this.block = block;
-
     }
 
 
@@ -54,7 +53,7 @@ public class MutualBlockItem {
     }
 
     /**
-     *  Get the sequence number of block.
+     * Get the sequence number of block.
      * @return the sequence number of block
      */
     public int getSeqNum() {

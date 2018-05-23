@@ -77,7 +77,6 @@ public class AttestClaimsActivity extends AppCompatActivity {
 //        if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
 //            processIntent(getIntent());
 //        }
-
     }
 
     @Override
@@ -87,12 +86,20 @@ public class AttestClaimsActivity extends AppCompatActivity {
         super.onPause();
     }
 
+    /**
+     * Receives data from Android Beam.
+     * @param intent
+     */
     @Override
     protected void onNewIntent(Intent intent) {
         Log.d(TAG, "Tag received");
         processIntent(intent);
     }
 
+    /**
+     * Processes a received Intent from Android Beam to get a block.
+     * @param intent
+     */
     void processIntent(Intent intent) {
         Parcelable[] rawMsgs = intent.getParcelableArrayExtra(
                 NfcAdapter.EXTRA_NDEF_MESSAGES);
@@ -114,20 +121,43 @@ public class AttestClaimsActivity extends AppCompatActivity {
         signButton.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * Completes the block proposal and inserts it into the database.
+     * @param v - unused
+     */
     public void onClickSign(View v) {
+        //TODO what do we do here exactly, sending back, generating proof?
+        TrustChainDBHelper DBHelper = new TrustChainDBHelper(this);
         DualSecret keyPair = Key.loadKeys(this);
+        MessageProto.TrustChainBlock block = TrustChainBlockHelper.createBlock(null, DBHelper,
+                keyPair.getPublicKeyPair().toBytes(),
+                receivedBlock, receivedBlock.getPublicKey().toByteArray(), null);
+
         final MessageProto.TrustChainBlock signedBlock = TrustChainBlockHelper.sign(receivedBlock, keyPair.getSigningKey());
-        new TrustChainDBHelper(this).insertInDB(signedBlock);
+        DBHelper.insertInDB(signedBlock);
     }
 
+    /**
+     * Called when the user clicks the Scan QR code button.
+     * @param v
+     */
     public void onClickScanQR (View v) {
         startQRScanner();
     }
 
+    /**
+     * Starts ScanQRActivity to scan a QR code from another device.
+     */
     private void startQRScanner () {
         startActivityForResult(new Intent(this, ScanQRActivity.class), SCAN_QR);
     }
 
+    /**
+     * Receives data from ScanQRActivity containing the block scanned from a QR code.
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

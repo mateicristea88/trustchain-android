@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="nl.tudelft.cs4160.trustchain_android.claims.AttestClaimsActivity"
-    tools:showIn="@layout/activity_attest_claims">
+    >
 
     <LinearLayout
         android:orientation="vertical"
@@ -33,28 +33,22 @@
             android:onClick="onClickScanQR"
             />
 
-        <me.dm7.barcodescanner.zxing.ZXingScannerView
-            android:id="@+id/scanner_view"
-            android:layout_width="300dp"
-            android:layout_height="300dp">
-
-        </me.dm7.barcodescanner.zxing.ZXingScannerView>
-
-
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="250dp">
 
             <TextView
-                    android:id="@+id/textView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
         </ScrollView>
 
         <Button
             android:id="@+id/sign_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:padding="5dp"
             style="@style/Widget.AppCompat.Button.Colored"
             android:background="@color/colorPrimary"
             android:text="@string/sign_claim_block"
