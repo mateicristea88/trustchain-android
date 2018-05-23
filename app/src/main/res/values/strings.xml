@@ -167,7 +167,10 @@
     <string name="create_claim">Create claim</string>
     <string name="is_claim_checkbox_text">Is Claim</string>
     <string name="send_claim">Create Claim</string>
-    <string name="choose_file">Choose File</string>
-    <string name="no_file_selected">No File Selected</string>
+    <string name="deny_permission">Deny</string>
+    <string name="qr_camera_permission_explanation">Camera permission is required in order to scan a QR code</string>
+    <string name="attest_claims_explanation">Tap a sending device to receive a claim. Or press the button below to scan one from a QR coe</string>
+    <string name="scan_qr_code">Scan a Claim QR code</string>
+    <string name="sign_claim_block">Sign received claim block</string>
 
 </resources>

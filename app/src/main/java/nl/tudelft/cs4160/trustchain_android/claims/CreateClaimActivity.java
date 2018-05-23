@@ -24,7 +24,6 @@ import static nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper.c
 
 public class CreateClaimActivity extends AppCompatActivity {
 
-    private static final int REQUEST_STORAGE_PERMISSIONS = 1;
     private static final String TAG = CreateClaimActivity.class.getName();
     private EditText messageEditText;
     private InboxItem inboxItemOtherPeer;

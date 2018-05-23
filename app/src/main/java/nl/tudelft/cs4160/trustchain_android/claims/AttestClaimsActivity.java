@@ -1,5 +1,6 @@
 package nl.tudelft.cs4160.trustchain_android.claims;
 
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -23,9 +24,11 @@ import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class AttestClaimsActivity extends AppCompatActivity {
+    //TODO check for NFC availability, show settings snackbar
 
     private static final String TAG = AttestClaimsActivity.class.toString();
     private NfcAdapter mNfcAdapter;
@@ -35,7 +38,7 @@ public class AttestClaimsActivity extends AppCompatActivity {
 
     private TextView textView;
     private Button signButton;
-
+    public static final int SCAN_QR = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +66,7 @@ public class AttestClaimsActivity extends AppCompatActivity {
         intentFiltersArray = new IntentFilter[] { def };
 
         signButton = findViewById(R.id.sign_button);
+        textView = findViewById(R.id.textView);
     }
 
     @Override
@@ -73,6 +77,7 @@ public class AttestClaimsActivity extends AppCompatActivity {
 //        if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
 //            processIntent(getIntent());
 //        }
+
     }
 
     @Override
@@ -89,7 +94,6 @@ public class AttestClaimsActivity extends AppCompatActivity {
     }
 
     void processIntent(Intent intent) {
-        textView = findViewById(R.id.textView);
         Parcelable[] rawMsgs = intent.getParcelableArrayExtra(
                 NfcAdapter.EXTRA_NDEF_MESSAGES);
         // only one message sent during the beam
@@ -114,5 +118,36 @@ public class AttestClaimsActivity extends AppCompatActivity {
         DualSecret keyPair = Key.loadKeys(this);
         final MessageProto.TrustChainBlock signedBlock = TrustChainBlockHelper.sign(receivedBlock, keyPair.getSigningKey());
         new TrustChainDBHelper(this).insertInDB(signedBlock);
+    }
+
+    public void onClickScanQR (View v) {
+        startQRScanner();
+    }
+
+    private void startQRScanner () {
+        startActivityForResult(new Intent(this, ScanQRActivity.class), SCAN_QR);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == SCAN_QR) {
+            if (resultCode == Activity.RESULT_OK) {
+                String result = data.getStringExtra("result");
+                byte[] bytes = result.getBytes(ISO_8859_1);
+                try {
+                    receivedBlock = MessageProto.TrustChainBlock.newBuilder().mergeFrom(bytes).build();
+                } catch (InvalidProtocolBufferException e) {
+                    e.printStackTrace();
+                    Log.e(TAG, "Could not parse received block!");
+                    return;
+                }
+                String claimText = "name: " + new String(receivedBlock.getTransaction().getClaim().getName().toByteArray(), UTF_8) + "\n" +
+                        "data: " + new String(receivedBlock.getTransaction().getUnformatted().toByteArray(), UTF_8);
+                textView.setText(claimText);
+                signButton.setVisibility(View.VISIBLE);
+            }
+        }
     }
 }

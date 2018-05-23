@@ -11,22 +11,17 @@ import android.nfc.NfcAdapter.OnNdefPushCompleteCallback;
 import android.nfc.NfcEvent;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
@@ -38,7 +33,7 @@ import nl.tudelft.cs4160.trustchain_android.funds.qr.QRGenerator;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 
 import static android.nfc.NdefRecord.createMime;
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
 public class SendClaimActivity extends AppCompatActivity implements OnNdefPushCompleteCallback, NfcAdapter.CreateBeamUrisCallback {
 
@@ -109,7 +104,7 @@ public class SendClaimActivity extends AppCompatActivity implements OnNdefPushCo
 
                 Log.e(TAG, block.toByteArray().length + " bytes");
                 try {
-                    BitMatrix matrix = writer.encode(new String(block.toByteArray(), UTF_8), BarcodeFormat.QR_CODE, size, size, hints);
+                    BitMatrix matrix = writer.encode(new String(block.toByteArray(), ISO_8859_1), BarcodeFormat.QR_CODE, size, size, hints);
                     final Bitmap image = QRGenerator.GenerateQRCode(size, matrix);
                     runOnUiThread(new Runnable() {
                                       @Override

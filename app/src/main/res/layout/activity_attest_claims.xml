@@ -7,25 +7,60 @@
     tools:context="nl.tudelft.cs4160.trustchain_android.claims.AttestClaimsActivity"
     tools:showIn="@layout/activity_attest_claims">
 
-    <Button
-        android:id="@+id/sign_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/Widget.AppCompat.Button.Colored"
-        android:background="@color/colorPrimary"
-        android:text="Sign received claim block"
-        android:onClick="onClickSign"
-        android:visibility="gone"
-    />
-
-    <ScrollView
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <TextView
-                android:id="@+id/textView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-    </ScrollView>
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textSize="20sp"
+            android:padding="30dp"
+            android:text="@string/attest_claims_explanation"/>
 
+        <Button
+            android:id="@+id/start_qr_scan_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:background="@color/colorPrimary"
+            android:padding="5dp"
+            android:layout_margin="10dp"
+            android:layout_gravity="center"
+            android:text="@string/scan_qr_code"
+            android:onClick="onClickScanQR"
+            />
+
+        <me.dm7.barcodescanner.zxing.ZXingScannerView
+            android:id="@+id/scanner_view"
+            android:layout_width="300dp"
+            android:layout_height="300dp">
+
+        </me.dm7.barcodescanner.zxing.ZXingScannerView>
+
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                    android:id="@+id/textView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+        </ScrollView>
+
+        <Button
+            android:id="@+id/sign_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:background="@color/colorPrimary"
+            android:text="@string/sign_claim_block"
+            android:onClick="onClickSign"
+            android:visibility="gone"
+            />
+
+    </LinearLayout>
 </android.support.constraint.ConstraintLayout>
