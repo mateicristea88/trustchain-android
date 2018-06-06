@@ -48,29 +48,53 @@ public class TrustChainBlockHelper {
     }
 
     /**
-     * Creates a TrustChainBlockHelper for the given input.
-     * @param transaction - Details the message of the block, can be null if there is a linked block
+     * Creates a new block proposal (half block)
+     * @param transaction - Transaction payload of this block
      * @param dbHelper - database helper for the database in which the previous blocks of this peer can be found
      * @param mypubk - the public key of this peer
-     * @param linkedBlock - The halfblock that is linked to this to be created half block, can be null
      * @param linkpubk - The public key of the linked peer
-     * @return a new half block
+     * @return a new block proposal
      */
-    public static MessageProto.TrustChainBlock createBlock(byte[] transaction, TrustChainDBHelper dbHelper,
-                                                         byte[] mypubk, MessageProto.TrustChainBlock linkedBlock,
-                                                         byte[] linkpubk) {
-        MessageProto.TrustChainBlock latestBlock = dbHelper.getLatestBlock(mypubk);
+    public static MessageProto.TrustChainBlock createBlockProposal(byte[] transaction, TrustChainDBHelper dbHelper,
+                                                         byte[] mypubk, byte[] linkpubk) {
 
         MessageProto.TrustChainBlock.Builder builder = MessageProto.TrustChainBlock.newBuilder();
-        if(linkedBlock != null) {
+        builder.setTransaction(Transaction.newBuilder().setUnformatted(ByteString.copyFrom(transaction)).build())
+                .setLinkPublicKey(ByteString.copyFrom(linkpubk))
+                .setLinkSequenceNumber(TrustChainBlockHelper.UNKNOWN_SEQ);
+
+        finishBlockParamaters(dbHelper, builder, mypubk);
+        return builder.build();
+    }
+
+    /**
+     * Creates a full block based on a given block proposal
+     * @param dbHelper - database helper for the database in which the previous blocks of this peer can be found
+     * @param mypubk - the public key of this peer
+     * @param linkedBlock - The block proposal to complete.
+     * @return a completed (full) block
+     */
+    public static MessageProto.TrustChainBlock completeBlockProposal (TrustChainDBHelper dbHelper,
+                                                                      MessageProto.TrustChainBlock linkedBlock,
+                                                                      byte[] mypubk) {
+
+            MessageProto.TrustChainBlock.Builder builder = MessageProto.TrustChainBlock.newBuilder();
             builder.setTransaction(linkedBlock.getTransaction())
                     .setLinkPublicKey(linkedBlock.getPublicKey())
                     .setLinkSequenceNumber(linkedBlock.getSequenceNumber());
-        } else {
-            builder.setTransaction(Transaction.newBuilder().setUnformatted(ByteString.copyFrom(transaction)).build())
-                    .setLinkPublicKey(ByteString.copyFrom(linkpubk))
-                    .setLinkSequenceNumber(TrustChainBlockHelper.UNKNOWN_SEQ);
-        }
+
+            finishBlockParamaters(dbHelper, builder, mypubk);
+            return builder.build();
+    }
+
+    /**
+     * Code that finishes up the creation of a new block. Used by createBlockProposal and
+     * completeBlockProposal to insert a sequence number and public key
+     */
+    private static void finishBlockParamaters (TrustChainDBHelper dbHelper,
+                                               MessageProto.TrustChainBlock.Builder builder,
+                                               byte[] mypubk) {
+        MessageProto.TrustChainBlock latestBlock = dbHelper.getLatestBlock(mypubk);
 
         // if a latest block was found set the correct fields, if not the block won't be validated
         // so it doesn't matter much that no exception is raised here.
@@ -81,9 +105,8 @@ public class TrustChainBlockHelper {
 
         builder.setPublicKey(ByteString.copyFrom(mypubk));
         builder.setSignature(EMPTY_SIG);
-
-        return builder.build();
     }
+
 
     /**
      * Checks if the given block is a genesis block

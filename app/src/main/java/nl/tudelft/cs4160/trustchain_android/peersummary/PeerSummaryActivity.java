@@ -48,7 +48,8 @@ import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.InboxItemStorage;
 
 import static nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper.GENESIS_SEQ;
-import static nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper.createBlock;
+import static nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper.completeBlockProposal;
+import static nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper.createBlockProposal;
 import static nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper.sign;
 
 public class PeerSummaryActivity extends AppCompatActivity implements CrawlRequestListener {
@@ -216,7 +217,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
     public void onClickSend(View view) throws UnsupportedEncodingException {
         byte[] publicKey = Key.loadKeys(this).getPublicKeyPair().toBytes();
         byte[] transactionData = messageEditText.getText().toString().getBytes("UTF-8");
-        final MessageProto.TrustChainBlock block = createBlock(transactionData, DBHelper, publicKey, null, inboxItemOtherPeer.getPublicKeyPair().toBytes());
+        final MessageProto.TrustChainBlock block = createBlockProposal(transactionData, DBHelper, publicKey, inboxItemOtherPeer.getPublicKeyPair().toBytes());
         final MessageProto.TrustChainBlock signedBlock = TrustChainBlockHelper.sign(block, Key.loadKeys(getApplicationContext()).getSigningKey());
         messageEditText.setText("");
         messageEditText.clearFocus();
@@ -260,7 +261,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
                     builder.setMessage("Do you want to sign Block[ " + block.getTransaction().getUnformatted().toString("UTF-8") + " ] from " + inboxItemOtherPeer.getUserName() + "?")
                             .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
-                                    signAndSendHalfBlock(block);
+                                    completeAndReturnBlockProposal(block);
                                 }
                             })
                             .setNegativeButton("DELETE", new DialogInterface.OnClickListener() {
@@ -281,11 +282,10 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
      * sign a received halfblock and directly send this block back to the peer.
      * @param linkedBlock
      */
-    public void signAndSendHalfBlock(MessageProto.TrustChainBlock linkedBlock) {
+    public void completeAndReturnBlockProposal(MessageProto.TrustChainBlock linkedBlock) {
         DualSecret keyPair = Key.loadKeys(this);
-        MessageProto.TrustChainBlock block = createBlock(null, DBHelper,
-                keyPair.getPublicKeyPair().toBytes(),
-                linkedBlock, inboxItemOtherPeer.getPublicKeyPair().toBytes());
+        MessageProto.TrustChainBlock block = completeBlockProposal(DBHelper, linkedBlock,
+                keyPair.getPublicKeyPair().toBytes());
 
         final MessageProto.TrustChainBlock signedBlock = sign(block, keyPair.getSigningKey());
 
