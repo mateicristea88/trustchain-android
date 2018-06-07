@@ -24,12 +24,12 @@
     <uses-feature android:name="android.hardware.camera.autofocus" />
 
     <application
-        tools:replace="android:allowBackup"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:replace="android:allowBackup">
         <activity
             android:name=".peersummary.PeerSummaryActivity"
             android:configChanges="orientation|screenLayout|screenSize"
@@ -48,10 +48,9 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
         <activity android:name=".funds.qr.ScanQRActivity" />
         <activity android:name=".funds.qr.ExportWalletQRActivity" />
         <activity android:name=".funds.FundsActivity" />
@@ -61,11 +60,11 @@
         <activity
             android:name=".main.BootstrapActivity"
             android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".inbox.InboxActivity"/>
+        <activity android:name=".inbox.InboxActivity" />
         <activity android:name=".passport.ocr.camera.CameraActivity" />
         <activity android:name=".passport.ocr.ManualInputActivity" />
         <activity android:name=".passport.nfc.PassportConActivity" />
-
+        <activity android:name=".stresstest.StressTestActivity"></activity>
     </application>
 
 </manifest>

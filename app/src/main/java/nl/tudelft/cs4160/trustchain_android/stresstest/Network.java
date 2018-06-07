@@ -1,4 +1,4 @@
-package nl.tudelft.cs4160.trustchain_android.network;
+package nl.tudelft.cs4160.trustchain_android.stresstest;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -26,6 +26,7 @@ import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
 import nl.tudelft.cs4160.trustchain_android.inbox.InboxItem;
 import nl.tudelft.cs4160.trustchain_android.main.OverviewConnectionsActivity;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
+import nl.tudelft.cs4160.trustchain_android.network.NetworkCommunicationListener;
 import nl.tudelft.cs4160.trustchain_android.network.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.peersummary.PeerSummaryActivity;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.InboxItemStorage;
@@ -40,7 +41,6 @@ public class Network {
     private int connectionType;
     private static InetSocketAddress internalSourceAddress;
     private String networkOperator;
-    private static Network network;
     private PublicKeyPair publicKey;
     private static NetworkCommunicationListener networkCommunicationListener;
     private static PeerSummaryActivity mutualBlockListener;
@@ -52,29 +52,16 @@ public class Network {
     public final static int BLOCK_MESSAGE_ID = 5;
     public final static int CRAWL_REQUEST_ID = 6;
 
+    private int port = OverviewConnectionsActivity.DEFAULT_PORT;
+
     /**
      * Emtpy constructor
      */
-    private Network() {
-    }
-
-//
-//    public Network(String username, PublicKeyPair publicKey) {
-//
-//    }
-
-    /**
-     * Get the network instance.
-     * If the network isn't initizlized create a network and set the variables.
-     * @param context
-     * @return
-     */
-    public synchronized static Network getInstance(Context context) {
-        if (network == null) {
-            network = new Network();
-            network.initVariables(context);
-        }
-        return network;
+    public Network(String username, PublicKeyPair publicKey, Context context, int port) {
+        this.hashId = username;
+        this.publicKey = publicKey;
+        this.port = port;
+        initVariables(context);
     }
 
     /**
@@ -100,8 +87,6 @@ public class Network {
     private void initVariables(Context context) {
         TelephonyManager telephonyManager = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE));
         networkOperator = telephonyManager.getNetworkOperatorName();
-        hashId = UserNameStorage.getUserName(context);
-        publicKey = Key.loadKeys(context).getPublicKeyPair();
         openChannel();
         showLocalIpAddress();
     }
@@ -112,7 +97,7 @@ public class Network {
     private void openChannel() {
         try {
             channel = DatagramChannel.open();
-            channel.socket().bind(new InetSocketAddress(OverviewConnectionsActivity.DEFAULT_PORT));
+            channel.socket().bind(new InetSocketAddress(port));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -135,7 +120,6 @@ public class Network {
      * Close the channel
      */
     public void closeChannel() {
-        Log.e("CHANNELTEST", "chanel closed");
         channel.socket().close();
         try {
             channel.close();
@@ -350,7 +334,7 @@ public class Network {
             String peerId = message.getSourcePeerId();
 
             if (networkCommunicationListener != null) {
-                networkCommunicationListener.updateWan(message);
+//                networkCommunicationListener.updateWan(message);
 
                 Peer peer = networkCommunicationListener.getPeerHandler().getOrMakePeer(peerId, address);
 

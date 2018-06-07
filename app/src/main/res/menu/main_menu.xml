@@ -35,4 +35,8 @@
         android:title="@string/scan_passport"
         app:showAsAction="never"/>
 
+    <item
+        android:id="@+id/stress_test"
+        android:title="@string/stress_test"
+        app:showAsAction="never"/>
 </menu>

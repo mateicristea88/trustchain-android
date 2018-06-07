@@ -160,4 +160,5 @@
 
     <string name="type_file">%s file</string>
     <string name="click_to_open_file">%s file\nClick to open</string>
+    <string name="stress_test">Stress Test</string>
 </resources>

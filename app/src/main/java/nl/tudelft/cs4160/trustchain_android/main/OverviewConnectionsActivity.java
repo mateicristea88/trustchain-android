@@ -55,6 +55,7 @@ import nl.tudelft.cs4160.trustchain_android.network.peer.PeerListener;
 import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.BootstrapIPStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
+import nl.tudelft.cs4160.trustchain_android.stresstest.StressTestActivity;
 
 public class OverviewConnectionsActivity extends AppCompatActivity implements NetworkCommunicationListener, PeerListener {
 
@@ -174,6 +175,9 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
             case R.id.passport_scan:
                 Intent cameraActivity = new Intent(this, CameraActivity.class);
                 startActivityForResult(cameraActivity, 1);
+                return true;
+            case R.id.stress_test:
+                startActivity(new Intent(this, StressTestActivity.class));
                 return true;
             default:
                 return false;
@@ -305,7 +309,9 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
                         if (peerHandler.size() > 0) {
                             Peer peer = peerHandler.getEligiblePeer(null);
                             if (peer != null) {
+                                Log.e("CHANNELTEST", "start thread running");
                                 network.sendIntroductionRequest(peer);
+
                                 //  sendBlockMessage(peer);
                             }
                         }
@@ -341,6 +347,7 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
                         inputBuffer.clear();
                         SocketAddress address = network.receive(inputBuffer);
                         inputBuffer.flip();
+                        Log.e("CHANNELTEST", "listen thread running");
                         network.dataReceived(context, inputBuffer, (InetSocketAddress) address);
                     }
                 } catch (IOException e) {
