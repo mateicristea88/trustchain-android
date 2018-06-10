@@ -21,6 +21,7 @@ import nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper;
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
+import nl.tudelft.cs4160.trustchain_android.network.Network;
 import nl.tudelft.cs4160.trustchain_android.network.NetworkCommunicationListener;
 import nl.tudelft.cs4160.trustchain_android.network.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.network.peer.PeerHandler;
@@ -71,12 +72,12 @@ public class StressTestNode implements PeerListener, NetworkCommunicationListene
 //        }
     }
 
-    public StressTestNode (Context context, int port, NodeStatistics statistics) {
+    public StressTestNode (Context context, int port) {
         this.context = context;
         this.userName = UsernameGenerator.getUsername();
         this.keyPair = Key.createNewKeyPair();
         this.port = port;
-        this.statistics = statistics;
+        this.statistics = StatisticsServer.getInstance();
     }
 
 
@@ -118,27 +119,12 @@ public class StressTestNode implements PeerListener, NetworkCommunicationListene
     private void initVariables() {
 
         peerHandler = new PeerHandler(userName);
-        initKey();
         network = new Network(userName, keyPair.getPublicKeyPair(), context, port);
 
         getPeerHandler().setPeerListener(this);
         network.setNetworkCommunicationListener(this);
         network.updateConnectionType((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
 //        ((TextView) findViewById(R.id.peer_id)).setText(peerHandler.getHashId());
-    }
-
-    /**
-     * If the app is launched for the first time
-     * a new keyPair is created and saved locally in the storage.
-     * A genesis block is also created automatically.
-     */
-    private void initKey() {
-        DualSecret kp = Key.loadKeys(context);
-        if (kp == null) {
-            kp = Key.createAndSaveKeys(context);
-            MessageProto.TrustChainBlock block = TrustChainBlockHelper.createGenesisBlock(kp);
-//            dbHelper.insertInDB(block);
-        }
     }
 
     /**
@@ -156,7 +142,7 @@ public class StressTestNode implements PeerListener, NetworkCommunicationListene
                                 network.sendIntroductionRequest(peer);
                                 messagesSent++;
                                 introductionRequestsSent++;
-                                statistics.incrementMessagesSent();
+                                statistics.messageSent();
                                 //  sendBlockMessage(peer);
                             }
                         }
@@ -164,7 +150,7 @@ public class StressTestNode implements PeerListener, NetworkCommunicationListene
                         e.printStackTrace();
                     }
                     try {
-                        Thread.sleep(5000);
+                        Thread.sleep(1000);
                     } catch (InterruptedException e) {
                         break;
                     }
@@ -191,9 +177,10 @@ public class StressTestNode implements PeerListener, NetworkCommunicationListene
                     while (!Thread.interrupted()) {
                         inputBuffer.clear();
                         SocketAddress address = network.receive(inputBuffer);
+                        Log.e("TESTTEST", "received from " + address.toString());
 
                         bytesReceived += inputBuffer.position();
-                        statistics.addBytesReceived(inputBuffer.position());
+                        statistics.bytesReceived(inputBuffer.position());
 
                         inputBuffer.flip();
                         network.dataReceived(context, inputBuffer, (InetSocketAddress) address);
@@ -252,11 +239,11 @@ public class StressTestNode implements PeerListener, NetworkCommunicationListene
                 network.sendIntroductionResponse(peer, invitee);
                 messagesSent++;
                 introductionResponsesSent++;
-                statistics.incrementMessagesSent();
+                statistics.messageSent();
                 network.sendPunctureRequest(invitee, peer);
                 messagesSent++;
                 puncturesSent++;
-                statistics.incrementMessagesSent();
+                statistics.messageSent();
                 Log.d("Network", "Introducing " + invitee.getAddress() + " to " + peer.getAddress());
             }
         } else {
@@ -264,7 +251,7 @@ public class StressTestNode implements PeerListener, NetworkCommunicationListene
             network.sendIntroductionResponse(peer, null);
             messagesSent++;
             introductionResponsesSent++;
-            statistics.incrementMessagesSent();
+            statistics.messageSent();
         }
     }
 
@@ -272,7 +259,7 @@ public class StressTestNode implements PeerListener, NetworkCommunicationListene
     public void handleIntroductionResponse(Peer peer, MessageProto.IntroductionResponse response) throws Exception {
         messagesReceived++;
         introductionResponsesReceived++;
-        statistics.incrementMessagesReceived();
+        statistics.messageReceived();
 
         peer.setConnectionType((int) response.getConnectionType());
         peer.setNetworkOperator(response.getNetworkOperator());
@@ -289,7 +276,7 @@ public class StressTestNode implements PeerListener, NetworkCommunicationListene
     public void handlePunctureRequest(Peer peer, MessageProto.PunctureRequest request) throws IOException {
         messagesReceived++;
         puncturesReceived++;
-        statistics.incrementMessagesReceived();
+        statistics.messageReceived();
 
         Peer puncturePeer = null;
         try {
@@ -300,7 +287,7 @@ public class StressTestNode implements PeerListener, NetworkCommunicationListene
         if (!getPeerHandler().peerExistsInList(puncturePeer)) {
             network.sendPuncture(puncturePeer);
             puncturesSent++;
-            statistics.incrementMessagesSent();
+            statistics.messageSent();
         }
     }
 
@@ -309,7 +296,7 @@ public class StressTestNode implements PeerListener, NetworkCommunicationListene
         // Blocks are ignored
         messagesReceived++;
         blockMessagesReceived++;
-        statistics.incrementMessagesReceived();
+        statistics.messageReceived();
     }
 
     @Override
@@ -317,14 +304,14 @@ public class StressTestNode implements PeerListener, NetworkCommunicationListene
         // Crawl requests are ignored
         messagesReceived++;
         crawlRequestsReceived++;
-        statistics.incrementMessagesReceived();
+        statistics.messageReceived();
     }
 
     @Override
     public void handlePuncture(Peer peer, MessageProto.Puncture puncture) throws IOException {
         messagesReceived++;
         puncturesReceived++;
-        statistics.incrementMessagesReceived();
+        statistics.messageReceived();
     }
 
     /**
@@ -378,10 +365,5 @@ public class StressTestNode implements PeerListener, NetworkCommunicationListene
 
     public void stopNode() {
         network.closeChannel();
-
-    }
-
-    private void logMessageReiceived() {
-
     }
 }

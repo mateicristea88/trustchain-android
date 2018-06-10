@@ -11,27 +11,50 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Nodes to start"
-        />
-
-        <EditText
-            android:id="@+id/nodes_to_start"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="number"
-            android:text="1"
-            />
-
-        <NumberPicker
-            android:id="@+id/number_picker"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-        </NumberPicker>
+            <TextView
+                android:layout_weight="0.5"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Nodes to start"
+                />
+
+            <TextView
+                android:layout_weight="0.5"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Nodes running"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/nodes_to_start"
+                android:layout_weight="0.5"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="number"
+                android:text="1"
+                />
+
+            <TextView
+                android:id="@+id/nodes_running"
+                android:layout_weight="0.5"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                />
+
+        </LinearLayout>
+
         <Button
             android:id="@+id/start_stress_test"
             android:layout_width="match_parent"
@@ -39,13 +62,25 @@
             android:layout_marginEnd="@dimen/activity_horizontal_margin"
             android:layout_marginStart="@dimen/activity_horizontal_margin"
             android:layout_marginTop="@dimen/activity_horizontal_margin"
-            android:layout_marginBottom="45dp"
             android:background="@color/colorPrimary"
-            android:text="Start"
+            android:text="Start nodes"
             android:textColor="@android:color/white" />
 
+        <Button
+            android:id="@+id/stop_stress_test"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginEnd="@dimen/activity_horizontal_margin"
+            android:layout_marginStart="@dimen/activity_horizontal_margin"
+            android:layout_marginTop="@dimen/activity_horizontal_margin"
+            android:layout_marginBottom="30dp"
+            android:background="@color/colorPrimary"
+            android:text="Stop nodes"
+            android:textColor="@android:color/white" />
 
+        <!-- Received stats -->
         <TextView
+            android:layout_marginTop="20dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Received Stats"
@@ -54,6 +89,13 @@
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Total messages received:"
+                />
 
             <TextView
                 android:id="@+id/messages_received"
@@ -71,8 +113,94 @@
 
         </LinearLayout>
 
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Punctures:"
+                />
+
+            <TextView
+                android:id="@+id/punctures_received"
+                android:layout_marginEnd="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Puncture requests:"
+                />
+
+            <TextView
+                android:id="@+id/puncture_requests_received"
+                android:layout_marginEnd="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Introduction requests:"
+                />
+
+            <TextView
+                android:id="@+id/introduction_requests_received"
+                android:layout_marginEnd="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Introduction responses:"
+                />
+
+            <TextView
+                android:id="@+id/introduction_responses_received"
+                android:layout_marginEnd="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+
+        </LinearLayout>
+
+
+        <!-- Sent stats -->
         <TextView
+            android:layout_marginTop="20dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Sent Stats"
@@ -81,6 +209,13 @@
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Total messages sent:"
+                />
 
             <TextView
                 android:id="@+id/messages_sent"
@@ -96,6 +231,91 @@
                 android:layout_height="wrap_content"
                 />
         </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Punctures:"
+                />
+
+            <TextView
+                android:id="@+id/punctures_sent"
+                android:layout_marginEnd="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Introduction requests:"
+                />
+
+            <TextView
+                android:id="@+id/introduction_requests_sent"
+                android:layout_marginEnd="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_marginEnd="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Introduction responses:"
+            />
+
+        <TextView
+            android:id="@+id/introduction_responses_sent"
+            android:layout_marginEnd="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+
+    </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Puncture requests:"
+                />
+
+            <TextView
+                android:id="@+id/puncture_requests_sent"
+                android:layout_marginEnd="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+
+        </LinearLayout>
+
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

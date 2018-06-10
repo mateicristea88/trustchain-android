@@ -31,6 +31,7 @@ import nl.tudelft.cs4160.trustchain_android.peersummary.PeerSummaryActivity;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.InboxItemStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.PubKeyAndAddressPairStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
+import nl.tudelft.cs4160.trustchain_android.stresstest.StatisticsServer;
 
 public class Network {
     private final String TAG = this.getClass().getName();
@@ -42,8 +43,10 @@ public class Network {
     private String networkOperator;
     private static Network network;
     private PublicKeyPair publicKey;
+    private int port = OverviewConnectionsActivity.DEFAULT_PORT;
     private static NetworkCommunicationListener networkCommunicationListener;
     private static PeerSummaryActivity mutualBlockListener;
+    private StatisticsServer statistics;
 
     public final static int INTRODUCTION_REQUEST_ID = 1;
     public final static int INTRODUCTION_RESPONSE_ID = 2;
@@ -58,10 +61,21 @@ public class Network {
     private Network() {
     }
 
-//
-//    public Network(String username, PublicKeyPair publicKey) {
-//
-//    }
+    /**
+     * Non-singleton version of Network _specifically for stress tests_.
+     * Allows to overwrite the peer's name, keypair and port number.
+     * @param username
+     * @param publicKey
+     * @param context
+     * @param port
+     */
+    public Network(String username, PublicKeyPair publicKey, Context context, int port) {
+        this.hashId = username;
+        this.publicKey = publicKey;
+        this.port = port;
+        initVariables(context);
+    }
+
 
     /**
      * Get the network instance.
@@ -98,21 +112,22 @@ public class Network {
      * @param context is for retrieving from storage.
      */
     private void initVariables(Context context) {
+        this.statistics = StatisticsServer.getInstance();
         TelephonyManager telephonyManager = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE));
         networkOperator = telephonyManager.getNetworkOperatorName();
-        hashId = UserNameStorage.getUserName(context);
-        publicKey = Key.loadKeys(context).getPublicKeyPair();
+        if (hashId == null) hashId = UserNameStorage.getUserName(context);
+        if (publicKey == null) publicKey = Key.loadKeys(context).getPublicKeyPair();
         openChannel();
         showLocalIpAddress();
     }
 
     /**
-     * Oopen the network channel on the default port.
+     * Open the network channel on the default port.
      */
     private void openChannel() {
         try {
             channel = DatagramChannel.open();
-            channel.socket().bind(new InetSocketAddress(OverviewConnectionsActivity.DEFAULT_PORT));
+            channel.socket().bind(new InetSocketAddress(port));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -183,6 +198,12 @@ public class Network {
                 .setType(INTRODUCTION_REQUEST_ID)
                 .setPayload(MessageProto.Payload.newBuilder().setIntroductionRequest(request));
 
+        try {
+            Log.e("Dest", peer.getAddress().getAddress().getAddress().toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        statistics.introductionRequestSent();
         sendMessage(messageBuilder.build(), peer);
     }
 
@@ -221,6 +242,7 @@ public class Network {
                 .setPayload(MessageProto.Payload.newBuilder().setCrawlRequest(request))
                 .build();
 
+
         sendMessage(message, peer);
     }
 
@@ -246,6 +268,7 @@ public class Network {
                 .setPayload(MessageProto.Payload.newBuilder().setPunctureRequest(pRequest))
                 .build();
 
+        statistics.punctureRequestSent();
         sendMessage(message, peer);
     }
 
@@ -269,6 +292,7 @@ public class Network {
                 .setPayload(MessageProto.Payload.newBuilder().setPuncture(puncture))
                 .build();
 
+        statistics.punctureSent();
         sendMessage(message, peer);
     }
 
@@ -303,6 +327,7 @@ public class Network {
                 .setPayload(MessageProto.Payload.newBuilder().setIntroductionResponse(response))
                 .build();
 
+        statistics.introductionResponseSent();
         sendMessage(message, peer);
     }
 
@@ -315,19 +340,22 @@ public class Network {
      */
     private synchronized void sendMessage(MessageProto.Message message, Peer peer) throws IOException {
         ByteBuffer outputBuffer = ByteBuffer.allocate(BUFFER_SIZE);
-        channel.send(outputBuffer.wrap(message.toByteArray()), peer.getAddress());
-        Log.i(TAG, "Sending " + message);
+        outputBuffer = outputBuffer.wrap(message.toByteArray());
+        channel.send(outputBuffer, peer.getAddress());
+        statistics.bytesSent(outputBuffer.position());
+        Log.i(TAG, "Sending to " + peer.getPeerId() + ":\n" + message);
         peer.sentData();
         if (networkCommunicationListener != null) {
             networkCommunicationListener.updatePeerLists();
         }
+        statistics.messageSent();
     }
 
     /**
      * Show local ip address.
      */
     private void showLocalIpAddress() {
-        ShowLocalIPTask showLocalIPTask = new ShowLocalIPTask();
+        ShowLocalIPTask showLocalIPTask = new ShowLocalIPTask(port);
         showLocalIPTask.execute();
     }
 
@@ -350,7 +378,12 @@ public class Network {
             String peerId = message.getSourcePeerId();
 
             if (networkCommunicationListener != null) {
-                networkCommunicationListener.updateWan(message);
+                try {
+                    networkCommunicationListener.updateWan(message);
+                } catch (Exception e) {
+                    Log.e("Wan", "error settin wan");
+                }
+                Log.i(TAG, "Received fro " + peerId);
 
                 Peer peer = networkCommunicationListener.getPeerHandler().getOrMakePeer(peerId, address);
 
@@ -359,17 +392,25 @@ public class Network {
                 PubKeyAndAddressPairStorage.addPubkeyAndAddressPair(context, pubKeyPair, ip);
                 if (peer == null) return;
                 peer.received(data);
+
+                statistics.messageReceived();
+                statistics.bytesReceived(data.remaining());
+
                 switch (message.getType()) {
                     case INTRODUCTION_REQUEST_ID:
+                        statistics.introductionRequestReceived();
                         networkCommunicationListener.handleIntroductionRequest(peer, message.getPayload().getIntroductionRequest());
                         break;
                     case INTRODUCTION_RESPONSE_ID:
+                        statistics.introductionResponseReceived();
                         networkCommunicationListener.handleIntroductionResponse(peer, message.getPayload().getIntroductionResponse());
                         break;
                     case PUNCTURE_ID:
+                        statistics.punctureReceived();
                         networkCommunicationListener.handlePuncture(peer, message.getPayload().getPuncture());
                         break;
                     case PUNCTURE_REQUEST_ID:
+                        statistics.punctureRequestReceived();
                         networkCommunicationListener.handlePunctureRequest(peer, message.getPayload().getPunctureRequest());
                         break;
                     case BLOCK_MESSAGE_ID:
@@ -422,8 +463,15 @@ public class Network {
      * Show local ip visually to the user.
      */
     private static class ShowLocalIPTask extends AsyncTask<Void, Void, InetAddress> {
+        int port;
+
+        public ShowLocalIPTask(int port) {
+            super();
+            this.port = port;
+        }
+
         @Override
-        protected InetAddress doInBackground(Void... params) {
+        protected InetAddress doInBackground(Void... nothin) {
             try {
                 for (Enumeration en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements(); ) {
                     NetworkInterface intf = (NetworkInterface) en.nextElement();
@@ -444,7 +492,7 @@ public class Network {
         protected void onPostExecute(InetAddress inetAddress) {
             super.onPostExecute(inetAddress);
             if (inetAddress != null) {
-                internalSourceAddress = new InetSocketAddress(inetAddress, OverviewConnectionsActivity.DEFAULT_PORT);
+                internalSourceAddress = new InetSocketAddress(inetAddress, port);
                 if (networkCommunicationListener != null) {
                     networkCommunicationListener.updateInternalSourceAddress(internalSourceAddress.toString().replace("/",""));
                 }
