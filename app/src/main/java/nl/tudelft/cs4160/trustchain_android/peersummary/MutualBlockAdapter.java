@@ -1,6 +1,9 @@
-package nl.tudelft.cs4160.trustchain_android.peersummary.mutualblock;
+package nl.tudelft.cs4160.trustchain_android.peersummary;
 
 import android.content.Context;
+
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,33 +16,111 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import nl.tudelft.cs4160.trustchain_android.R;
+import nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper;
 import nl.tudelft.cs4160.trustchain_android.block.ValidationResult;
 import nl.tudelft.cs4160.trustchain_android.chainExplorer.ChainColor;
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
-import nl.tudelft.cs4160.trustchain_android.peersummary.PeerSummaryActivity;
+import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
+import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
+import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
 import nl.tudelft.cs4160.trustchain_android.util.ByteArrayConverter;
+import nl.tudelft.cs4160.trustchain_android.util.OpenFileClickListener;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class MutualBlockAdapter extends RecyclerView.Adapter<MutualBlockAdapter.ViewHolder> {
 
-    private ArrayList<MutualBlockItem> mutualBlocks;
+    private ArrayList<MessageProto.TrustChainBlock> mutualBlocks = new ArrayList<>();
+    private ArrayList<Integer> validationResults = new ArrayList<>();
     private Context context;
     private DualSecret keyPair;
+    private PublicKeyPair peerPublicKey;
     private TrustChainDBHelper dbHelper;
+
+    private String myPeerName, peerName;
+    private PeerSummaryActivity activity;
+
 
     /**
      * Constructor.
-     *
-     * @param mutualBlocks the list of blocks that both user have in common.
-     */
-    public MutualBlockAdapter(Context context, ArrayList<MutualBlockItem> mutualBlocks) {
-        this.mutualBlocks = mutualBlocks;
-        this.context = context;
+     **/
+    public MutualBlockAdapter(PeerSummaryActivity activity, Peer peer) {
+        this.context = activity.getApplicationContext();
         this.keyPair = Key.loadKeys(context);
         this.dbHelper = new TrustChainDBHelper(context);
+        this.myPeerName = UserNameStorage.getUserName(context);
+        this.peerName = peer.getName();
+        this.activity = activity;
+        this.peerPublicKey = peer.getPublicKeyPair();
+
+        loadMutualBlocks();
     }
+
+    /**
+     * Load the mutual blocks async and update when a new mutual block has been found.
+     */
+    private void loadMutualBlocks() {
+        Runnable loadMutualBlocks = new Runnable() {
+            @Override
+            public void run() {
+                DualSecret keyPair = Key.loadKeys(activity);
+                PublicKeyPair myPublicKey = keyPair.getPublicKeyPair();
+                for (MessageProto.TrustChainBlock block : dbHelper.getBlocks(keyPair.getPublicKeyPair().toBytes(), true)) {
+                    PublicKeyPair linkedPublicKey = new PublicKeyPair(block.getLinkPublicKey().toByteArray());
+                    PublicKeyPair publicKey = new PublicKeyPair(block.getPublicKey().toByteArray());
+                    if (linkedPublicKey.equals(myPublicKey) && publicKey.equals(peerPublicKey)) {
+                        int validationResultStatus;
+                        try {
+                            validationResultStatus = TrustChainBlockHelper.validate(block, dbHelper).getStatus();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            continue;
+                        }
+                        addBlock(block, validationResultStatus);
+                    }
+
+                }
+            }
+        };
+        //start handler thread which starts the above runnable
+        HandlerThread ht = new HandlerThread("loadBlocks");
+        ht.start();
+        Handler handler= new Handler(ht.getLooper());
+        handler.post(loadMutualBlocks);
+        ht.quitSafely();
+    }
+
+    /**
+     * Add a block to the mutual blocks with the corresponding validation result.
+     * @param block The mutual block.
+     * @param validationResult Validation result of this block.
+     */
+    public void addBlock(MessageProto.TrustChainBlock block, int validationResult) {
+        if(mutualBlocks.contains(block)) return;
+        mutualBlocks.add(block);
+        validationResults.add(validationResult);
+        activity.mutualBlocksChanged();
+    }
+
+    /**
+     * Update the validation result of a mutual block.
+     * @param block The mutual block.
+     * @param validationResult The new validation result.
+     */
+    public void updateValidationResult(MessageProto.TrustChainBlock block, int validationResult) {
+        for(int i=0; i<mutualBlocks.size(); i++) {
+            if(block.equals(mutualBlocks.get(i))) {
+                validationResults.set(i,validationResult);
+                activity.mutualBlocksChanged();
+                return;
+            }
+        }
+    }
+
+
 
     /**
      * Create a holder where item will be stored in the view.
@@ -64,7 +145,8 @@ public class MutualBlockAdapter extends RecyclerView.Adapter<MutualBlockAdapter.
      */
     @Override
     public void onBindViewHolder(MutualBlockAdapter.ViewHolder viewHolder, int position) {
-        MutualBlockItem mutualBlock = mutualBlocks.get(position);
+        MessageProto.TrustChainBlock mutualBlock = mutualBlocks.get(position);
+        int validationResult = validationResults.get(position);
         if (mutualBlock != null) {
             Button signButton = viewHolder.signButton;
             TextView blockStatTv = viewHolder.blockStatTextView;
@@ -72,9 +154,9 @@ public class MutualBlockAdapter extends RecyclerView.Adapter<MutualBlockAdapter.
 
             //if the linked public key is equal to ours, it means this block is addressed to us.
             //So if we don't have a linked block, we know we still need to sign it.
-            if(Arrays.equals(mutualBlock.getBlock().getLinkPublicKey().toByteArray(), keyPair.getPublicKeyPair().toBytes()) &&
-                    dbHelper.getLinkedBlock(mutualBlock.getBlock()) == null) {
-                if(mutualBlock.getValidationResult() == ValidationResult.INVALID) {
+            if(Arrays.equals(mutualBlock.getLinkPublicKey().toByteArray(), keyPair.getPublicKeyPair().toBytes()) &&
+                    dbHelper.getLinkedBlock(mutualBlock) == null) {
+                if(validationResult == ValidationResult.INVALID) {
                     blockStatTv.setText(context.getResources().getString(R.string.invalid_block));
                     signButton.setVisibility(View.GONE);
                 } else {
@@ -87,35 +169,40 @@ public class MutualBlockAdapter extends RecyclerView.Adapter<MutualBlockAdapter.
                 signButton.setVisibility(View.GONE);
             }
 
-            viewHolder.userNameTextView.setText(UserNameStorage.getUserName(context));
-            viewHolder.peerNameTextView.setText(mutualBlock.getPeerName());
+            viewHolder.userNameTextView.setText(myPeerName);
+            viewHolder.peerNameTextView.setText(peerName);
 
-            if (mutualBlock.getSeqNum() == 0) {
+            if (mutualBlock.getSequenceNumber() == 0) {
                 viewHolder.seqNumTextView.setText(context.getResources().getString(R.string.seq_unknown));
             } else {
                 viewHolder.seqNumTextView.setText(context.getResources().getString(R.string.sequenceNum,
-                        mutualBlock.getSeqNum()));
+                        mutualBlock.getSequenceNumber()));
             }
 
-            if (mutualBlock.getLinkSeqNum() == 0) {
+            if (mutualBlock.getLinkSequenceNumber() == 0) {
                 viewHolder.linkSeqNumTextView.setText(context.getResources().getString(R.string.seq_unknown));
             } else {
                 signButton.setVisibility(View.GONE);
                 viewHolder.linkSeqNumTextView.setText(context.getResources().getString(R.string.sequenceNum,
-                        mutualBlock.getSeqNum()));
+                        mutualBlock.getSequenceNumber()));
             }
 
             TextView transTv = viewHolder.transactionTextView;
-            transTv.setText(mutualBlock.getTransaction());
 
-
+            if (TrustChainBlockHelper.containsBinaryFile(mutualBlock)) {
+                // If the block contains a file show the 'click to open' text
+                transTv.setText(context.getString(R.string.click_to_open_file, mutualBlock.getTransaction().getFormat()));
+                setOpenFileClickListener(transTv, mutualBlock);
+            } else {
+                transTv.setText(new String(mutualBlock.getTransaction().getUnformatted().toByteArray(), UTF_8));
+            }
 
             String myPublicKeyString = null;
             if (keyPair != null) {
                 myPublicKeyString = ByteArrayConverter.bytesToHexString(keyPair.getPublicKey().toBytes());
             }
-            String linkedKey = ByteArrayConverter.byteStringToString(mutualBlock.getBlock().getLinkPublicKey());
-            String normalKey = ByteArrayConverter.byteStringToString(mutualBlock.getBlock().getPublicKey());
+            String linkedKey = ByteArrayConverter.byteStringToString(mutualBlock.getLinkPublicKey());
+            String normalKey = ByteArrayConverter.byteStringToString(mutualBlock.getPublicKey());
 
             if (normalKey.equals(myPublicKeyString)) {
                 viewHolder.own_chain_indicator.setBackgroundColor(ChainColor.getMyColor(context));
@@ -131,6 +218,17 @@ public class MutualBlockAdapter extends RecyclerView.Adapter<MutualBlockAdapter.
     }
 
     /**
+     * Takes a view and a TrustChainBlock, attaches a click listener to the view that extracts the
+     * file from the given block and opens it using an intent.
+     * @param view View to attach the listener to
+     * @param block TrustChainBlock that contains a file
+     */
+    private void setOpenFileClickListener(View view, final MessageProto.TrustChainBlock block) {
+        view.setOnClickListener(new OpenFileClickListener(activity, block));
+    }
+
+
+    /**
      * Define the listener on the button for the unsigned blocks and invoke the method of signing blocks
      *
      * @param holder The viewholder for this adapter.
@@ -139,11 +237,15 @@ public class MutualBlockAdapter extends RecyclerView.Adapter<MutualBlockAdapter.
         View.OnClickListener mOnClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((PeerSummaryActivity) context).requestPermission(mutualBlocks.get(position).getBlock());
+                activity.requestSignPermission(mutualBlocks.get(position));
             }
         };
         holder.signButton.setOnClickListener(mOnClickListener);
     }
+
+
+
+
 
     @Override
     public int getItemCount() {

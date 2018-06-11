@@ -51,12 +51,20 @@ public class CreateClaimActivity extends AppCompatActivity {
         claimBuilder.setProofFormat(ByteString.copyFromUtf8("1"));
         claimBuilder.setValidityTerm(0);
 
+        byte[] linkpk;
+        if (inboxItemOtherPeer != null) {
+            linkpk = inboxItemOtherPeer.getPeer().getPublicKeyPair().toBytes();
+        } else {
+            linkpk = new byte[32];
+        }
+
         final MessageProto.TrustChainBlock block = createBlock(
                 transactionData,
+                "",
                 new TrustChainDBHelper(this),
                 publicKey,
                 null,
-                inboxItemOtherPeer.getPublicKeyPair().toBytes(),
+                linkpk,
                 claimBuilder.build());
         final MessageProto.TrustChainBlock signedBlock = TrustChainBlockHelper.sign(block, Key.loadKeys(getApplicationContext()).getSigningKey());
 

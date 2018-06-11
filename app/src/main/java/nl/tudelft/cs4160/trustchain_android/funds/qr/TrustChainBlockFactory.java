@@ -20,7 +20,7 @@ import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto.TrustChainBlock.Transaction;
 import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 
-public class TrustChainQRBlockFactory {
+public class TrustChainBlockFactory {
     Moshi moshi = new Moshi.Builder().build();
     JsonAdapter<QRTransaction> transactionAdapter = moshi.adapter(QRTransaction.class);
 
@@ -54,7 +54,7 @@ public class TrustChainQRBlockFactory {
 
         MessageProto.TrustChainBlock identityHalfBlock = reconstructTemporaryIdentityHalfBlock(wallet);
 
-        MessageProto.TrustChainBlock block = TrustChainBlockHelper.createBlock(transactionString.getBytes(), helper, myPublicKey, identityHalfBlock, walletKeyPair.getPublicKeyPair().toBytes(), null);
+        MessageProto.TrustChainBlock block = TrustChainBlockHelper.createBlock(transactionString.getBytes(), null, helper, myPublicKey, identityHalfBlock, walletKeyPair.getPublicKeyPair().toBytes(), null);
 
         block = TrustChainBlockHelper.sign(block, ownKeyPair.getSigningKey());
 

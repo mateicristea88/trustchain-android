@@ -129,12 +129,12 @@ public class AttestClaimsActivity extends AppCompatActivity {
         //TODO what do we do here exactly, sending back, generating proof?
         TrustChainDBHelper DBHelper = new TrustChainDBHelper(this);
         DualSecret keyPair = Key.loadKeys(this);
-        MessageProto.TrustChainBlock block = TrustChainBlockHelper.createBlock(null, DBHelper,
-                keyPair.getPublicKeyPair().toBytes(),
-                receivedBlock, receivedBlock.getPublicKey().toByteArray(), null);
+//        MessageProto.TrustChainBlock block = TrustChainBlockHelper.createBlock(null, DBHelper,
+//                keyPair.getPublicKeyPair().toBytes(),
+//                receivedBlock, receivedBlock.getPublicKey().toByteArray(), null, null);
 
-        final MessageProto.TrustChainBlock signedBlock = TrustChainBlockHelper.sign(receivedBlock, keyPair.getSigningKey());
-        DBHelper.insertInDB(signedBlock);
+//        final MessageProto.TrustChainBlock signedBlock = TrustChainBlockHelper.sign(receivedBlock, keyPair.getSigningKey());
+//        DBHelper.insertInDB(signedBlock);
     }
 
     /**

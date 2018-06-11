@@ -41,7 +41,7 @@ public class ScanQRActivity extends AppCompatActivity {
     private Vibrator vibrator;
     private ZXingScannerView scannerView;
 
-    private TrustChainQRBlockFactory trustChainQRBlockFactory = new TrustChainQRBlockFactory();
+    private TrustChainBlockFactory trustChainQRBlockFactory = new TrustChainBlockFactory();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

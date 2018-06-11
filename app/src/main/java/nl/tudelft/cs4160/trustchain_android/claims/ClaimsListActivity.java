@@ -80,7 +80,7 @@ public class ClaimsListActivity extends AppCompatActivity {
                 startActivity(chainExplorerInfoActivity);
                 return true;
             case R.id.createclaim:
-                Intent createClaimActivity = new Intent(this, ChainExplorerInfoActivity.class);
+                Intent createClaimActivity = new Intent(this, CreateClaimActivity.class);
                 startActivity(createClaimActivity);
                 return true;
             default:
