@@ -7,13 +7,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -37,9 +35,6 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 import nl.tudelft.cs4160.trustchain_android.R;
@@ -52,8 +47,6 @@ import nl.tudelft.cs4160.trustchain_android.inbox.InboxItem;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.network.CrawlRequestListener;
 import nl.tudelft.cs4160.trustchain_android.network.Network;
-import nl.tudelft.cs4160.trustchain_android.peersummary.mutualblock.MutualBlockAdapter;
-import nl.tudelft.cs4160.trustchain_android.peersummary.mutualblock.MutualBlockItem;
 import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.InboxItemStorage;
 import nl.tudelft.cs4160.trustchain_android.util.FileDialog;
@@ -68,17 +61,16 @@ import static nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper.s
 public class PeerSummaryActivity extends AppCompatActivity implements CrawlRequestListener {
     private final static String TAG = PeerSummaryActivity.class.toString();
     private static final int REQUEST_STORAGE_PERMISSIONS = 1;
-    private static final int MAX_ATTACHMENT_SIZE = 61440; //Max file attachment size in bytes, set to 60bytes leaving 5kb for other block data, as the max message size in UDP is 64KB
+    private static final int MAX_ATTACHMENT_SIZE = 61440; //Max file attachment size in bytes, set to 60kbytes leaving 5kb for other block data, as the max message size in UDP is 64KB
     private Context context;
     private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
+    private MutualBlockAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private Network network;
     private InboxItem inboxItemOtherPeer;
     private TrustChainDBHelper DBHelper;
     TextView statusText;
     EditText messageEditText;
-    PeerSummaryActivity thisActivity;
     DualSecret kp;
     TrustChainDBHelper dbHelper;
 
@@ -107,7 +99,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.trustchain_menu, menu);
+        inflater.inflate(R.menu.menu_trustchain, menu);
         return true;
     }
 
@@ -141,7 +133,6 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
      * such as local and external ip
      */
     private void initVariables() {
-        thisActivity = this;
         statusText = findViewById(R.id.status);
         statusText.setMovementMethod(new ScrollingMovementMethod());
 
@@ -158,8 +149,12 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
      * Initialize the recycle view that will show the mutual blocks of the user and the other peer.
      */
     private void initializeMutualBlockRecycleView() {
-        FindMutualBlocksTask findMutualBlocksTask = new FindMutualBlocksTask(this);
-        findMutualBlocksTask.execute();
+        mLayoutManager = new LinearLayoutManager(this);
+
+        mAdapter = new MutualBlockAdapter(this, inboxItemOtherPeer.getPeer());
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.setAdapter(mAdapter);
+
     }
 
     /**
@@ -173,7 +168,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
         network.updateConnectionType((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE));
 
         int sq = -5;
-        MessageProto.TrustChainBlock block = dbHelper.getBlock(inboxItemOtherPeer.getPublicKeyPair().toBytes(), dbHelper.getMaxSeqNum(inboxItemOtherPeer.getPublicKeyPair().toBytes()));
+        MessageProto.TrustChainBlock block = dbHelper.getBlock(inboxItemOtherPeer.getPeer().getPublicKeyPair().toBytes(), dbHelper.getMaxSeqNum(inboxItemOtherPeer.getPeer().getPublicKeyPair().toBytes()));
         if (block != null) {
             sq = block.getSequenceNumber();
         } else {
@@ -191,7 +186,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
             public void run() {
                 try {
                     Log.d("BCrawlTest", "Sent crawl request");
-                    network.sendCrawlRequest(inboxItemOtherPeer.getPeerAppToApp(), crawlRequest);
+                    network.sendCrawlRequest(inboxItemOtherPeer.getPeer(), crawlRequest);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -208,10 +203,10 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
      */
     public void onClickViewChain(View view) {
         // Try to instantiate public key.
-        if (this.inboxItemOtherPeer.getPublicKeyPair() != null) {
-            byte[] publicKey = this.inboxItemOtherPeer.getPublicKeyPair().toBytes();
+        if (this.inboxItemOtherPeer.getPeer().getPublicKeyPair() != null) {
+            byte[] publicKey = this.inboxItemOtherPeer.getPeer().getPublicKeyPair().toBytes();
             if (publicKey != null) {
-                Intent intent = new Intent(context, ChainExplorerActivity.class);
+                Intent intent = new Intent(this, ChainExplorerActivity.class);
                 intent.putExtra(ChainExplorerActivity.BUNDLE_EXTRAS_PUBLIC_KEY , publicKey);
                 startActivity(intent);
             }
@@ -257,7 +252,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
             transactionData = messageEditText.getText().toString().getBytes(UTF_8);
         }
 
-        final MessageProto.TrustChainBlock block = createBlock(transactionData, format, DBHelper, publicKey, null, inboxItemOtherPeer.getPublicKeyPair().toBytes());
+        final MessageProto.TrustChainBlock block = createBlock(transactionData, format, DBHelper, publicKey, null, inboxItemOtherPeer.getPeer().getPublicKeyPair().toBytes());
         final MessageProto.TrustChainBlock signedBlock = TrustChainBlockHelper.sign(block, Key.loadKeys(getApplicationContext()).getSigningKey());
         Log.d(TAG, "Signed block is " + signedBlock.toByteArray().length + " bytes");
         messageEditText.setText("");
@@ -272,7 +267,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
             @Override
             public void run() {
                 try {
-                    network.sendBlockMessage(inboxItemOtherPeer.getPeerAppToApp(), signedBlock);
+                    network.sendBlockMessage(inboxItemOtherPeer.getPeer(), signedBlock);
                     Snackbar mySnackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout),"Half block send!", Snackbar.LENGTH_SHORT);
                     mySnackbar.show();
                 } catch (IOException e) {
@@ -303,7 +298,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
                 String txString = containsBinaryFile(block) ?
                         getString(R.string.type_file, block.getTransaction().getFormat()) :
                         block.getTransaction().getUnformatted().toString(UTF_8);
-                builder.setMessage("Do you want to sign Block[ " + txString + " ] from " + inboxItemOtherPeer.getUserName() + "?")
+                builder.setMessage("Do you want to sign Block[ " + txString + " ] from " + inboxItemOtherPeer.getPeer().getName() + "?")
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 signAndSendHalfBlock(block);
@@ -321,28 +316,27 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
     }
 
     /**
-     * sign a received halfblock and directly send this block back to the peer.
+     * Sign a received halfblock and directly send this block back to the peer.
      * @param linkedBlock
      */
-    public void signAndSendHalfBlock(MessageProto.TrustChainBlock linkedBlock) {
+    public void signAndSendHalfBlock(final MessageProto.TrustChainBlock linkedBlock) {
         DualSecret keyPair = Key.loadKeys(this);
         MessageProto.TrustChainBlock block = createBlock(null, null, //Setting format and transaction not needed, they are already contained in linkedblock
                 DBHelper, keyPair.getPublicKeyPair().toBytes(),
-                linkedBlock, inboxItemOtherPeer.getPublicKeyPair().toBytes());
+                linkedBlock, inboxItemOtherPeer.getPeer().getPublicKeyPair().toBytes());
 
         final MessageProto.TrustChainBlock signedBlock = sign(block, keyPair.getSigningKey());
 
-        //todo again we could do validation?
+        //insert the new signed block
         DBHelper.insertInDB(signedBlock); // See read the docs (should be signed though)
-
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    network.sendBlockMessage(inboxItemOtherPeer.getPeerAppToApp(), signedBlock);
+                    network.sendBlockMessage(inboxItemOtherPeer.getPeer(), signedBlock);
 
-                    // update the mutualblocks list
-                    initializeMutualBlockRecycleView();
+                    //show that the block is valid
+                    mAdapter.updateValidationResult(linkedBlock, ValidationResult.VALID);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -351,21 +345,37 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
     }
 
     /**
+     * Notifies the adapter that the mutualblocks set has changed. It runs on the ui thread
+     * just be sure when calling it from another thread.
+     */
+    public void mutualBlocksChanged() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mAdapter.notifyDataSetChanged();
+            }
+        });
+    }
+
+    /**
      * Block received and added to the inbox.
      * If the received block should be displayed in the trustchain activity
-     * the recycle adapter is reloaded. This makes sure new blocks show up
-     * real-time.
+     * it will add the block to the adapter and notify the adapter of the change.
      * @param block the received block
      */
     @Override
     public void blockAdded(MessageProto.TrustChainBlock block) {
         DualSecret keyPair = Key.loadKeys(this);
         byte[] myPublicKey = keyPair.getPublicKeyPair().toBytes();
-        byte[] peerPublicKey = this.inboxItemOtherPeer.getPublicKeyPair().toBytes();
+        byte[] peerPublicKey = this.inboxItemOtherPeer.getPeer().getPublicKeyPair().toBytes();
         byte[] publicKey = block.getPublicKey().toByteArray();
         byte[] linkedPublicKey = block.getLinkPublicKey().toByteArray();
         if (Arrays.equals(myPublicKey,linkedPublicKey) && Arrays.equals(peerPublicKey, publicKey)) {
-            initializeMutualBlockRecycleView();
+            try {
+                mAdapter.addBlock(block, TrustChainBlockHelper.validate(block, dbHelper).getStatus());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -388,7 +398,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
     public void onClickChooseFile(View view) {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
-            requestStoragePermissions();
+            Util.requestReadStoragePermissions(this, 1);
             return;
         }
 
@@ -401,23 +411,16 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
                 selectedFilePath.setText(file.getPath());
                 if (file.length() > MAX_ATTACHMENT_SIZE) {
                     selectedFilePath.requestFocus();
-                    selectedFilePath.setError("Too big (" + Util.readableSize(file.length()) + ")");
+                    selectedFilePath.setError("Too big (" + Util.readableSize(file.length()) + ") max is " + Util.readableSize(MAX_ATTACHMENT_SIZE));
                     sendButton.setEnabled(false);
                 } else {
                     selectedFilePath.setError(null);
                     sendButton.setEnabled(true);
+                    Snackbar.make(findViewById(R.id.myCoordinatorLayout),getString(R.string.warning_files),Snackbar.LENGTH_LONG).show();
                 }
             }
         });
         fileDialog.showDialog();
-    }
-
-    private void requestStoragePermissions() {
-        if (Build.VERSION.SDK_INT >= 23) {
-            requestPermissions(new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE }, REQUEST_STORAGE_PERMISSIONS);
-        } else {
-            ActivityCompat.requestPermissions(this, new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE }, REQUEST_STORAGE_PERMISSIONS);
-        }
     }
 
     @Override
@@ -442,58 +445,4 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
         }
     }
 
-    /**
-     * Asynctask to find blocks that both the user and the other peer have in common.
-     * This method is called when the activity is started.
-     */
-    private static class FindMutualBlocksTask extends AsyncTask<Void, Void, ArrayList<MutualBlockItem>> {
-        private WeakReference<PeerSummaryActivity> activityReference;
-
-        FindMutualBlocksTask(PeerSummaryActivity context) {
-            activityReference = new WeakReference<>(context);
-        }
-
-        protected ArrayList<MutualBlockItem> doInBackground(Void... params) {
-            PeerSummaryActivity activity = activityReference.get();
-            if (activity == null) return null;
-
-            ArrayList<MutualBlockItem> mutualBlocks = new ArrayList<>();
-            DualSecret keyPair = Key.loadKeys(activity);
-            byte[] myPublicKey = keyPair.getPublicKeyPair().toBytes();
-            byte[] peerPublicKey = activity.inboxItemOtherPeer.getPublicKeyPair().toBytes();
-
-
-            for (MessageProto.TrustChainBlock block : activity.DBHelper.getBlocks(keyPair.getPublicKeyPair().toBytes(), true)) {
-                byte[] linkedPublicKey = block.getLinkPublicKey().toByteArray();
-                byte[] publicKey = block.getPublicKey().toByteArray();
-                if (Arrays.equals(linkedPublicKey,myPublicKey) && Arrays.equals(publicKey,peerPublicKey)) {
-                    int validationResultStatus;
-                    try {
-                        validationResultStatus = TrustChainBlockHelper.validate(block, activity.DBHelper).getStatus();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        continue;
-                    }
-                    mutualBlocks.add(new MutualBlockItem(
-                            activity.inboxItemOtherPeer.getUserName(), block, validationResultStatus));
-                }
-            }
-            return mutualBlocks;
-        }
-
-        /**
-         * Use the produced blocklist to update the UI.
-         *
-         * @param mutualBlockList
-         */
-        protected void onPostExecute(ArrayList<MutualBlockItem> mutualBlockList) {
-            PeerSummaryActivity activity = activityReference.get();
-            if (activity == null) return;
-
-            activity.mLayoutManager = new LinearLayoutManager(activity);
-            activity.mAdapter = new MutualBlockAdapter(activity, mutualBlockList);
-            activity.mRecyclerView.setLayoutManager(activity.mLayoutManager);
-            activity.mRecyclerView.setAdapter(activity.mAdapter);
-        }
-    }
 }
