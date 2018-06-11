@@ -102,7 +102,7 @@ public class MessageHandler {
      */
     public void handleReceivedBlock(Peer peer, MessageProto.TrustChainBlock block) {
         try {
-            if (TrustChainBlockHelper.validate(block,dbHelper).getStatus() != ValidationResult.INVALID ) {
+            if (dbHelper != null && TrustChainBlockHelper.validate(block,dbHelper).getStatus() != ValidationResult.INVALID ) {
                 dbHelper.replaceInDB(block);
             }
         } catch (Exception e) {
@@ -118,8 +118,10 @@ public class MessageHandler {
      */
     public void handleCrawlRequest(Peer peer, MessageProto.CrawlRequest request) throws IOException {
         //ToDo for future application sending the entire chain is a bit too much
-        for (MessageProto.TrustChainBlock block : dbHelper.getAllBlocks()) {
-            network.sendBlockMessage(peer, block);
+        if (dbHelper != null) {
+            for (MessageProto.TrustChainBlock block : dbHelper.getAllBlocks()) {
+                network.sendBlockMessage(peer, block);
+            }
         }
     }
 

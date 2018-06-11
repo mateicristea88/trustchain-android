@@ -3,9 +3,9 @@ package nl.tudelft.cs4160.trustchain_android.stresstest;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
-
-import com.google.protobuf.ByteString;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -15,20 +15,18 @@ import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
-import java.util.List;
 
-import nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper;
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.network.Network;
-import nl.tudelft.cs4160.trustchain_android.network.NetworkCommunicationListener;
+import nl.tudelft.cs4160.trustchain_android.network.NetworkStatusListener;
 import nl.tudelft.cs4160.trustchain_android.network.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.network.peer.PeerHandler;
 import nl.tudelft.cs4160.trustchain_android.network.peer.PeerListener;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.BootstrapIPStorage;
 
-public class StressTestNode implements PeerListener, NetworkCommunicationListener {
+public class StressTestNode implements PeerListener, NetworkStatusListener {
 
     private static final String TAG = StressTestNode.class.getName();
     private Network network;
@@ -44,32 +42,23 @@ public class StressTestNode implements PeerListener, NetworkCommunicationListene
 
     int port;
 
-    // --- Node stats ---
-    NodeStatistics statistics;
-    int messagesSent = 0;
-    int messagesReceived = 0;
-    int introductionRequestsSent = 0;
-    int introductionRequestsReceived = 0;
-    int introductionResponsesSent = 0;
-    int introductionResponsesReceived = 0;
-    int puncturesSent = 0;
-    int puncturesReceived = 0;
-    int blockMessagesSent = 0;
-    int blockMessagesReceived = 0;
-    int crawlRequestsReceived = 0;
-    private long bytesReceived = 0;
-    private long bytesSent = 0;
-
-
     public void startNode () {
         initVariables();
         addInitialPeer();
         startListenThread();
         startSendThread();
-//        initPeerLists();
-//        if (savedInstanceState != null) {
-//            updatePeerLists();
-//        }
+
+        Runnable refreshTask = () -> {
+            while(true) {
+                updatePeerLists();
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        new Thread(refreshTask).start();
     }
 
     public StressTestNode (Context context, int port) {
@@ -77,9 +66,7 @@ public class StressTestNode implements PeerListener, NetworkCommunicationListene
         this.userName = UsernameGenerator.getUsername();
         this.keyPair = Key.createNewKeyPair();
         this.port = port;
-        this.statistics = StatisticsServer.getInstance();
     }
-
 
     /**
      * Add the initial hard-coded connectable inboxItem to the inboxItem list.
@@ -98,6 +85,7 @@ public class StressTestNode implements PeerListener, NetworkCommunicationListene
         }
     }
 
+
 //    /**
 //     * Initialize the inboxItem lists.
 //     */
@@ -109,7 +97,6 @@ public class StressTestNode implements PeerListener, NetworkCommunicationListene
 //        outgoingPeerAdapter = new PeerListAdapter(getApplicationContext(), R.layout.peer_connection_list_item, peerHandler.getOutgoingList(), (CoordinatorLayout) findViewById(R.id.myCoordinatorLayout));
 //        outgoingPeerConnectionListView.setAdapter(outgoingPeerAdapter);
 //    }
-
     /**
      * Initialize all local variables
      * If this activity is opened with a saved instance state
@@ -118,11 +105,11 @@ public class StressTestNode implements PeerListener, NetworkCommunicationListene
      */
     private void initVariables() {
 
-        peerHandler = new PeerHandler(userName);
+        peerHandler = new PeerHandler(keyPair.getPublicKeyPair(), userName);
         network = new Network(userName, keyPair.getPublicKeyPair(), context, port);
 
         getPeerHandler().setPeerListener(this);
-        network.setNetworkCommunicationListener(this);
+        network.setNetworkStatusListener(this);
         network.updateConnectionType((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
 //        ((TextView) findViewById(R.id.peer_id)).setText(peerHandler.getHashId());
     }
@@ -140,9 +127,9 @@ public class StressTestNode implements PeerListener, NetworkCommunicationListene
                             Peer peer = peerHandler.getEligiblePeer(null);
                             if (peer != null) {
                                 network.sendIntroductionRequest(peer);
-                                messagesSent++;
-                                introductionRequestsSent++;
-                                statistics.messageSent();
+//                                messagesSent++;
+//                                introductionRequestsSent++;
+//                                statistics.messageSent();
                                 //  sendBlockMessage(peer);
                             }
                         }
@@ -163,6 +150,24 @@ public class StressTestNode implements PeerListener, NetworkCommunicationListene
     }
 
     /**
+     * Update the showed inboxItem lists.
+     * First split into new peers and the active list
+     * Then remove the peers that aren't responding for a long time.
+     */
+    @Override
+    public void updatePeerLists() {
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (this) {
+                    peerHandler.removeDeadPeers();
+                    peerHandler.splitPeerList();
+                }
+            }
+        });
+    }
+
+    /**
      * Start the listen thread. The thread opens a new {@link DatagramChannel} and calls {@link Network#dataReceived(Context, ByteBuffer,
      * InetSocketAddress)} for each incoming datagram.
      */
@@ -179,8 +184,8 @@ public class StressTestNode implements PeerListener, NetworkCommunicationListene
                         SocketAddress address = network.receive(inputBuffer);
                         Log.e("TESTTEST", "received from " + address.toString());
 
-                        bytesReceived += inputBuffer.position();
-                        statistics.bytesReceived(inputBuffer.position());
+//                        bytesReceived += inputBuffer.position();
+//                        statistics.bytesReceived(inputBuffer.position());
 
                         inputBuffer.flip();
                         network.dataReceived(context, inputBuffer, (InetSocketAddress) address);
@@ -217,102 +222,96 @@ public class StressTestNode implements PeerListener, NetworkCommunicationListene
     }
 
     @Override
-    public void updatePeerLists() {
-
-    }
-
-    @Override
     public void updateConnectionType(int connectionType, String typename, String subtypename) {
 
     }
-
-    @Override
-    public void handleIntroductionRequest(Peer peer, MessageProto.IntroductionRequest request) throws IOException {
-        messagesReceived++;
-        introductionRequestsReceived++;
-
-        peer.setConnectionType((int) request.getConnectionType());
-        peer.setNetworkOperator(request.getNetworkOperator());
-        if (getPeerHandler().size() > 1) {
-            Peer invitee = getPeerHandler().getEligiblePeer(peer);
-            if (invitee != null) {
-                network.sendIntroductionResponse(peer, invitee);
-                messagesSent++;
-                introductionResponsesSent++;
-                statistics.messageSent();
-                network.sendPunctureRequest(invitee, peer);
-                messagesSent++;
-                puncturesSent++;
-                statistics.messageSent();
-                Log.d("Network", "Introducing " + invitee.getAddress() + " to " + peer.getAddress());
-            }
-        } else {
-            Log.d("Network", "Peerlist too small, can't handle introduction request");
-            network.sendIntroductionResponse(peer, null);
-            messagesSent++;
-            introductionResponsesSent++;
-            statistics.messageSent();
-        }
-    }
-
-    @Override
-    public void handleIntroductionResponse(Peer peer, MessageProto.IntroductionResponse response) throws Exception {
-        messagesReceived++;
-        introductionResponsesReceived++;
-        statistics.messageReceived();
-
-        peer.setConnectionType((int) response.getConnectionType());
-        peer.setNetworkOperator(response.getNetworkOperator());
-        List<ByteString> pex = response.getPexList();
-        for (ByteString pexPeer : pex) {
-            Peer p = Peer.deserialize(pexPeer.toByteArray());
-            Log.d(TAG, "From " + peer + " | found peer in pexList: " + p);
-
-            getPeerHandler().getOrMakePeer(p.getPeerId(), p.getAddress());
-        }
-    }
-
-    @Override
-    public void handlePunctureRequest(Peer peer, MessageProto.PunctureRequest request) throws IOException {
-        messagesReceived++;
-        puncturesReceived++;
-        statistics.messageReceived();
-
-        Peer puncturePeer = null;
-        try {
-            puncturePeer = Peer.deserialize(request.getPuncturePeer().toByteArray());
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        if (!getPeerHandler().peerExistsInList(puncturePeer)) {
-            network.sendPuncture(puncturePeer);
-            puncturesSent++;
-            statistics.messageSent();
-        }
-    }
-
-    @Override
-    public void handleReceivedBlock(Peer peer, MessageProto.TrustChainBlock block) throws IOException {
-        // Blocks are ignored
-        messagesReceived++;
-        blockMessagesReceived++;
-        statistics.messageReceived();
-    }
-
-    @Override
-    public void handleCrawlRequest(Peer peer, MessageProto.CrawlRequest request) throws IOException {
-        // Crawl requests are ignored
-        messagesReceived++;
-        crawlRequestsReceived++;
-        statistics.messageReceived();
-    }
-
-    @Override
-    public void handlePuncture(Peer peer, MessageProto.Puncture puncture) throws IOException {
-        messagesReceived++;
-        puncturesReceived++;
-        statistics.messageReceived();
-    }
+//
+//    @Override
+//    public void handleIntroductionRequest(Peer peer, MessageProto.IntroductionRequest request) throws IOException {
+//        messagesReceived++;
+//        introductionRequestsReceived++;
+//
+//        peer.setConnectionType((int) request.getConnectionType());
+//        if (getPeerHandler().size() > 1) {
+//            Peer invitee = getPeerHandler().getEligiblePeer(peer);
+//            if (invitee != null) {
+//                network.sendIntroductionResponse(peer, invitee);
+//                messagesSent++;
+//                introductionResponsesSent++;
+//                statistics.messageSent();
+//                network.sendPunctureRequest(invitee, peer);
+//                messagesSent++;
+//                puncturesSent++;
+//                statistics.messageSent();
+//                Log.d("Network", "Introducing " + invitee.getAddress() + " to " + peer.getAddress());
+//            }
+//        } else {
+//            Log.d("Network", "Peerlist too small, can't handle introduction request");
+//            network.sendIntroductionResponse(peer, null);
+//            messagesSent++;
+//            introductionResponsesSent++;
+//            statistics.messageSent();
+//        }
+//    }
+//
+//    @Override
+//    public void handleIntroductionResponse(Peer peer, MessageProto.IntroductionResponse response) throws Exception {
+//        messagesReceived++;
+//        introductionResponsesReceived++;
+//        statistics.messageReceived();
+//
+//        peer.setConnectionType((int) response.getConnectionType());
+//        peer.setNetworkOperator(response.getNetworkOperator());
+//        List<ByteString> pex = response.getPexList();
+//        for (ByteString pexPeer : pex) {
+//            Peer p = Peer.deserialize(pexPeer.toByteArray());
+//            Log.d(TAG, "From " + peer + " | found peer in pexList: " + p);
+//
+//            getPeerHandler().getOrMakePeer(p.getPeerId(), p.getAddress());
+//        }
+//    }
+//
+//    @Override
+//    public void handlePunctureRequest(Peer peer, MessageProto.PunctureRequest request) throws IOException {
+//        messagesReceived++;
+//        puncturesReceived++;
+//        statistics.messageReceived();
+//
+//        Peer puncturePeer = null;
+//        try {
+//            puncturePeer = Peer.deserialize(request.getPuncturePeer().toByteArray());
+//        } catch (ClassNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//        if (!getPeerHandler().peerExistsInList(puncturePeer)) {
+//            network.sendPuncture(puncturePeer);
+//            puncturesSent++;
+//            statistics.messageSent();
+//        }
+//    }
+//
+//    @Override
+//    public void handleReceivedBlock(Peer peer, MessageProto.TrustChainBlock block) throws IOException {
+//        // Blocks are ignored
+//        messagesReceived++;
+//        blockMessagesReceived++;
+//        statistics.messageReceived();
+//    }
+//
+//    @Override
+//    public void handleCrawlRequest(Peer peer, MessageProto.CrawlRequest request) throws IOException {
+//        // Crawl requests are ignored
+//        messagesReceived++;
+//        crawlRequestsReceived++;
+//        statistics.messageReceived();
+//    }
+//
+//    @Override
+//    public void handlePuncture(Peer peer, MessageProto.Puncture puncture) throws IOException {
+//        messagesReceived++;
+//        puncturesReceived++;
+//        statistics.messageReceived();
+//    }
 
     /**
      * Return the peer handler object.
@@ -324,12 +323,12 @@ public class StressTestNode implements PeerListener, NetworkCommunicationListene
     }
 
     @Override
-    public void updateIncomingPeers() {
+    public void updateActivePeers() {
 
     }
 
     @Override
-    public void updateOutgoingPeers() {
+    public void updateNewPeers() {
 
     }
 
@@ -354,7 +353,7 @@ public class StressTestNode implements PeerListener, NetworkCommunicationListene
                 int port = Integer.parseInt(params[1]);
                 inetSocketAddress = new InetSocketAddress(connectableAddress, port);
 
-                activity.peerHandler.addPeer(null, inetSocketAddress);
+                activity.peerHandler.addPeer(inetSocketAddress, null,null);
             } catch (UnknownHostException e) {
                 e.printStackTrace();
             }

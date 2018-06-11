@@ -73,7 +73,7 @@ public class Network {
      * @param port
      */
     public Network(String username, PublicKeyPair publicKey, Context context, int port) {
-        this.hashId = username;
+        this.name = username;
         this.publicKey = publicKey;
         this.port = port;
         initVariables(context);
@@ -115,10 +115,10 @@ public class Network {
      */
     private void initVariables(Context context) {
         this.statistics = StatisticsServer.getInstance();
-        TelephonyManager telephonyManager = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE));
-        networkOperator = telephonyManager.getNetworkOperatorName();
-        if (hashId == null) hashId = UserNameStorage.getUserName(context);
+        if (name == null) name = UserNameStorage.getUserName(context);
         if (publicKey == null) publicKey = Key.loadKeys(context).getPublicKeyPair();
+        messageHandler = new MessageHandler(this, new TrustChainDBHelper(context),
+                new PeerHandler(publicKey,name));
         openChannel();
         showLocalIpAddress();
     }
@@ -343,7 +343,7 @@ public class Network {
         outputBuffer = outputBuffer.wrap(message.toByteArray());
         channel.send(outputBuffer, peer.getAddress());
         statistics.bytesSent(outputBuffer.position());
-        Log.i(TAG, "Sending to " + peer.getPeerId() + ":\n" + message);
+        Log.i(TAG, "Sending to " + peer.getName() + ":\n" + message);
         peer.sentData();
         if (networkStatusListener != null) {
             networkStatusListener.updatePeerLists();
@@ -441,6 +441,7 @@ public class Network {
                 }
                 break;
             case CRAWL_REQUEST_ID:
+                // Crawl messages not logged
                 messageHandler.handleCrawlRequest(peer, message.getPayload().getCrawlRequest());
                 break;
         }

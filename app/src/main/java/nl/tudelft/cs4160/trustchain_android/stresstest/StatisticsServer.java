@@ -99,6 +99,18 @@ public class StatisticsServer implements NodeStatistics {
     }
 
     @Override
+    public void blockMessageReceived() {
+        blockMessagesReceived++;
+        if (statisticsDisplay != null) statisticsDisplay.blockMessageReceived();
+    }
+
+    @Override
+    public void blockMessageSent() {
+        blockMessagesSent++;
+        if (statisticsDisplay != null) statisticsDisplay.blockMessageSent();
+    }
+
+    @Override
     public void bytesSent(int bytes) {
         bytesSentCount += bytes;
         if (statisticsDisplay != null) statisticsDisplay.bytesSent(bytes);

@@ -16,6 +16,9 @@ interface NodeStatistics {
     void punctureRequestReceived();
     void punctureRequestSent();
 
+    void blockMessageReceived();
+    void blockMessageSent();
+
     void bytesSent(int bytes);
     void bytesReceived(int bytes);
 }

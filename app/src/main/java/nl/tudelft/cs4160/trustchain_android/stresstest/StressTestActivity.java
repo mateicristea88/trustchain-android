@@ -38,6 +38,8 @@ public class StressTestActivity extends AppCompatActivity implements NodeStatist
     private TextView introductionRequestsReceived;
     private TextView introductionResponsesSent;
     private TextView introductionsResponsesReceived;
+    private TextView blockMessagesSent;
+    private TextView blockMessagesReceived;
 
     private TextView nodesRunning;
 
@@ -69,6 +71,7 @@ public class StressTestActivity extends AppCompatActivity implements NodeStatist
                 for (StressTestNode node : nodes) {
                     node.stopNode();
                 }
+                nodesRunning.setText(String.valueOf(nodes.size()));
             }
         });
 
@@ -84,9 +87,9 @@ public class StressTestActivity extends AppCompatActivity implements NodeStatist
         introductionsResponsesReceived = findViewById(R.id.introduction_responses_received);
         introductionRequestsSent= findViewById(R.id.introduction_requests_sent);
         introductionRequestsReceived = findViewById(R.id.introduction_requests_received);
-
+        blockMessagesSent = findViewById(R.id.block_messages_sent);
+        blockMessagesReceived = findViewById(R.id.block_messages_received);
         nodesRunning = findViewById(R.id.nodes_running);
-
     }
 
     @Override
@@ -245,6 +248,26 @@ public class StressTestActivity extends AppCompatActivity implements NodeStatist
                               punctureRequestsSent.setText(String.valueOf(StatisticsServer.getInstance().punctureRequestsSent));
                           }
                       });
+    }
+
+    @Override
+    public void blockMessageReceived() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                blockMessagesReceived.setText(String.valueOf(StatisticsServer.getInstance().blockMessagesReceived));
+            }
+        });
+    }
+
+    @Override
+    public void blockMessageSent() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                blockMessagesSent.setText(String.valueOf(StatisticsServer.getInstance().blockMessagesSent));
+            }
+        });
     }
 
     @Override
