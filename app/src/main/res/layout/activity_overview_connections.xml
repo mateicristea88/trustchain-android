@@ -14,6 +14,13 @@
         android:paddingBottom="0dp"
         android:paddingTop="8dp">
 
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Crash me!"
+            android:onClick="crashMe"
+            android:visibility="gone"/>
+
         <TableLayout
             android:id="@+id/overviewButtons"
             android:layout_width="match_parent"
