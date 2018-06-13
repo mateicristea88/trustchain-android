@@ -84,6 +84,8 @@
     <string name="outgoing">outgoing</string>
     <string name="left_connections">Active Peers</string>
     <string name="right_connections">New Peers</string>
+    <string name="left_connections_with_count">Active Peers (%d)</string>
+    <string name="right_connections_with_count">New Peers (%d)</string>
     <string name="connection">Connection</string>
     <string name="connectable_ratio">Connectable\nratio</string>
     <string name="connectable_peers">Connectable\nPeers</string>

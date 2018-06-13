@@ -73,6 +73,8 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
     private TrustChainDBHelper dbHelper;
     private Network network;
     private PeerHandler peerHandler;
+    private TextView activePeersText;
+    private TextView newPeersText;
     private String wan = "";
     private static final String TAG = "OverviewConnections";
 
@@ -143,6 +145,8 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
             e.printStackTrace();
         }
         ((TextView )findViewById(R.id.version)).setText(getString(R.string.version, versionName));
+        activePeersText = findViewById(R.id.active_peers_text);
+        newPeersText = findViewById(R.id.new_peers_text);
     }
 
     /**
@@ -463,6 +467,8 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
                     peerHandler.splitPeerList();
                     activePeersAdapter.notifyDataSetChanged();
                     newPeersAdapter.notifyDataSetChanged();
+                    activePeersText.setText(getString(R.string.left_connections_with_count,peerHandler.getactivePeersList().size()));
+                    newPeersText.setText(getString(R.string.right_connections_with_count,peerHandler.getnewPeersList().size()));
                 }
             }
         });
