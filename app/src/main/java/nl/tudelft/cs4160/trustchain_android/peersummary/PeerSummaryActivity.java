@@ -165,7 +165,6 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
     public void requestChain() {
         network = Network.getInstance(getApplicationContext());
         network.setMutualBlockListener(this);
-        network.updateConnectionType((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE));
 
         int sq = -5;
         MessageProto.TrustChainBlock block = dbHelper.getBlock(inboxItemOtherPeer.getPeer().getPublicKeyPair().toBytes(), dbHelper.getMaxSeqNum(inboxItemOtherPeer.getPeer().getPublicKeyPair().toBytes()));
@@ -181,15 +180,12 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
                         .setRequestedSequenceNumber(sq)
                         .setLimit(100).build();
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Log.d("BCrawlTest", "Sent crawl request");
-                    network.sendCrawlRequest(inboxItemOtherPeer.getPeer(), crawlRequest);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        new Thread(() -> {
+            try {
+                Log.d("BCrawlTest", "Sent crawl request");
+                network.sendCrawlRequest(inboxItemOtherPeer.getPeer(), crawlRequest);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }).start();
     }

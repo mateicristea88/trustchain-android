@@ -313,15 +313,12 @@ public class Network {
         channel.send(outputBuffer.wrap(message.toByteArray()), peer.getAddress());
         Log.d(TAG, "Sending " + message);
         peer.sentData();
-        if (networkStatusListener != null) {
-            networkStatusListener.updatePeerLists();
-        }
     }
 
     /**
      * Show local ip address.
      */
-    private void showLocalIpAddress() {
+    public void showLocalIpAddress() {
         ShowLocalIPTask showLocalIPTask = new ShowLocalIPTask();
         showLocalIPTask.execute();
     }
@@ -358,7 +355,6 @@ public class Network {
                 peer.receivedData();
                 PubKeyAndAddressPairStorage.addPubkeyAndAddressPair(context, sourcePubKey, address);
                 handleMessage(peer, message, sourcePubKey, context);
-                networkStatusListener.updatePeerLists();
             }
         } catch (Exception e) {
             e.printStackTrace();

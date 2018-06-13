@@ -98,7 +98,8 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
             while(true) {
                 updatePeerLists();
                 try {
-                    Thread.sleep(500);
+                    // update every 198 ms, because we want to display a sent/received message cue when a message was received less than 200ms ago.
+                    Thread.sleep(198);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -346,6 +347,9 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
 
             while(true) {
                 try {
+                    // update connection type and internal ip address
+                    network.updateConnectionType((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE));
+                    network.showLocalIpAddress();
                     if (peerHandler.size() > 0) {
                         // select 10 random peers to send an introduction request to
                         int limit = 10;
@@ -428,8 +432,8 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
 
         if (peerHandler.getWanVote().vote(socketAddress)) {
             wan = peerHandler.getWanVote().getAddress().toString();
+            setWanvote(wan.replace("/",""));
         }
-        setWanvote(wan.replace("/",""));
     }
 
     /**
