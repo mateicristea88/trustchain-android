@@ -141,7 +141,7 @@ public class Util {
     public static String timeToString(long msSinceLastMessage) {
         // display seconds
         if(msSinceLastMessage < 60000) {
-            return " " + ((int) Math.floor(msSinceLastMessage / 1000.0)) + "s";
+            return ((int) Math.floor(msSinceLastMessage / 1000.0)) + "s";
         }
 
         // display minutes
@@ -149,7 +149,7 @@ public class Util {
             int seconds = ((int) Math.floor((msSinceLastMessage / 1000.0)));
             int minutes = ((int) Math.floor(seconds /60.0));
             seconds = seconds % 60;
-            return " " + minutes + "m" + seconds + "s";
+            return minutes + "m" + seconds + "s";
         }
 
         // display hours
@@ -157,7 +157,7 @@ public class Util {
             int minutes = ((int) Math.floor(msSinceLastMessage /60000.0));
             int hours = ((int) Math.floor(minutes / 60.0));
             minutes = minutes % 60;
-            return " " + hours + "h" + minutes + "m";
+            return hours + "h" + minutes + "m";
         }
 
         // default: more than 1 day, display nothing, getting a time since last message that is this
