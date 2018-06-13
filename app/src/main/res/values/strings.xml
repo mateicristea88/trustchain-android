@@ -98,15 +98,15 @@
 
     <!-- Connection explanation view -->
     <string name="symbolMeaningText">Meaning:</string>
-    <string name="connectionInfoText">Here we provide an explanation of each symbol and their corresponding color.</string>
+    <string name="connectionInfoText">Explanations of texts and symbols of the connection overview.</string>
     <string name="symbolExplanationText">Explanation</string>
     <string name="connected">Connected with peer</string>
     <string name="connecting">Connecting with peer</string>
     <string name="cannot_connect">Cannot connect with peer</string>
     <string name="received_packet">Received a packet from peer</string>
     <string name="sent_packet">Sent a packet to peer</string>
-    <string name="time_since_received">Time since last received message"</string>
-    <string name="time_since_sent">Time since last message sent</string>
+    <string name="time_since_received">Time since last received message, lights up on message received"</string>
+    <string name="time_since_sent">Time since last sent message, lights up on message sent</string>
 
     <!--- info chain explorer -->
     <string name="color_info">Color is based on the hash of the public key.</string>
