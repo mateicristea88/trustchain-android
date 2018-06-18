@@ -83,6 +83,23 @@ Background handling of messages
 ===============================
 Since all messages are created using protocolbuffers, it is easy to rebuild them on reception. When a message is received, the message type is checked and the appropriate functions are called to further handle the message. Messages not build with (the correct) protocolbuffers will simply be discarded.
 
+Message transmission
+====================
+Network
+-------
+Messages are sent over the network using UDP datagrams. Currently, one message is sent in one datagram, putting an upper limit on teh message size of 65KB, the maximum UDP datagram size.
+The message is sent in the `Network` class' `sendMessage` method.
+
+Offline transmission
+--------------------
+The app also provides functionality to transmit blocks offline. A checkbox in the `PeerSummaryActivity` activates this functionality.
+Offline sending can be performed in two ways, one is using QR codes and the other is using `Android Beam`.
+
+QR code transmission uses the QR generator located in the funds.qr package.
+The maximum size of data contained in a QR code is limited to about 3 kilobytes, so this has an even stricter maximum size then the network's UDP transmissions.
+
+Android Beam transmits data using either NFC or Bluetooth, allowing a practically infinite maximum message size, providing both the sending and receiving party support the required technologies.
+
 
 Networking classes and their responsibilities
 =============================================
