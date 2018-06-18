@@ -91,3 +91,12 @@ There are two main classes which have to do with networking. `Network <TODO_add_
 The Network class is a singleton class and is responsible for sending and receiving messages. It has a datagram channel which has a socket bound to a local port (default 1873). Through this channel messages are send and received to and from peers. The network class has methods to build the different messages of the protocol.
 
 The OverviewConnectionsActivity class is responsible for handling the messages after they have been deserialized. Furthermore it updates the information in the UI based on the messages it receives. This includes adding and removing peers and updating the connection information.
+
+Statistics
+==========
+The Network class logs al its sent and received messages into the singleton `Statistics <TODO_add_link>` class. Messages are logged by type. Additionally, the number of sent and receives bytes are also tallied.
+
+Stress Testing
+==============
+The stress testing feature allows to spin up any desired number of nodes. These nodes start in the `StressTestNode <TODO_add_link>` class, they use their own instances of the `Network` class and provide the `StressTestNode` instance as a PeerListener, instead of the normal `OverviewconnectionActivity`.
+They act just like a normal node, except having no visual displays and generating a new temporary keypair.

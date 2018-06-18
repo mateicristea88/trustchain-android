@@ -29,7 +29,7 @@ Initiating a transaction
 ------------------------
 When you want to initiate a transaction, you need to provide the bytes of the transaction, your public key, and the public key of the other party, and a link to the database containing your chain to ``createBlock``. The latest block in your chain will be retrieved from the database, to be able to set ``sequence_number`` and ``prev_hash``. The other attributes will be set according to the input, ``signature`` will remain empty for now.
 
-Received a half block
+Received a block proposal
 ---------------------
 A half block was received and it contains a transaction that we agree with. In this Android implementation we always want to complete the block, regardless of the transaction, so we don't need to check the transaction. The attributes are again set according to the input, with as difference that we now retrieve ``transaction`` and ``link_sequence_number`` from the linked block. ``signature`` will again remain empty.
 
