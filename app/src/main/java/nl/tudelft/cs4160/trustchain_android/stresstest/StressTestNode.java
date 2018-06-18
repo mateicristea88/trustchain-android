@@ -15,6 +15,7 @@ import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
+import java.util.ArrayList;
 
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
@@ -104,11 +105,11 @@ public class StressTestNode implements PeerListener, NetworkStatusListener {
 //     * @param savedInstanceState
      */
     private void initVariables() {
-
         peerHandler = new PeerHandler(keyPair.getPublicKeyPair(), userName);
-        network = new Network(userName, keyPair.getPublicKeyPair(), context, port);
-
         getPeerHandler().setPeerListener(this);
+
+        network = new Network(userName, keyPair.getPublicKeyPair(), context, port);
+        network.getMessageHandler().setPeerHandler(getPeerHandler());
         network.setNetworkStatusListener(this);
         network.updateConnectionType((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
 //        ((TextView) findViewById(R.id.peer_id)).setText(peerHandler.getHashId());
@@ -124,7 +125,7 @@ public class StressTestNode implements PeerListener, NetworkStatusListener {
                 do {
                     try {
                         if (peerHandler.size() > 0) {
-                            Peer peer = peerHandler.getEligiblePeer(null);
+                            Peer peer = peerHandler.getEligiblePeer(new ArrayList<>());
                             if (peer != null) {
                                 network.sendIntroductionRequest(peer);
 //                                messagesSent++;

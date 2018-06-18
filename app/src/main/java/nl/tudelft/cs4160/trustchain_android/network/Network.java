@@ -42,13 +42,13 @@ public class Network {
     private DatagramChannel channel;
     private String name;
     private int connectionType;
-    private static InetSocketAddress internalSourceAddress;
+    private InetSocketAddress internalSourceAddress;
     private static Network network;
     private PublicKeyPair publicKey;
     private MessageHandler messageHandler;
-    private static NetworkStatusListener networkStatusListener;
+    private NetworkStatusListener networkStatusListener;
     private int port = OverviewConnectionsActivity.DEFAULT_PORT;
-    private static PeerSummaryActivity mutualBlockListener;
+    private PeerSummaryActivity mutualBlockListener;
     private StatisticsServer statistics;
 
     public final static int INTRODUCTION_REQUEST_ID = 1;
@@ -66,7 +66,7 @@ public class Network {
 
     /**
      * Non-singleton version of Network _specifically for stress tests_.
-     * Allows to overwrite the peer's name, keypair and port number.
+     * Allows to overwrite the node's name, keypair and port number.
      * @param username
      * @param publicKey
      * @param context
@@ -99,7 +99,7 @@ public class Network {
      * @param networkStatusListener
      */
     public void setNetworkStatusListener(NetworkStatusListener networkStatusListener) {
-        Network.networkStatusListener = networkStatusListener;
+        this.networkStatusListener = networkStatusListener;
     }
 
     /**
@@ -107,7 +107,7 @@ public class Network {
      * @param mutualBlockListener
      */
     public void setMutualBlockListener(PeerSummaryActivity mutualBlockListener) {
-        Network.mutualBlockListener = mutualBlockListener;
+        this.mutualBlockListener = mutualBlockListener;
     }
 
     /**
@@ -447,6 +447,10 @@ public class Network {
         }
     }
 
+    public MessageHandler getMessageHandler() {
+        return messageHandler;
+    }
+
     /**
      * Add peer to inbox.
      * This means storing the InboxItem object in the local preferences.
@@ -474,7 +478,7 @@ public class Network {
     /**
      * Show local ip visually to the user.
      */
-    private static class ShowLocalIPTask extends AsyncTask<Void, Void, InetAddress> {
+    private class ShowLocalIPTask extends AsyncTask<Void, Void, InetAddress> {
         int port;
 
         public ShowLocalIPTask(int port) {
