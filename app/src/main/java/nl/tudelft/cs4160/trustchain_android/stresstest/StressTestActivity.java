@@ -71,6 +71,7 @@ public class StressTestActivity extends AppCompatActivity implements NodeStatist
                 for (StressTestNode node : nodes) {
                     node.stopNode();
                 }
+                nodes.clear();
                 nodesRunning.setText(String.valueOf(nodes.size()));
             }
         });
@@ -98,9 +99,13 @@ public class StressTestActivity extends AppCompatActivity implements NodeStatist
         StatisticsServer.getInstance().setStatisticsDisplay(this);
     }
 
+    /**
+     * Trigger an update for all stats shown on the page
+     */
     @Override
     protected void onResume() {
         super.onResume();
+        startStressTest(0);
         introductionRequestReceived();
         introductionRequestSent();
         introductionResponseReceived();
@@ -111,6 +116,8 @@ public class StressTestActivity extends AppCompatActivity implements NodeStatist
         punctureRequestSent();
         messageReceived();
         messageSent();
+        blockMessageReceived();
+        blockMessageSent();
         bytesReceived(0);
         bytesSent(0);
     }
@@ -127,22 +134,14 @@ public class StressTestActivity extends AppCompatActivity implements NodeStatist
             StressTestNode node = new StressTestNode(this, port);
             nodes.add(node);
             node.startNode();
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    nodesRunning.setText(String.valueOf(nodes.size()));
-                }
-            });
         }
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                nodesRunning.setText(String.valueOf(nodes.size()));
+            }
+        });
     }
-
-//    @Override
-//    public void onBackPressed() {
-//        for (StressTestNode node : nodes) {
-//            node.stopNode();
-//        }
-//        super.onBackPressed();
-//    }
 
     @Override
     public void messageSent() {

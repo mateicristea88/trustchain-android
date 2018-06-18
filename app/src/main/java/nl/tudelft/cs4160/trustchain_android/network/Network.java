@@ -111,7 +111,8 @@ public class Network {
     }
 
     /**
-     * Open the network channel on the default port.
+     * Initialize local variables including opening the channel.
+     * name and publicKey are only set if that wasn't already done by the constructor.
      */
     private void initVariables(Context context) {
         this.statistics = StatisticsServer.getInstance();
@@ -152,7 +153,7 @@ public class Network {
      * Close the channel
      */
     public void closeChannel() {
-        Log.e("CHANNELTEST", "chanel closed");
+        Log.i("Network", "Closing channel");
         channel.socket().close();
         try {
             channel.close();
@@ -199,11 +200,6 @@ public class Network {
                 .setType(INTRODUCTION_REQUEST_ID)
                 .setPayload(MessageProto.Payload.newBuilder().setIntroductionRequest(request));
 
-        try {
-            Log.e("Dest", peer.getAddress().getAddress().getAddress().toString());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         statistics.introductionRequestSent();
         sendMessage(messageBuilder.build(), peer);
     }
@@ -242,7 +238,6 @@ public class Network {
                 .setType(CRAWL_REQUEST_ID)
                 .setPayload(MessageProto.Payload.newBuilder().setCrawlRequest(request))
                 .build();
-
 
         sendMessage(message, peer);
     }
