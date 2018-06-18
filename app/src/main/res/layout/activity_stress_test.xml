@@ -17,17 +17,18 @@
             android:layout_height="wrap_content">
 
             <TextView
+                android:labelFor="@id/nodes_to_start"
                 android:layout_weight="0.5"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Nodes to start"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/nodes_to_start"
                 />
 
             <TextView
                 android:layout_weight="0.5"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Nodes running"
+                android:text="@string/nodes_running"
                 />
         </LinearLayout>
 
@@ -43,7 +44,7 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:inputType="number"
-                android:text="1"
+                android:text="@string/default_nodes_num"
                 />
 
             <TextView
@@ -63,7 +64,7 @@
             android:layout_marginStart="@dimen/activity_horizontal_margin"
             android:layout_marginTop="@dimen/activity_horizontal_margin"
             android:background="@color/colorPrimary"
-            android:text="Start nodes"
+            android:text="@string/button_start_nodes"
             android:textColor="@android:color/white" />
 
         <Button
@@ -75,7 +76,7 @@
             android:layout_marginTop="@dimen/activity_horizontal_margin"
             android:layout_marginBottom="30dp"
             android:background="@color/colorPrimary"
-            android:text="Stop nodes"
+            android:text="@string/button_stop_nodes"
             android:textColor="@android:color/white" />
 
         <!-- Received stats -->
@@ -83,7 +84,7 @@
             android:layout_marginTop="20dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Received Stats"
+            android:text="@string/stats_received_title"
             />
         <LinearLayout
             android:orientation="horizontal"
@@ -94,7 +95,7 @@
                 android:layout_marginEnd="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Total messages received:"
+                android:text="@string/stats_messages_received"
                 />
 
             <TextView
@@ -122,7 +123,7 @@
                 android:layout_marginEnd="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Punctures:"
+                android:text="@string/stats_punctures"
                 />
 
             <TextView
@@ -143,7 +144,7 @@
                 android:layout_marginEnd="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Puncture requests:"
+                android:text="@string/stats_puncture_requests"
                 />
 
             <TextView
@@ -164,7 +165,7 @@
                 android:layout_marginEnd="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Introduction requests:"
+                android:text="@string/stats_introduction_requests"
                 />
 
             <TextView
@@ -185,7 +186,7 @@
                 android:layout_marginEnd="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Introduction responses:"
+                android:text="@string/stats_introduction_responses"
                 />
 
             <TextView
@@ -206,7 +207,7 @@
                 android:layout_marginEnd="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Block messages:"
+                android:text="@string/stats_block_messages"
                 />
 
             <TextView
@@ -223,7 +224,7 @@
             android:layout_marginTop="20dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Sent Stats"
+            android:text="@string/stats_sent"
             />
         <LinearLayout
             android:orientation="horizontal"
@@ -234,7 +235,7 @@
                 android:layout_marginEnd="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Total messages sent:"
+                android:text="@string/status_messages_sent"
                 />
 
             <TextView
@@ -261,7 +262,7 @@
                 android:layout_marginEnd="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Punctures:"
+                android:text="@string/stats_punctures"
                 />
 
             <TextView
@@ -282,7 +283,7 @@
                 android:layout_marginEnd="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Introduction requests:"
+                android:text="@string/stats_introduction_requests"
                 />
 
             <TextView
@@ -303,7 +304,7 @@
             android:layout_marginEnd="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Introduction responses:"
+            android:text="@string/stats_introduction_responses"
             />
 
         <TextView
@@ -324,7 +325,7 @@
                 android:layout_marginEnd="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Puncture requests:"
+                android:text="@string/stats_puncture_requests"
                 />
 
             <TextView
@@ -345,7 +346,7 @@
                 android:layout_marginEnd="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Block messages:"
+                android:text="@string/stats_block_messages"
                 />
 
             <TextView

@@ -37,6 +37,6 @@
 
     <item
         android:id="@+id/stress_test"
-        android:title="@string/stress_test"
+        android:title="@string/menu_stress_test"
         app:showAsAction="never"/>
 </menu>
