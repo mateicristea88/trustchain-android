@@ -22,6 +22,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -58,6 +59,7 @@ import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.BootstrapIPStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.SharedPreferencesStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
+import nl.tudelft.cs4160.trustchain_android.util.RequestCode;
 
 import static nl.tudelft.cs4160.trustchain_android.main.UserConfigurationActivity.*;
 
@@ -117,7 +119,6 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
         dbHelper = new TrustChainDBHelper(this);
         initKey();
         peerHandler = new PeerHandler(Key.loadKeys(this).getPublicKeyPair(), UserNameStorage.getUserName(this));
-        network = Network.getInstance(getApplicationContext());
 
         if (savedInstanceState != null) {
             ArrayList<Peer> list = (ArrayList<Peer>) savedInstanceState.getSerializable("peers");
@@ -125,6 +126,8 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
         }
 
         getPeerHandler().setPeerListener(this);
+        network = Network.getInstance(getApplicationContext());
+        network.getMessageHandler().setPeerHandler(getPeerHandler());
         network.setNetworkStatusListener(this);
         network.updateConnectionType((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE));
     }
@@ -207,11 +210,11 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
                 return true;
             case R.id.find_peer:
                 Intent bootstrapActivity = new Intent(this, ChangeBootstrapActivity.class);
-                startActivityForResult(bootstrapActivity, 1);
+                startActivityForResult(bootstrapActivity, RequestCode.CHANGE_BOOTSTRAP);
                 return true;
             case R.id.passport_scan:
                 Intent cameraActivity = new Intent(this, CameraActivity.class);
-                startActivityForResult(cameraActivity, 1);
+                startActivity(cameraActivity);
                 return true;
             default:
                 return false;
@@ -263,16 +266,13 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 1) {
-            if (resultCode == Activity.RESULT_OK) {
-                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putString("ConnectableAddress", data.getStringExtra("ConnectableAddress"));
-                editor.apply();
-                String newBootstrap = BootstrapIPStorage.getIP(this);
-                CONNECTABLE_ADDRESS = newBootstrap;
-                addInitialPeer();
-            }
+        if (requestCode == RequestCode.CHANGE_BOOTSTRAP && resultCode == Activity.RESULT_OK) {
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putString("ConnectableAddress", data.getStringExtra("ConnectableAddress"));
+            editor.apply();
+            CONNECTABLE_ADDRESS = BootstrapIPStorage.getIP(this);
+            addInitialPeer();
         }
     }
 
@@ -541,5 +541,22 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
     @Override
     public PeerHandler getPeerHandler() {
         return peerHandler;
+    }
+
+
+    /**
+     * Show a toast when the user presses the home button. Since this activity is always running,
+     * it is not necessary to add this function to other activities. Source:
+     * http://www.developerphil.com/no-you-can-not-override-the-home-button-but-you-dont-have-to/
+     * @param level
+     */
+    @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+        if (level == TRIM_MEMORY_UI_HIDDEN) {
+            Toast.makeText(this,
+                    getString(R.string.toast_app_running), Toast.LENGTH_LONG).show();
+
+        }
     }
 }
