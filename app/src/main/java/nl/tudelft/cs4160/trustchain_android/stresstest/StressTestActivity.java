@@ -68,11 +68,7 @@ public class StressTestActivity extends AppCompatActivity implements NodeStatist
         stopStressTestButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                for (StressTestNode node : nodes) {
-                    node.stopNode();
-                }
-                nodes.clear();
-                nodesRunning.setText(String.valueOf(nodes.size()));
+                stopNodes();
             }
         });
 
@@ -93,10 +89,23 @@ public class StressTestActivity extends AppCompatActivity implements NodeStatist
         nodesRunning = findViewById(R.id.nodes_running);
     }
 
-    @Override
+    private void stopNodes() {
+        for (StressTestNode node : nodes) {
+            node.stopNode();
+        }
+        nodes.clear();
+        nodesRunning.setText(String.valueOf(nodes.size()));
+    }
+    
     protected void onStart() {
         super.onStart();
         StatisticsServer.getInstance().setStatisticsDisplay(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        stopNodes();
+        super.onDestroy();
     }
 
     /**
