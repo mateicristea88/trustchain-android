@@ -54,17 +54,14 @@
             android:name=".chainExplorer.ChainExplorerInfoActivity"
             android:label="@string/title_activity_info_chain_explorer" />
         <activity
-            android:name=".claims.ClaimsListActivity"
-            android:label="@string/title_activity_info_claims_list" />
-        <activity
             android:name=".main.BootstrapActivity"
             android:windowSoftInputMode="adjustResize" />
         <activity android:name=".inbox.InboxActivity" />
         <activity
-            android:name=".claims.SendClaimActivity"
+            android:name=".claims.SendOfflineActivity"
             android:label="@string/title_activity_send_claim"></activity>
         <activity
-            android:name=".claims.AttestClaimsActivity"
+            android:name=".claims.ReceiveOfflineActivity"
             android:label="Attest claims"
             android:screenOrientation="portrait">
             <intent-filter>

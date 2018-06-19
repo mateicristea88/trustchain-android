@@ -18,7 +18,6 @@ import android.widget.Toast;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import nl.tudelft.cs4160.trustchain_android.R;
-import nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper;
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
@@ -27,10 +26,10 @@ import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-public class AttestClaimsActivity extends AppCompatActivity {
+public class ReceiveOfflineActivity extends AppCompatActivity {
     //TODO check for NFC availability, show settings snackbar
 
-    private static final String TAG = AttestClaimsActivity.class.toString();
+    private static final String TAG = ReceiveOfflineActivity.class.toString();
     private NfcAdapter mNfcAdapter;
     private PendingIntent pendingIntent;
     private IntentFilter[] intentFiltersArray;

@@ -1,6 +1,7 @@
 package nl.tudelft.cs4160.trustchain_android.main;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -39,8 +40,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import nl.tudelft.cs4160.trustchain_android.R;
 import nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper;
 import nl.tudelft.cs4160.trustchain_android.chainExplorer.ChainExplorerActivity;
-import nl.tudelft.cs4160.trustchain_android.claims.AttestClaimsActivity;
-import nl.tudelft.cs4160.trustchain_android.claims.ClaimsListActivity;
+import nl.tudelft.cs4160.trustchain_android.claims.ReceiveOfflineActivity;
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.funds.FundsActivity;
@@ -188,12 +188,8 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
                 Intent chainExplorerActivity = new Intent(this, ChainExplorerActivity.class);
                 startActivity(chainExplorerActivity);
                 return true;
-            case R.id.claims_menu:
-                Intent claimsActivity = new Intent(this, ClaimsListActivity.class);
-                startActivity(claimsActivity);
-                return true;
-            case R.id.attest_claims:
-                Intent attestActivity = new Intent(this, AttestClaimsActivity.class);
+            case R.id.receive_offline:
+                Intent attestActivity = new Intent(this, ReceiveOfflineActivity.class);
                 startActivity(attestActivity);
                 return true;
             case R.id.connection_explanation_menu:

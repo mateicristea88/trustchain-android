@@ -6,12 +6,8 @@
         android:title="@string/menu_chainexplorer"
         app:showAsAction="never"/>
     <item
-        android:id="@+id/claims_menu"
-        android:title="@string/menu_claims"
-        app:showAsAction="never"/>
-    <item
-        android:id="@+id/attest_claims"
-        android:title="@string/menu_attest"
+        android:id="@+id/receive_offline"
+        android:title="@string/menu_receive_offline"
         app:showAsAction="never"/>
     <item
         android:id="@+id/connection_explanation_menu"

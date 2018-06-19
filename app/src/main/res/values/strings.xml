@@ -56,8 +56,7 @@
     <string name="menu_chainexplorer">My Chain</string>
     <string name="menu_clear_inbox">Clear Entire Inbox</string>
     <string name="menu_info">Info</string>
-    <string name="menu_claims">My claims</string>
-    <string name="menu_attest">Attest</string>
+    <string name="menu_receive_offline">Receive offline</string>
     <string name="menu_change_bootstrap">Change bootstrap</string>
     <string name="menu_import_tokens">Import Tokens</string>
     <string name="menu_export_tokens">Export Tokens</string>
@@ -175,11 +174,10 @@
     <string name="type_file">%s file</string>
     <string name="click_to_open_file">%s file\nClick to open</string>
 
-    <!-- Claims -->
-    <string name="title_activity_info_claims_list">My Claims</string>
-    <string name="title_activity_send_claim">SendClaimActivity</string>
-    <string name="sending_claim">Sending claim, hold receiver close</string>
-    <string name="sending_claim_complete">Claim was sent successfully</string>
+    <!-- Offline block signing -->
+    <string name="title_activity_send_claim">Send blocks offline</string>
+    <string name="sending_block_beam">Sending block, hold receiver close</string>
+    <string name="sending_block_beam_complete">Block was sent successfully</string>
     <string name="create_claim">Create claim</string>
     <string name="is_claim_checkbox_text">Is Claim</string>
     <string name="send_claim">Create Claim</string>

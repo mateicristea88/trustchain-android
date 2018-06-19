@@ -35,9 +35,9 @@ import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import static android.nfc.NdefRecord.createMime;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
-public class SendClaimActivity extends AppCompatActivity implements OnNdefPushCompleteCallback, NfcAdapter.CreateBeamUrisCallback {
+public class SendOfflineActivity extends AppCompatActivity implements OnNdefPushCompleteCallback, NfcAdapter.CreateBeamUrisCallback {
 
-    private static final String TAG = SendClaimActivity.class.toString();
+    private static final String TAG = SendOfflineActivity.class.toString();
     private static final String TITLE = "Send claim";
     NfcAdapter mNfcAdapter;
 

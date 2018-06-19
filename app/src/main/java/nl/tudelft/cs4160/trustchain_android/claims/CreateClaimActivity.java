@@ -87,7 +87,7 @@ public class CreateClaimActivity extends AppCompatActivity {
             return;
         }
         new TrustChainDBHelper(this).insertInDB(signedBlock);
-        Intent claimIntent = new Intent(this, SendClaimActivity.class);
+        Intent claimIntent = new Intent(this, SendOfflineActivity.class);
         claimIntent.putExtra("claimBlock", signedBlock);
         startActivity(claimIntent);
     }
