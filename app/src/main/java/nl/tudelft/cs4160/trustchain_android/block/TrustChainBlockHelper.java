@@ -59,7 +59,7 @@ public class TrustChainBlockHelper {
      */
     public static MessageProto.TrustChainBlock createBlock(byte[] transaction, String format, TrustChainDBHelper dbHelper,
                                                          byte[] mypubk, MessageProto.TrustChainBlock linkedBlock,
-                                                         byte[] linkpubk, MessageProto.TrustChainBlock.Claim claim) {
+                                                         byte[] linkpubk) {
         MessageProto.TrustChainBlock latestBlock = dbHelper.getLatestBlock(mypubk);
 
         MessageProto.TrustChainBlock.Builder builder = MessageProto.TrustChainBlock.newBuilder();
@@ -72,7 +72,6 @@ public class TrustChainBlockHelper {
                         Transaction.newBuilder()
                                 .setUnformatted(ByteString.copyFrom(transaction))
                                 .setFormat(format)
-                                .setClaim(claim)
                                 .build())
                     .setLinkPublicKey(ByteString.copyFrom(linkpubk))
                     .setLinkSequenceNumber(TrustChainBlockHelper.UNKNOWN_SEQ);

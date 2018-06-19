@@ -25,6 +25,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,7 +42,7 @@ import nl.tudelft.cs4160.trustchain_android.R;
 import nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper;
 import nl.tudelft.cs4160.trustchain_android.block.ValidationResult;
 import nl.tudelft.cs4160.trustchain_android.chainExplorer.ChainExplorerActivity;
-import nl.tudelft.cs4160.trustchain_android.claims.CreateClaimActivity;
+import nl.tudelft.cs4160.trustchain_android.claims.SendOfflineActivity;
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.inbox.InboxItem;
@@ -78,6 +79,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
     private File transactionDocument;
     private TextView selectedFilePath;
     private Button sendButton;
+    private CheckBox sendOffline;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,6 +143,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
         mRecyclerView = findViewById(R.id.mutualBlocksRecyclerView);
         selectedFilePath = findViewById(R.id.selected_path);
         sendButton = findViewById(R.id.send_button);
+        sendOffline = findViewById(R.id.send_offline_checkbox);
 
         dbHelper = new TrustChainDBHelper(this);
         network = Network.getInstance(getApplicationContext());
@@ -253,7 +256,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
             transactionData = messageEditText.getText().toString().getBytes(UTF_8);
         }
 
-        final MessageProto.TrustChainBlock block = createBlock(transactionData, format, DBHelper, publicKey, null, inboxItemOtherPeer.getPeer().getPublicKeyPair().toBytes(), null);
+        final MessageProto.TrustChainBlock block = createBlock(transactionData, format, DBHelper, publicKey, null, inboxItemOtherPeer.getPeer().getPublicKeyPair().toBytes());
         final MessageProto.TrustChainBlock signedBlock = TrustChainBlockHelper.sign(block, Key.loadKeys(getApplicationContext()).getSigningKey());
 
         messageEditText.setText("");
@@ -263,10 +266,12 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
         // insert the half block in your own chain
         new TrustChainDBHelper(this).insertInDB(signedBlock);
 
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
+        if (sendOffline.isChecked()) {
+            Intent intent = new Intent(this, SendOfflineActivity.class);
+            intent.putExtra("block", signedBlock);
+            startActivity(intent);
+        } else {
+            new Thread(() -> {
                 try {
                     network.sendBlockMessage(inboxItemOtherPeer.getPeer(), signedBlock);
                     Snackbar mySnackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout),"Half block send!", Snackbar.LENGTH_SHORT);
@@ -275,15 +280,10 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
                     e.printStackTrace();
                     Snackbar.make(findViewById(R.id.myCoordinatorLayout),e.getMessage(), Snackbar.LENGTH_LONG);
                 }
-            }
-        }).start();
+            }).start();
+        }
     }
 
-    public void onClickCreateClaim(View view) {
-        Intent claimIntent = new Intent(this, CreateClaimActivity.class);
-        claimIntent.putExtra("peer", inboxItemOtherPeer);
-        startActivity(claimIntent);
-    }
     /**
      * Called when pressing the sign button in a mutual block.
      * This method signs the half block when agreed with the pop-up.
@@ -329,7 +329,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
         DualSecret keyPair = Key.loadKeys(this);
         MessageProto.TrustChainBlock block = createBlock(null, null, //Setting format and transaction not needed, they are already contained in linkedblock
                 DBHelper, keyPair.getPublicKeyPair().toBytes(),
-                linkedBlock, inboxItemOtherPeer.getPeer().getPublicKeyPair().toBytes(), null);
+                linkedBlock, inboxItemOtherPeer.getPeer().getPublicKeyPair().toBytes());
 
         final MessageProto.TrustChainBlock signedBlock = sign(block, keyPair.getSigningKey());
 

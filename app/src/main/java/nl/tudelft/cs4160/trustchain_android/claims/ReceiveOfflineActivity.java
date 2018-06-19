@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import nl.tudelft.cs4160.trustchain_android.R;
+import nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper;
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
@@ -73,9 +74,6 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
         super.onResume();
         // It's important, that the activity is in the foreground (resumed). Otherwise an IllegalStateException is thrown.
         mNfcAdapter.enableForegroundDispatch(this, pendingIntent, intentFiltersArray, null);
-//        if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
-//            processIntent(getIntent());
-//        }
     }
 
     @Override
@@ -125,15 +123,14 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
      * @param v - unused
      */
     public void onClickSign(View v) {
-        //TODO what do we do here exactly, sending back, generating proof?
         TrustChainDBHelper DBHelper = new TrustChainDBHelper(this);
         DualSecret keyPair = Key.loadKeys(this);
-//        MessageProto.TrustChainBlock block = TrustChainBlockHelper.createBlock(null, DBHelper,
-//                keyPair.getPublicKeyPair().toBytes(),
-//                receivedBlock, receivedBlock.getPublicKey().toByteArray(), null, null);
+        MessageProto.TrustChainBlock block = TrustChainBlockHelper.createBlock(null, null, DBHelper,
+                keyPair.getPublicKeyPair().toBytes(),
+                receivedBlock, receivedBlock.getPublicKey().toByteArray());
 
-//        final MessageProto.TrustChainBlock signedBlock = TrustChainBlockHelper.sign(receivedBlock, keyPair.getSigningKey());
-//        DBHelper.insertInDB(signedBlock);
+        final MessageProto.TrustChainBlock signedBlock = TrustChainBlockHelper.sign(receivedBlock, keyPair.getSigningKey());
+        DBHelper.insertInDB(signedBlock);
     }
 
     /**

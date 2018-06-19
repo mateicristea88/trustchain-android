@@ -47,7 +47,7 @@ public class SendOfflineActivity extends AppCompatActivity implements OnNdefPush
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.content_send_claim);
+        setContentView(R.layout.activity_send_offline);
 
         View layout = findViewById(R.id.layout_send_claim);
         QRImage = findViewById(R.id.qr_image);
@@ -100,7 +100,7 @@ public class SendOfflineActivity extends AppCompatActivity implements OnNdefPush
                 getWindowManager().getDefaultDisplay().getMetrics(metrics);
                 int size = metrics.widthPixels;
 
-                MessageProto.TrustChainBlock block = (MessageProto.TrustChainBlock) getIntent().getSerializableExtra("claimBlock");
+                MessageProto.TrustChainBlock block = (MessageProto.TrustChainBlock) getIntent().getSerializableExtra("block");
 
                 Log.e(TAG, block.toByteArray().length + " bytes");
                 try {

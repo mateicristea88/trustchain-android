@@ -181,8 +181,7 @@
     <string name="sending_block_beam">Sending block, hold receiver close</string>
     <string name="sending_block_beam_complete">Block was sent successfully</string>
     <string name="create_claim">Create claim</string>
-    <string name="is_claim_checkbox_text">Is Claim</string>
-    <string name="send_claim">Create Claim</string>
+    <string name="send_offline_checkbox_text">Send offline</string>
     <string name="deny_permission">Deny</string>
     <string name="qr_camera_permission_explanation">Camera permission is required in order to scan a QR code</string>
     <string name="attest_claims_explanation">Tap a sending device to receive a claim. Or press the button below to scan one from a QR coe</string>
