@@ -1,4 +1,4 @@
-package nl.tudelft.cs4160.trustchain_android.claims;
+package nl.tudelft.cs4160.trustchain_android.offline;
 
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -112,9 +112,8 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
             Log.e(TAG, "Could not parse received block!");
             return;
         }
-        String claimText = "name: " + new String(receivedBlock.getTransaction().getClaim().getName().toByteArray(), UTF_8) + "\n" +
-                "data: " + new String(receivedBlock.getTransaction().getUnformatted().toByteArray(), UTF_8);
-        textView.setText(claimText);
+        String message = "Message: " + new String(receivedBlock.getTransaction().getUnformatted().toByteArray(), UTF_8);
+        textView.setText(message);
         signButton.setVisibility(View.VISIBLE);
     }
 
@@ -123,6 +122,7 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
      * @param v - unused
      */
     public void onClickSign(View v) {
+        signButton.setEnabled(false);
         TrustChainDBHelper DBHelper = new TrustChainDBHelper(this);
         DualSecret keyPair = Key.loadKeys(this);
         MessageProto.TrustChainBlock block = TrustChainBlockHelper.createBlock(null, null, DBHelper,
@@ -169,9 +169,8 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
                     Log.e(TAG, "Could not parse received block!");
                     return;
                 }
-                String claimText = "name: " + new String(receivedBlock.getTransaction().getClaim().getName().toByteArray(), UTF_8) + "\n" +
-                        "data: " + new String(receivedBlock.getTransaction().getUnformatted().toByteArray(), UTF_8);
-                textView.setText(claimText);
+                String message = "Message: " + new String(receivedBlock.getTransaction().getUnformatted().toByteArray(), UTF_8);
+                textView.setText(message);
                 signButton.setVisibility(View.VISIBLE);
             }
         }

@@ -1,4 +1,4 @@
-package nl.tudelft.cs4160.trustchain_android.claims;
+package nl.tudelft.cs4160.trustchain_android.offline;
 
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
@@ -147,7 +147,7 @@ public class SendOfflineActivity extends AppCompatActivity implements OnNdefPush
     }
 
     public NdefMessage createNdefMessage() {
-        MessageProto.TrustChainBlock block = (MessageProto.TrustChainBlock) getIntent().getSerializableExtra("claimBlock");
+        MessageProto.TrustChainBlock block = (MessageProto.TrustChainBlock) getIntent().getSerializableExtra("block");
         NdefMessage msg = new NdefMessage(
                 new NdefRecord[]{createMime(
                         "application/nl.tudelft.cs4160.trustchain_android", block.toByteArray())

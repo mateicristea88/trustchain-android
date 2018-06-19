@@ -58,10 +58,10 @@
             android:windowSoftInputMode="adjustResize" />
         <activity android:name=".inbox.InboxActivity" />
         <activity
-            android:name=".claims.SendOfflineActivity"
+            android:name=".offline.SendOfflineActivity"
             android:label="@string/title_activity_send_claim"></activity>
         <activity
-            android:name=".claims.ReceiveOfflineActivity"
+            android:name=".offline.ReceiveOfflineActivity"
             android:label="Attest claims"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -75,7 +75,7 @@
         <activity android:name=".passport.ocr.camera.CameraActivity" />
         <activity android:name=".passport.ocr.ManualInputActivity" />
         <activity android:name=".passport.nfc.PassportConActivity" />
-        <activity android:name=".claims.ScanQRActivity" />
+        <activity android:name=".offline.ScanQRActivity" />
     </application>
 
 </manifest>

@@ -1,4 +1,4 @@
-package nl.tudelft.cs4160.trustchain_android.claims;
+package nl.tudelft.cs4160.trustchain_android.offline;
 
 import android.Manifest;
 import android.app.Activity;
