@@ -43,7 +43,7 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_attest_claims);
+        setContentView(R.layout.activity_receive_offline);
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (mNfcAdapter == null){
             Toast.makeText(this, "No NFC on this device", Toast.LENGTH_LONG).show();
@@ -129,7 +129,7 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
                 keyPair.getPublicKeyPair().toBytes(),
                 receivedBlock, receivedBlock.getPublicKey().toByteArray());
 
-        final MessageProto.TrustChainBlock signedBlock = TrustChainBlockHelper.sign(receivedBlock, keyPair.getSigningKey());
+        final MessageProto.TrustChainBlock signedBlock = TrustChainBlockHelper.sign(block, keyPair.getSigningKey());
         DBHelper.insertInDB(signedBlock);
     }
 

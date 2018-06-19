@@ -47,7 +47,7 @@
             android:id="@+id/sign_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
+            android:layout_gravity="center"
             android:padding="5dp"
             style="@style/Widget.AppCompat.Button.Colored"
             android:background="@color/colorPrimary"
