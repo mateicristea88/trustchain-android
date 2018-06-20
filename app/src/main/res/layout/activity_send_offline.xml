@@ -60,13 +60,17 @@
             android:layout_height="wrap_content"
             />
 
+
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
     <Button
         android:id="@+id/receive_completed"
         style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:layout_margin="5dp"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="20dp"
         android:background="@color/colorPrimary"
         android:visibility="gone"
         android:layout_gravity="center"
