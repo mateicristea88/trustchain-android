@@ -77,4 +77,24 @@ public class UtilTest {
         assertEquals(Util.ellipsize(shortString, 1000), shortString);
     }
 
+
+    @Test
+    public void testReadableSize() {
+        assertEquals("1 KB", Util.readableSize(1024));
+        assertEquals("100 B", Util.readableSize(100));
+        assertEquals("1 MB", Util.readableSize(1024*1024));
+    }
+
+
+    @Test
+    public void testTimeToString() {
+        assertEquals("0s", Util.timeToString(100));
+        assertEquals("0s", Util.timeToString(999));
+        assertEquals("1s", Util.timeToString(1000));
+        assertEquals("2s", Util.timeToString(2000));
+        assertEquals("59s", Util.timeToString(1000*60-1));
+        assertEquals("1m0s", Util.timeToString(1000*60));
+        assertEquals("1m1s", Util.timeToString(1000*60+1000));
+        assertEquals("1h0m", Util.timeToString(1000*60*60));
+    }
 }

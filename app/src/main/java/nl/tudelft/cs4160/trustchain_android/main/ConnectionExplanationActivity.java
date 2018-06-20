@@ -14,7 +14,7 @@ public class ConnectionExplanationActivity extends AppCompatActivity {
 
     private ArrayList<String> symbolList;
     private String[] explanationText;
-    private int[] colorList = {R.color.colorStatusConnected, R.color.colorStatusConnecting, R.color.colorStatusCantConnect, R.color.colorReceived, R.color.colorSent, 0, 0};
+    private int[] colorList = {R.color.colorStatusConnected, R.color.colorStatusConnecting, R.color.colorStatusCantConnect, android.R.color.secondary_text_light, android.R.color.secondary_text_light};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,19 +50,14 @@ public class ConnectionExplanationActivity extends AppCompatActivity {
      * Create the list of symbols for the list view.
      */
     private void createSymbolList() {
-        symbolList = new ArrayList<String>();
+        symbolList = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             String symbol = this.getString(R.string.circle_symbol);
             symbolList.add(symbol);
         }
 
-        for (int i = 0; i < 2; i++) {
-            String symbol = this.getString(R.string.indicator_symbol);
-            symbolList.add(symbol);
-        }
-
-        symbolList.add(getString(R.string.last_received));
-        symbolList.add(getString(R.string.last_sent));
+        symbolList.add(getString(R.string.last_received,""));
+        symbolList.add(getString(R.string.last_sent,""));
     }
 
     /**
@@ -73,8 +68,6 @@ public class ConnectionExplanationActivity extends AppCompatActivity {
         ids.add(R.string.connected);
         ids.add(R.string.connecting);
         ids.add(R.string.cannot_connect);
-        ids.add(R.string.received_packet);
-        ids.add(R.string.sent_packet);
         ids.add(R.string.time_since_received);
         ids.add(R.string.time_since_sent);
 

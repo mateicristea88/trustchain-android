@@ -1,11 +1,9 @@
-package nl.tudelft.cs4160.trustchain_android.Block;
+package nl.tudelft.cs4160.trustchain_android.block;
 
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import nl.tudelft.cs4160.trustchain_android.block.ValidationResult;
 
 import static org.junit.Assert.assertEquals;
 

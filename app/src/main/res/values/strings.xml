@@ -13,8 +13,10 @@
     <string name="connect">connect</string>
     <string name="view_chain">View Chain</string>
     <string name="reset_database_button">Clear Database (closes app)</string>
-    <string name="last_received">Received: </string>
-    <string name="last_sent">Sent: </string>
+    <string name="last_received">Received: %s</string>
+    <string name="last_sent">Sent: %s</string>
+    <string name="last_received_hint">Received:</string>
+    <string name="last_sent_hint">Sent: </string>
     <string name="peer_id">peer id</string>
     <string name="snackbar_peer_added">%s added to inbox</string>
     <string name="snackbar_no_pub_key">This peer didn\'t send a public key yet</string>
@@ -83,6 +85,8 @@
     <string name="outgoing">outgoing</string>
     <string name="left_connections">Active Peers</string>
     <string name="right_connections">New Peers</string>
+    <string name="left_connections_with_count">Active Peers (%d)</string>
+    <string name="right_connections_with_count">New Peers (%d)</string>
     <string name="connection">Connection</string>
     <string name="connectable_ratio">Connectable\nratio</string>
     <string name="connectable_peers">Connectable\nPeers</string>
@@ -95,15 +99,15 @@
 
     <!-- Connection explanation view -->
     <string name="symbolMeaningText">Meaning:</string>
-    <string name="connectionInfoText">Here we provide an explanation of each symbol and their corresponding color.</string>
+    <string name="connectionInfoText">Explanations of texts and symbols of the connection overview.</string>
     <string name="symbolExplanationText">Explanation</string>
     <string name="connected">Connected with peer</string>
     <string name="connecting">Connecting with peer</string>
     <string name="cannot_connect">Cannot connect with peer</string>
     <string name="received_packet">Received a packet from peer</string>
     <string name="sent_packet">Sent a packet to peer</string>
-    <string name="time_since_received">Time since last received message"</string>
-    <string name="time_since_sent">Time since last message sent</string>
+    <string name="time_since_received">Time since last received message, lights up on message received"</string>
+    <string name="time_since_sent">Time since last sent message, lights up on message sent</string>
 
     <!--- info chain explorer -->
     <string name="color_info">Color is based on the hash of the public key.</string>

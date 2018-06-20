@@ -142,22 +142,20 @@ public class Network {
     }
 
     /**
-     * Request and display the current connection type.
+     * Request and return the current connection type.
+     * @return a string representation of the current connection type
      */
-    public void updateConnectionType(ConnectivityManager cm) {
+    public String getConnectionTypeString(ConnectivityManager cm) {
+        String typename = "No connection";
+        String subtypeName = "";
         try {
-            cm.getActiveNetworkInfo().getType();
-        } catch (Exception e) {
-            return;
-        }
+            connectionType = cm.getActiveNetworkInfo().getType();
+            typename = cm.getActiveNetworkInfo().getTypeName();
+            subtypeName = cm.getActiveNetworkInfo().getSubtypeName();
+        } catch(Exception e) {
 
-        connectionType = cm.getActiveNetworkInfo().getType();
-        String typename = cm.getActiveNetworkInfo().getTypeName();
-        String subtypeName = cm.getActiveNetworkInfo().getSubtypeName();
-
-        if (networkStatusListener != null) {
-            networkStatusListener.updateConnectionType(connectionType, typename, subtypeName);
         }
+        return typename + " " + subtypeName;
     }
 
     /**
@@ -313,15 +311,12 @@ public class Network {
         channel.send(outputBuffer.wrap(message.toByteArray()), peer.getAddress());
         Log.d(TAG, "Sending " + message);
         peer.sentData();
-        if (networkStatusListener != null) {
-            networkStatusListener.updatePeerLists();
-        }
     }
 
     /**
      * Show local ip address.
      */
-    private void showLocalIpAddress() {
+    public void showLocalIpAddress() {
         ShowLocalIPTask showLocalIPTask = new ShowLocalIPTask();
         showLocalIPTask.execute();
     }
@@ -358,7 +353,6 @@ public class Network {
                 peer.receivedData();
                 PubKeyAndAddressPairStorage.addPubkeyAndAddressPair(context, sourcePubKey, address);
                 handleMessage(peer, message, sourcePubKey, context);
-                networkStatusListener.updatePeerLists();
             }
         } catch (Exception e) {
             e.printStackTrace();
