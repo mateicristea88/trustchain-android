@@ -17,6 +17,7 @@ public class StatisticsServer implements NodeStatistics {
     public int blockMessagesSent = 0;
     public int blockMessagesReceived = 0;
     public int crawlRequestsReceived = 0;
+    public static long startTime = 0;
 
     private static StatisticsServer statistics;
     private NodeStatistics statisticsDisplay;
@@ -24,6 +25,7 @@ public class StatisticsServer implements NodeStatistics {
     public static synchronized StatisticsServer getInstance() {
         if (statistics == null) {
             statistics = new StatisticsServer();
+            startTime = System.currentTimeMillis();
         }
         return statistics;
     }

@@ -1,6 +1,7 @@
 package nl.tudelft.cs4160.trustchain_android.stresstest;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -39,8 +40,20 @@ public class StressTestActivity extends AppCompatActivity implements NodeStatist
     private TextView introductionsResponsesReceived;
     private TextView blockMessagesSent;
     private TextView blockMessagesReceived;
-
+    private TextView uptime;
     private TextView nodesRunning;
+
+    private Handler uptimeUpdateHandler;
+    private Runnable uptimeUpdateTask = new Runnable() {
+        @Override
+        public void run() {
+            runOnUiThread(() -> {
+                long runtime = System.currentTimeMillis() - StatisticsServer.getInstance().startTime;
+                uptime.setText(Util.timeToString(runtime));
+            });
+            uptimeUpdateHandler.postDelayed(uptimeUpdateTask, 1000);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +99,9 @@ public class StressTestActivity extends AppCompatActivity implements NodeStatist
         blockMessagesSent = findViewById(R.id.block_messages_sent);
         blockMessagesReceived = findViewById(R.id.block_messages_received);
         nodesRunning = findViewById(R.id.nodes_running);
+        uptime = findViewById(R.id.run_time);
+
+        uptimeUpdateHandler = new Handler();
     }
 
     private void stopNodes() {
@@ -99,6 +115,7 @@ public class StressTestActivity extends AppCompatActivity implements NodeStatist
     protected void onStart() {
         super.onStart();
         StatisticsServer.getInstance().setStatisticsDisplay(this);
+        uptimeUpdateHandler.postDelayed(uptimeUpdateTask, 1000);
     }
 
     @Override
@@ -134,6 +151,7 @@ public class StressTestActivity extends AppCompatActivity implements NodeStatist
     protected void onStop() {
         super.onStop();
         StatisticsServer.getInstance().removeStatisticsDisplay();
+        uptimeUpdateHandler.removeCallbacks(uptimeUpdateTask);
     }
 
     public void startStressTest(int amount) {

@@ -190,5 +190,6 @@
     <string name="stats_introduction_responses">Introduction responses:</string>
     <string name="stats_block_messages">Block messages:</string>
     <string name="stats_sent">Sent Stats</string>
-    <string name="status_messages_sent">Total messages sent:</string>
+    <string name="stats_messages_sent">Total messages sent:</string>
+    <string name="stats_uptime">Uptime:</string>
 </resources>
