@@ -24,7 +24,6 @@ import org.jmrtd.PassportService;
 import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 import java.security.Security;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -33,7 +32,6 @@ import nl.tudelft.cs4160.trustchain_android.passport.DocumentData;
 import nl.tudelft.cs4160.trustchain_android.passport.PassportHolder;
 import nl.tudelft.cs4160.trustchain_android.passport.ocr.ManualInputActivity;
 import nl.tudelft.cs4160.trustchain_android.util.ByteArrayConverter;
-import nl.tudelft.cs4160.trustchain_android.util.Util;
 
 public class PassportConActivity extends AppCompatActivity {
 

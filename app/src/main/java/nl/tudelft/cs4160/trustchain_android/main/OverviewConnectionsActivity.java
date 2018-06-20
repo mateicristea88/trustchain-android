@@ -49,17 +49,17 @@ import nl.tudelft.cs4160.trustchain_android.inbox.InboxActivity;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.network.Network;
 import nl.tudelft.cs4160.trustchain_android.network.NetworkStatusListener;
+import nl.tudelft.cs4160.trustchain_android.passport.ocr.camera.CameraActivity;
 import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.peer.PeerHandler;
 import nl.tudelft.cs4160.trustchain_android.peer.PeerListener;
-import nl.tudelft.cs4160.trustchain_android.passport.ocr.camera.CameraActivity;
 import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.BootstrapIPStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.SharedPreferencesStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
 import nl.tudelft.cs4160.trustchain_android.util.RequestCode;
 
-import static nl.tudelft.cs4160.trustchain_android.main.UserConfigurationActivity.*;
+import static nl.tudelft.cs4160.trustchain_android.main.UserConfigurationActivity.VERSION_NAME_KEY;
 
 public class OverviewConnectionsActivity extends AppCompatActivity implements NetworkStatusListener, PeerListener {
 
@@ -73,6 +73,8 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
     private TrustChainDBHelper dbHelper;
     private Network network;
     private PeerHandler peerHandler;
+    private TextView activePeersText;
+    private TextView newPeersText;
     private String wan = "";
     private static final String TAG = "OverviewConnections";
 
@@ -98,7 +100,8 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
             while(true) {
                 updatePeerLists();
                 try {
-                    Thread.sleep(500);
+                    // update every 198 ms, because we want to display a sent/received message cue when a message was received less than 200ms ago.
+                    Thread.sleep(198);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -127,7 +130,7 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
         network = Network.getInstance(getApplicationContext());
         network.getMessageHandler().setPeerHandler(getPeerHandler());
         network.setNetworkStatusListener(this);
-        network.updateConnectionType((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE));
+        updateConnectionType(network.getConnectionTypeString((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE)));
     }
 
     /**
@@ -142,6 +145,8 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
             e.printStackTrace();
         }
         ((TextView )findViewById(R.id.version)).setText(getString(R.string.version, versionName));
+        activePeersText = findViewById(R.id.active_peers_text);
+        newPeersText = findViewById(R.id.new_peers_text);
     }
 
     /**
@@ -346,6 +351,9 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
 
             while(true) {
                 try {
+                    // update connection type and internal ip address
+                    updateConnectionType(network.getConnectionTypeString((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE)));
+                    network.showLocalIpAddress();
                     if (peerHandler.size() > 0) {
                         // select 10 random peers to send an introduction request to
                         int limit = 10;
@@ -428,8 +436,8 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
 
         if (peerHandler.getWanVote().vote(socketAddress)) {
             wan = peerHandler.getWanVote().getAddress().toString();
+            setWanvote(wan.replace("/",""));
         }
-        setWanvote(wan.replace("/",""));
     }
 
     /**
@@ -459,6 +467,8 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
                     peerHandler.splitPeerList();
                     activePeersAdapter.notifyDataSetChanged();
                     newPeersAdapter.notifyDataSetChanged();
+                    activePeersText.setText(getString(R.string.left_connections_with_count,peerHandler.getactivePeersList().size()));
+                    newPeersText.setText(getString(R.string.right_connections_with_count,peerHandler.getnewPeersList().size()));
                 }
             }
         });
@@ -487,14 +497,13 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
     /**
      * Display connectionType
      *
-     * @param connectionType
-     * @param typename
-     * @param subtypename
+     * @param connectionTypeStr String representation of the connection type
      */
     @Override
-    public void updateConnectionType(int connectionType, String typename, String subtypename) {
-        String connectionTypeStr = typename + " " + subtypename;
-        ((TextView) findViewById(R.id.connection_type)).setText(connectionTypeStr);
+    public void updateConnectionType(String connectionTypeStr) {
+        runOnUiThread( () ->{
+            ((TextView) findViewById(R.id.connection_type)).setText(connectionTypeStr);
+        });
     }
 
     /**
