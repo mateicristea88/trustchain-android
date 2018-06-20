@@ -1,4 +1,4 @@
-.. _message_structure:
+.. _message-structure:
 
 ***********************************
 Message structure (Protocolbuffers)
@@ -34,7 +34,7 @@ The complete structure of all parsable objects as defined in protocolbuffers.
 * ``CrawlRequest`` crawlRequest
 
 ``TrustChainBlock``
------------
+-------------------
 * ``bytes`` public_key
 * ``int32`` sequence_number
 * ``bytes`` link_public_key
@@ -45,7 +45,7 @@ The complete structure of all parsable objects as defined in protocolbuffers.
 * ``google.protobuf.Timestamp`` insert_time
 
 ``Transaction``
------------
+---------------
 * ``bytes`` unformatted
 * ``string`` format
 * ``Claim`` claim
@@ -58,13 +58,13 @@ The complete structure of all parsable objects as defined in protocolbuffers.
 * ``bytes`` proof_format
 
 ``CrawlRequest``
------------
+----------------
 * ``bytes`` public_key
 * ``int32`` requested_sequence_number
 * ``int32`` limit
 
 ``IntroductionRequest``
------------
+-----------------------
 * ``int64`` connection_type
 
 ``IntroductionResponse``
