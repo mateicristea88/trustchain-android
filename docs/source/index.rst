@@ -19,5 +19,6 @@ TrustChain Android
    crypto
    wallet
    tokens
+   passport
    installation-instructions
    contact
