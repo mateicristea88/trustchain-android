@@ -77,6 +77,7 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
     private TextView newPeersText;
     private String wan = "";
     private static final String TAG = "OverviewConnections";
+    private boolean networkRunning = true;
 
     /**
      * Initialize views, start send and receive threads if necessary.
@@ -349,7 +350,7 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
                 t++;
             }
 
-            while(true) {
+            while(!Thread.interrupted() && networkRunning) {
                 try {
                     // update connection type and internal ip address
                     updateConnectionType(network.getConnectionTypeString((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE)));
@@ -395,6 +396,7 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
                     e.printStackTrace();
                 }
             }
+            Log.d(TAG, "Send thread stopped");
         });
         sendThread.start();
         Log.d(TAG, "Send thread started");
@@ -410,7 +412,7 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
         Thread listenThread = new Thread(() -> {
             try {
                 ByteBuffer inputBuffer = ByteBuffer.allocate(BUFFER_SIZE);
-                while (!Thread.interrupted()) {
+                while (!Thread.interrupted() && networkRunning) {
                     inputBuffer.clear();
                     SocketAddress address = network.receive(inputBuffer);
                     inputBuffer.flip();
@@ -418,8 +420,8 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                Log.d(TAG, "Listen thread stopped");
             }
+            Log.d(TAG, "Listen thread stopped");
         });
         listenThread.start();
         Log.d(TAG, "Listen thread started");
@@ -479,6 +481,7 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
      */
     @Override
     protected void onDestroy() {
+        networkRunning = false;
         network.closeChannel();
         super.onDestroy();
     }
