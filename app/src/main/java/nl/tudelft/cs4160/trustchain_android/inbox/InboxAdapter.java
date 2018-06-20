@@ -2,6 +2,7 @@ package nl.tudelft.cs4160.trustchain_android.inbox;
 
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ import nl.tudelft.cs4160.trustchain_android.peersummary.PeerSummaryActivity;
 public class InboxAdapter extends RecyclerView.Adapter<InboxAdapter.ViewHolder> {
     private ArrayList<InboxItem> mDataset;
     private ArrayList<Peer> peerList;
+    private static final String TAG = "InboxAdapter";
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -26,6 +28,7 @@ public class InboxAdapter extends RecyclerView.Adapter<InboxAdapter.ViewHolder> 
         // each data item is just a string in this case
         public TextView mUserNameTextView;
         public RelativeLayout mCounterRelativeLayout;
+        public TextView mCounterTextView;
         public TextView mAddressTextView;
         public TextView mStatusTextView;
 
@@ -35,6 +38,7 @@ public class InboxAdapter extends RecyclerView.Adapter<InboxAdapter.ViewHolder> 
             mCounterRelativeLayout = v.findViewById(R.id.counterRelativeLayout);
             mAddressTextView = v.findViewById(R.id.addressTextView);
             mStatusTextView = v.findViewById(R.id.status_indicator);
+            mCounterTextView = v.findViewById(R.id.counterTextView);
         }
     }
 
@@ -106,6 +110,7 @@ public class InboxAdapter extends RecyclerView.Adapter<InboxAdapter.ViewHolder> 
                 setOnClickListenerInboxItem(holder, position);
                 h.mUserNameTextView.setText(inboxItem.getPeer().getName());
                 if (inboxItem.getAmountUnread() > 0) {
+                    h.mCounterTextView.setText(Integer.toString(inboxItem.getAmountUnread()));
                     h.mCounterRelativeLayout.setVisibility(View.VISIBLE);
                 } else {
                     h.mCounterRelativeLayout.setVisibility(View.GONE);
@@ -131,12 +136,9 @@ public class InboxAdapter extends RecyclerView.Adapter<InboxAdapter.ViewHolder> 
      * @param holder
      */
     private void setOnClickListenerNewUser(final ViewHolderAddPeer holder) {
-        View.OnClickListener mOnClickListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                InboxActivity i = (InboxActivity) holder.mWrapperLinearLayout.getContext();
-                i.finish();
-            }
+        View.OnClickListener mOnClickListener = view -> {
+            InboxActivity i = (InboxActivity) holder.mWrapperLinearLayout.getContext();
+            i.finish();
         };
         holder.mUserButton.setOnClickListener(mOnClickListener);
     }
@@ -148,14 +150,11 @@ public class InboxAdapter extends RecyclerView.Adapter<InboxAdapter.ViewHolder> 
      * @param position
      */
     private void setOnClickListenerInboxItem(final ViewHolder holder, final int position) {
-        View.OnClickListener mOnClickListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(holder.mWrapperLinearLayout.getContext(), PeerSummaryActivity.class);
-                InboxItem inboxItem = mDataset.get(position);
-                intent.putExtra("inboxItem", inboxItem);
-                holder.mWrapperLinearLayout.getContext().startActivity(intent);
-            }
+        View.OnClickListener mOnClickListener = view -> {
+            Intent intent = new Intent(holder.mWrapperLinearLayout.getContext(), PeerSummaryActivity.class);
+            InboxItem inboxItem = mDataset.get(position);
+            intent.putExtra("inboxItem", inboxItem);
+            holder.mWrapperLinearLayout.getContext().startActivity(intent);
         };
         holder.mWrapperLinearLayout.setOnClickListener(mOnClickListener);
     }
