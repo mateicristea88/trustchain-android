@@ -1,7 +1,6 @@
 package nl.tudelft.cs4160.trustchain_android.peersummary;
 
 import android.content.Context;
-
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.v7.widget.RecyclerView;
@@ -23,7 +22,7 @@ import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
-import nl.tudelft.cs4160.trustchain_android.network.peer.Peer;
+import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
 import nl.tudelft.cs4160.trustchain_android.util.ByteArrayConverter;
@@ -69,9 +68,9 @@ public class MutualBlockAdapter extends RecyclerView.Adapter<MutualBlockAdapter.
                 DualSecret keyPair = Key.loadKeys(activity);
                 PublicKeyPair myPublicKey = keyPair.getPublicKeyPair();
                 for (MessageProto.TrustChainBlock block : dbHelper.getBlocks(keyPair.getPublicKeyPair().toBytes(), true)) {
-                    PublicKeyPair linkedPublicKey = new PublicKeyPair(block.getLinkPublicKey().toByteArray());
-                    PublicKeyPair publicKey = new PublicKeyPair(block.getPublicKey().toByteArray());
-                    if (linkedPublicKey.equals(myPublicKey) && publicKey.equals(peerPublicKey)) {
+                    byte[] linkedPublicKey = block.getLinkPublicKey().toByteArray();
+                    byte[] publicKey = block.getPublicKey().toByteArray();
+                    if (Arrays.equals(linkedPublicKey,myPublicKey.toBytes()) && Arrays.equals(publicKey,peerPublicKey.toBytes())) {
                         int validationResultStatus;
                         try {
                             validationResultStatus = TrustChainBlockHelper.validate(block, dbHelper).getStatus();

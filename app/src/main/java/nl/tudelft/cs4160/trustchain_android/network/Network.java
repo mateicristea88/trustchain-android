@@ -27,8 +27,8 @@ import nl.tudelft.cs4160.trustchain_android.main.OverviewConnectionsActivity;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto.Message;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto.TrustChainBlock;
-import nl.tudelft.cs4160.trustchain_android.network.peer.Peer;
-import nl.tudelft.cs4160.trustchain_android.network.peer.PeerHandler;
+import nl.tudelft.cs4160.trustchain_android.peer.Peer;
+import nl.tudelft.cs4160.trustchain_android.peer.PeerHandler;
 import nl.tudelft.cs4160.trustchain_android.peersummary.PeerSummaryActivity;
 import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.InboxItemStorage;
@@ -163,22 +163,20 @@ public class Network {
     }
 
     /**
-     * Request and display the current connection type.
+     * Request and return the current connection type.
+     * @return a string representation of the current connection type
      */
-    public void updateConnectionType(ConnectivityManager cm) {
+    public String getConnectionTypeString(ConnectivityManager cm) {
+        String typename = "No connection";
+        String subtypeName = "";
         try {
-            cm.getActiveNetworkInfo().getType();
-        } catch (Exception e) {
-            return;
-        }
+            connectionType = cm.getActiveNetworkInfo().getType();
+            typename = cm.getActiveNetworkInfo().getTypeName();
+            subtypeName = cm.getActiveNetworkInfo().getSubtypeName();
+        } catch(Exception e) {
 
-        connectionType = cm.getActiveNetworkInfo().getType();
-        String typename = cm.getActiveNetworkInfo().getTypeName();
-        String subtypeName = cm.getActiveNetworkInfo().getSubtypeName();
-
-        if (networkStatusListener != null) {
-            networkStatusListener.updateConnectionType(connectionType, typename, subtypeName);
         }
+        return typename + " " + subtypeName;
     }
 
     /**
@@ -340,9 +338,6 @@ public class Network {
         statistics.bytesSent(outputBuffer.position());
         Log.i(TAG, "Sending to " + peer.getName() + ":\n" + message);
         peer.sentData();
-        if (networkStatusListener != null) {
-            networkStatusListener.updatePeerLists();
-        }
         statistics.messageSent();
     }
 
@@ -388,7 +383,6 @@ public class Network {
                 peer.receivedData();
                 PubKeyAndAddressPairStorage.addPubkeyAndAddressPair(context, sourcePubKey, address);
                 handleMessage(peer, message, sourcePubKey, context);
-                networkStatusListener.updatePeerLists();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -455,8 +449,9 @@ public class Network {
      */
     private static void addPeerToInbox(PublicKeyPair pubKeyPair, Peer peer, Context context) {
         if (pubKeyPair != null) {
-            InboxItem i = new InboxItem(peer, new ArrayList<Integer>());
+            InboxItem i = new InboxItem(peer, new ArrayList<>());
             InboxItemStorage.addInboxItem(context, i);
+            UserNameStorage.setNewPeerByPublicKey(context, peer.getName(), pubKeyPair);
         }
     }
 
@@ -468,6 +463,10 @@ public class Network {
     private static void addBlockToInbox(TrustChainBlock block, Context context) {
         InboxItemStorage.addHalfBlock(context, new PublicKeyPair(block.getPublicKey().toByteArray())
                 , block.getSequenceNumber());
+    }
+
+    public MessageHandler getMessageHandler() {
+        return messageHandler;
     }
 
     /**

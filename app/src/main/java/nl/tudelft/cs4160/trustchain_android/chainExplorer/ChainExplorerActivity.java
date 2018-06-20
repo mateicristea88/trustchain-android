@@ -10,14 +10,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-
-import com.google.protobuf.ByteString;
 
 import java.util.Arrays;
 import java.util.List;
@@ -29,7 +26,6 @@ import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
-import nl.tudelft.cs4160.trustchain_android.util.ByteArrayConverter;
 
 import static android.view.Gravity.CENTER;
 
@@ -108,13 +104,17 @@ public class ChainExplorerActivity extends AppCompatActivity {
         try {
             List<MessageProto.TrustChainBlock> blocks = dbHelper.getBlocks(publicKeyPair, true);
             if(blocks.size() > 0) {
-                String ownPubKey = ByteArrayConverter.byteStringToString(blocks.get(0).getPublicKey());
-                String firstPubKey = ByteArrayConverter.byteStringToString(ByteString.copyFrom(publicKeyPair));
-                if (ownPubKey.equals(firstPubKey)){
+                byte[] ownPubKey = kp.getPublicKeyPair().toBytes();
+                byte[] firstPubKey = blocks.get(0).getPublicKey().toByteArray();
+                if (Arrays.equals(ownPubKey,firstPubKey)){
                     this.setTitle(TITLE);
                 } else {
-                    this.setTitle("Chain of " + UserNameStorage.getPeerByPublicKey(this,
-                            new PublicKeyPair(blocks.get(0).getPublicKey().toByteArray())));
+                    String username = UserNameStorage.getPeerByPublicKey(this,
+                            new PublicKeyPair(blocks.get(0).getPublicKey().toByteArray()));
+                    if(username == null) {
+                        username = "unknown peer";
+                    }
+                    this.setTitle("Chain of " + username);
                 }
                 adapter = new ChainExplorerAdapter(this, blocks,
                         kp.getPublicKeyPair().toBytes(), publicKeyPair);
@@ -126,28 +126,25 @@ public class ChainExplorerActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        blocksList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                LinearLayout expandedItem = view.findViewById(R.id.expanded_item);
-                ImageView expandArrow = view.findViewById(R.id.expand_arrow);
+        blocksList.setOnItemClickListener((parent, view, position, id) -> {
+            LinearLayout expandedItem = view.findViewById(R.id.expanded_item);
+            ImageView expandArrow = view.findViewById(R.id.expand_arrow);
 
-                // Expand the item when it is clicked
-                if (expandedItem.getVisibility() == View.GONE) {
-                    expandedItem.setVisibility(View.VISIBLE);
-                    Log.v(TAG, "Item height: " + expandedItem.getHeight());
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        expandArrow.setImageDrawable(getDrawable(R.drawable.ic_expand_less_black_24dp));
-                    } else {
-                        expandArrow.setImageDrawable(getResources().getDrawable(R.drawable.ic_expand_less_black_24dp));
-                    }
+            // Expand the item when it is clicked
+            if (expandedItem.getVisibility() == View.GONE) {
+                expandedItem.setVisibility(View.VISIBLE);
+                Log.v(TAG, "Item height: " + expandedItem.getHeight());
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    expandArrow.setImageDrawable(getDrawable(R.drawable.ic_expand_less_black_24dp));
                 } else {
-                    expandedItem.setVisibility(View.GONE);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        expandArrow.setImageDrawable(getDrawable(R.drawable.ic_expand_more_black_24dp));
-                    } else {
-                        expandArrow.setImageDrawable(getResources().getDrawable(R.drawable.ic_expand_more_black_24dp));
-                    }
+                    expandArrow.setImageDrawable(getResources().getDrawable(R.drawable.ic_expand_less_black_24dp));
+                }
+            } else {
+                expandedItem.setVisibility(View.GONE);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    expandArrow.setImageDrawable(getDrawable(R.drawable.ic_expand_more_black_24dp));
+                } else {
+                    expandArrow.setImageDrawable(getResources().getDrawable(R.drawable.ic_expand_more_black_24dp));
                 }
             }
         });

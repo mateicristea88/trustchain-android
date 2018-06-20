@@ -1,5 +1,4 @@
-package nl.tudelft.cs4160.trustchain_android.network.peer;
-
+package nl.tudelft.cs4160.trustchain_android.peer;
 
 import org.junit.After;
 import org.junit.Before;
@@ -18,41 +17,40 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.validateMockitoUsage;
 
-/**
- * Created by Boning on 12/17/2017.
- */
-
 public class PeerHandlerTest {
-    private PeerHandler peerHandler;
     private ArrayList<Peer> originalIpList;
     private ArrayList<Peer> expectedIpList;
     InetSocketAddress randomInet = new InetSocketAddress(200);
     PublicKeyPair publicKeyPair = Key.createNewKeyPair().getPublicKeyPair();
     private String randomHashIdName = "randomHashIdName";
+    private PeerHandler peerHandler = new PeerHandler(publicKeyPair,randomHashIdName);
+    private PublicKeyPair peer1key = Key.createNewKeyPair().getPublicKeyPair();
+    private PublicKeyPair peer2key = Key.createNewKeyPair().getPublicKeyPair();
+    private PublicKeyPair peer3key = Key.createNewKeyPair().getPublicKeyPair();
+
 
     @Before
     public void initialization() {
-        Peer peer1 = new Peer(randomInet,Key.createNewKeyPair().getPublicKeyPair(),"peer1");
-        Peer peer2 = new Peer(randomInet,Key.createNewKeyPair().getPublicKeyPair(), "peer2");
-        Peer peer3 = new Peer(randomInet, Key.createNewKeyPair().getPublicKeyPair(), "peer3");
+        Peer peer1 = new Peer(randomInet, peer1key,"peer1");
+        Peer peer2 = new Peer(randomInet, peer2key, "peer2");
+        Peer peer3 = new Peer(randomInet, peer3key, "peer3");
 
         originalIpList = new ArrayList<>();
         originalIpList.add(peer1);
         originalIpList.add(peer2);
         originalIpList.add(peer3);
-        originalIpList.add(peer1);
 
         expectedIpList = new ArrayList<>();
         expectedIpList.add(peer1);
         expectedIpList.add(peer2);
         expectedIpList.add(peer3);
 
-        peerHandler = new PeerHandler(publicKeyPair,randomHashIdName);
         peerHandler.setPeerList(originalIpList);
+        originalIpList.add(peer1);
     }
 
     @Test
-    public void removeDuplicatesTest() {
+    public void testRemoveDuplicates() {
         peerHandler.removeDuplicates();
         ArrayList<Peer> newIPPeerList = peerHandler.getPeerList();
         boolean failed = false;
@@ -68,7 +66,14 @@ public class PeerHandlerTest {
     }
 
     @Test
-    public void peerExistsInListTest() {
+    public void testRemoveDuplicatesInGetOrMakePeer() {
+        assertNotEquals(expectedIpList.size(),peerHandler.getPeerList().size());
+        peerHandler.getOrMakePeer(randomInet,peer2key,"peer2");
+        assertEquals(expectedIpList.size(),peerHandler.getPeerList().size());
+    }
+
+    @Test
+    public void testPeerExistsInList() {
         Peer peer4 = new Peer(randomInet,Key.createNewKeyPair().getPublicKeyPair(),"peer4");
         assertTrue(peerHandler.peerExistsInList(originalIpList.get(0)));
         assertFalse(peerHandler.peerExistsInList(peer4));
@@ -91,6 +96,7 @@ public class PeerHandlerTest {
 
     @Test
     public void testSetPeerlist() {
+        peerHandler.setPeerList(originalIpList);
         assertEquals(expectedIpList.size(),peerHandler.getPeerList().size());
     }
 
