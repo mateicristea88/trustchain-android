@@ -40,6 +40,10 @@ android:
 
 script:
   - ./gradlew clean test build
+  - ./gradlew jacocoTestReport
 #  - ./gradlew connectedAndroidTest
 
+after_success:
+# Codecov
+  - bash <(curl -s https://codecov.io/bash)
 
