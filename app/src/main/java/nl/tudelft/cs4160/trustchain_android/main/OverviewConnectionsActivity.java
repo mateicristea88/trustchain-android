@@ -49,17 +49,17 @@ import nl.tudelft.cs4160.trustchain_android.inbox.InboxActivity;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.network.Network;
 import nl.tudelft.cs4160.trustchain_android.network.NetworkStatusListener;
+import nl.tudelft.cs4160.trustchain_android.passport.ocr.camera.CameraActivity;
 import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.peer.PeerHandler;
 import nl.tudelft.cs4160.trustchain_android.peer.PeerListener;
-import nl.tudelft.cs4160.trustchain_android.passport.ocr.camera.CameraActivity;
 import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.BootstrapIPStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.SharedPreferencesStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
 import nl.tudelft.cs4160.trustchain_android.util.RequestCode;
 
-import static nl.tudelft.cs4160.trustchain_android.main.UserConfigurationActivity.*;
+import static nl.tudelft.cs4160.trustchain_android.main.UserConfigurationActivity.VERSION_NAME_KEY;
 
 public class OverviewConnectionsActivity extends AppCompatActivity implements NetworkStatusListener, PeerListener {
 
@@ -130,7 +130,7 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
         network = Network.getInstance(getApplicationContext());
         network.getMessageHandler().setPeerHandler(getPeerHandler());
         network.setNetworkStatusListener(this);
-        network.updateConnectionType((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE));
+        updateConnectionType(network.getConnectionTypeString((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE)));
     }
 
     /**
@@ -352,7 +352,7 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
             while(true) {
                 try {
                     // update connection type and internal ip address
-                    network.updateConnectionType((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE));
+                    updateConnectionType(network.getConnectionTypeString((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE)));
                     network.showLocalIpAddress();
                     if (peerHandler.size() > 0) {
                         // select 10 random peers to send an introduction request to
@@ -497,14 +497,13 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
     /**
      * Display connectionType
      *
-     * @param connectionType
-     * @param typename
-     * @param subtypename
+     * @param connectionTypeStr String representation of the connection type
      */
     @Override
-    public void updateConnectionType(int connectionType, String typename, String subtypename) {
-        String connectionTypeStr = typename + " " + subtypename;
-        ((TextView) findViewById(R.id.connection_type)).setText(connectionTypeStr);
+    public void updateConnectionType(String connectionTypeStr) {
+        runOnUiThread( () ->{
+            ((TextView) findViewById(R.id.connection_type)).setText(connectionTypeStr);
+        });
     }
 
     /**

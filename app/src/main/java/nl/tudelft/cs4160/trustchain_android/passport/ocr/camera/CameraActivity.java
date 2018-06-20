@@ -16,14 +16,11 @@ package nl.tudelft.cs4160.trustchain_android.passport.ocr.camera;/*
 
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import nl.tudelft.cs4160.trustchain_android.R;
-import nl.tudelft.cs4160.trustchain_android.passport.nfc.PassportConActivity;
 
-import static nl.tudelft.cs4160.trustchain_android.passport.ocr.camera.CameraFragment.GET_DOC_INFO;
 import static nl.tudelft.cs4160.trustchain_android.passport.ocr.camera.CameraFragment.REQUEST_WRITE_CAMERA_PERMISSIONS;
 
 public class CameraActivity extends Activity {

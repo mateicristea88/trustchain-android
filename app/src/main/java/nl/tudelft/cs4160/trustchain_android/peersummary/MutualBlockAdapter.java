@@ -1,7 +1,6 @@
 package nl.tudelft.cs4160.trustchain_android.peersummary;
 
 import android.content.Context;
-
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.v7.widget.RecyclerView;
