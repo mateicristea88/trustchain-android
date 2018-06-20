@@ -34,7 +34,7 @@ import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.InboxItemStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.PubKeyAndAddressPairStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
-import nl.tudelft.cs4160.trustchain_android.stresstest.StatisticsServer;
+import nl.tudelft.cs4160.trustchain_android.statistics.StatisticsServer;
 
 public class Network {
     private final String TAG = this.getClass().getName();

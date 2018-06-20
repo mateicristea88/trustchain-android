@@ -1,6 +1,6 @@
-package nl.tudelft.cs4160.trustchain_android.stresstest;
+package nl.tudelft.cs4160.trustchain_android.statistics;
 
-interface NodeStatistics {
+public interface NodeStatistics {
     void messageSent();
     void messageReceived();
 

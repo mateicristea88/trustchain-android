@@ -1,8 +1,5 @@
 package nl.tudelft.cs4160.trustchain_android.stresstest;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -15,6 +12,8 @@ import java.util.List;
 
 import nl.tudelft.cs4160.trustchain_android.R;
 import nl.tudelft.cs4160.trustchain_android.main.OverviewConnectionsActivity;
+import nl.tudelft.cs4160.trustchain_android.statistics.NodeStatistics;
+import nl.tudelft.cs4160.trustchain_android.statistics.StatisticsServer;
 import nl.tudelft.cs4160.trustchain_android.util.Util;
 
 public class StressTestActivity extends AppCompatActivity implements NodeStatistics {

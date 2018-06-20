@@ -1,6 +1,4 @@
-package nl.tudelft.cs4160.trustchain_android.stresstest;
-
-import android.support.v4.content.LocalBroadcastManager;
+package nl.tudelft.cs4160.trustchain_android.statistics;
 
 public class StatisticsServer implements NodeStatistics {
 
