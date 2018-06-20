@@ -258,17 +258,14 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
         new TrustChainDBHelper(this).insertInDB(signedBlock);
 
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    network.sendBlockMessage(inboxItemOtherPeer.getPeer(), signedBlock);
-                    Snackbar mySnackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout),"Half block send!", Snackbar.LENGTH_SHORT);
-                    mySnackbar.show();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Snackbar.make(findViewById(R.id.myCoordinatorLayout),e.getMessage(), Snackbar.LENGTH_LONG);
-                }
+        new Thread(() -> {
+            try {
+                network.sendBlockMessage(inboxItemOtherPeer.getPeer(), signedBlock);
+                Snackbar mySnackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout),"Half block send!", Snackbar.LENGTH_SHORT);
+                mySnackbar.show();
+            } catch (IOException e) {
+                e.printStackTrace();
+                Snackbar.make(findViewById(R.id.myCoordinatorLayout),e.getMessage(), Snackbar.LENGTH_LONG);
             }
         }).start();
     }
@@ -281,32 +278,23 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
     public void requestSignPermission(final MessageProto.TrustChainBlock block) {
         //just to be sure run it on the ui thread
         //this is not necessary when this function is called from a AsyncTask
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                AlertDialog.Builder builder;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    builder = new AlertDialog.Builder(context, android.R.style.Theme_Material_Dialog_Alert);
-                } else {
-                    builder = new AlertDialog.Builder(context);
-                }
-                String txString = containsBinaryFile(block) ?
-                        getString(R.string.type_file, block.getTransaction().getFormat()) :
-                        block.getTransaction().getUnformatted().toString(UTF_8);
-                builder.setMessage("Do you want to sign Block[ " + txString + " ] from " + inboxItemOtherPeer.getPeer().getName() + "?")
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                signAndSendHalfBlock(block);
-                            }
-                        })
-                        .setNegativeButton("DELETE", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                // do nothing?
-                            }
-                        });
-                builder.create();
-                builder.show();
+        runOnUiThread(() -> {
+            AlertDialog.Builder builder;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                builder = new AlertDialog.Builder(context, android.R.style.Theme_Material_Dialog_Alert);
+            } else {
+                builder = new AlertDialog.Builder(context);
             }
+            String txString = containsBinaryFile(block) ?
+                    getString(R.string.type_file, block.getTransaction().getFormat()) :
+                    block.getTransaction().getUnformatted().toString(UTF_8);
+            builder.setMessage("Do you want to sign Block[ " + txString + " ] from " + inboxItemOtherPeer.getPeer().getName() + "?")
+                    .setPositiveButton("Yes", (dialog, id) -> signAndSendHalfBlock(block))
+                    .setNegativeButton("No", (dialog, id) -> {
+                        // do nothing?
+                    });
+            builder.create();
+            builder.show();
         });
     }
 
@@ -324,17 +312,14 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
 
         //insert the new signed block
         DBHelper.insertInDB(signedBlock); // See read the docs (should be signed though)
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    network.sendBlockMessage(inboxItemOtherPeer.getPeer(), signedBlock);
+        new Thread(() -> {
+            try {
+                network.sendBlockMessage(inboxItemOtherPeer.getPeer(), signedBlock);
 
-                    //show that the block is valid
-                    mAdapter.updateValidationResult(linkedBlock, ValidationResult.VALID);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                //show that the block is valid
+                mAdapter.updateValidationResult(linkedBlock, ValidationResult.VALID);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }).start();
     }
@@ -344,12 +329,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
      * just be sure when calling it from another thread.
      */
     public void mutualBlocksChanged() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mAdapter.notifyDataSetChanged();
-            }
-        });
+        runOnUiThread(() -> mAdapter.notifyDataSetChanged());
     }
 
     /**
@@ -399,20 +379,18 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
 
         File mPath = new File(Environment.getExternalStorageDirectory() + "//DIR//");
         FileDialog fileDialog = new FileDialog(this, mPath);
-        fileDialog.addFileListener(new FileDialog.FileSelectedListener() {
-            public void fileSelected(File file) {
-                messageEditText.setEnabled(false);
-                transactionDocument = file;
-                selectedFilePath.setText(file.getPath());
-                if (file.length() > MAX_ATTACHMENT_SIZE) {
-                    selectedFilePath.requestFocus();
-                    selectedFilePath.setError("Too big (" + Util.readableSize(file.length()) + ") max is " + Util.readableSize(MAX_ATTACHMENT_SIZE));
-                    sendButton.setEnabled(false);
-                } else {
-                    selectedFilePath.setError(null);
-                    sendButton.setEnabled(true);
-                    Snackbar.make(findViewById(R.id.myCoordinatorLayout),getString(R.string.warning_files),Snackbar.LENGTH_LONG).show();
-                }
+        fileDialog.addFileListener(file -> {
+            messageEditText.setEnabled(false);
+            transactionDocument = file;
+            selectedFilePath.setText(file.getPath());
+            if (file.length() > MAX_ATTACHMENT_SIZE) {
+                selectedFilePath.requestFocus();
+                selectedFilePath.setError("Too big (" + Util.readableSize(file.length()) + ") max is " + Util.readableSize(MAX_ATTACHMENT_SIZE));
+                sendButton.setEnabled(false);
+            } else {
+                selectedFilePath.setError(null);
+                sendButton.setEnabled(true);
+                Snackbar.make(findViewById(R.id.myCoordinatorLayout),getString(R.string.warning_files),Snackbar.LENGTH_LONG).show();
             }
         });
         fileDialog.showDialog();
