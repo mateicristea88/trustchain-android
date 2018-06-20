@@ -9,7 +9,7 @@ In order to perform BAC the name, date of birth and the BSN should be sent to th
 
 .. figure:: ./images/passport_example.jpg
    :width: 300px
-   :alt: Fig. 4. Sending a block to a peer.
+   :alt: Fig. 1. Sending a block to a peer.
 
 
 EAC gives more privileges as BAC. With these privileges biometrics can be read from the passport, such as the fingerprint from the passport holder. However, to gain access to the biometrics the government has to supply a private key, which is only supplied to trusted parties.
@@ -21,6 +21,15 @@ A connection with the passport is setup by the open source library `jMRTD <https
 The library that is used for OCR is called Tessarect. The package ocr (in the passport package) is responsible for handling all OCR related work, such as opening the camera and providing images to perform OCR.
 The class ManualInputActivity is responsible for handling the manual input of data for BAC. The ManualInputActivity can only be reached from the CameraActivity and when no MRZ has been successfully read by the OCR.
 
-The data about a passport holder is passed around via intents. The DocumentData class contains the data to perform BAC and is passed from either the CameraActivity or the ManualInputActivity to the PassportConActivity.
+
+.. figure:: ./images/passport/CameraActivity.png
+   :width: 48%
+   :alt: Fig. 2. CameraActivity
+.. figure:: ./images/passport/PassportConActivity.jpg
+   :width: 48%
+   :alt: Fig. 3. PassportConActivity
+
+
+The data of a passport holder is passed around via intents. The DocumentData class contains the data to perform BAC and is passed from either the CameraActivity or the ManualInputActivity to the PassportConActivity.
 
 
