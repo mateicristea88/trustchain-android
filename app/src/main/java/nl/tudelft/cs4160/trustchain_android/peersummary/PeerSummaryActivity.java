@@ -53,8 +53,9 @@ import nl.tudelft.cs4160.trustchain_android.util.Util;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper.GENESIS_SEQ;
+import static nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper.completeBlockProposal;
 import static nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper.containsBinaryFile;
-import static nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper.createBlock;
+import static nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper.createBlockProposal;
 import static nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper.sign;
 
 public class PeerSummaryActivity extends AppCompatActivity implements CrawlRequestListener {
@@ -247,7 +248,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
             transactionData = messageEditText.getText().toString().getBytes(UTF_8);
         }
 
-        final MessageProto.TrustChainBlock block = createBlock(transactionData, format, DBHelper, publicKey, null, inboxItemOtherPeer.getPeer().getPublicKeyPair().toBytes());
+        final MessageProto.TrustChainBlock block = createBlockProposal(transactionData, format, DBHelper, publicKey, inboxItemOtherPeer.getPeer().getPublicKeyPair().toBytes());
         final MessageProto.TrustChainBlock signedBlock = TrustChainBlockHelper.sign(block, Key.loadKeys(getApplicationContext()).getSigningKey());
         Log.d(TAG, "Signed block is " + signedBlock.toByteArray().length + " bytes");
         messageEditText.setText("");
@@ -316,9 +317,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
      */
     public void signAndSendHalfBlock(final MessageProto.TrustChainBlock linkedBlock) {
         DualSecret keyPair = Key.loadKeys(this);
-        MessageProto.TrustChainBlock block = createBlock(null, null, //Setting format and transaction not needed, they are already contained in linkedblock
-                DBHelper, keyPair.getPublicKeyPair().toBytes(),
-                linkedBlock, inboxItemOtherPeer.getPeer().getPublicKeyPair().toBytes());
+        MessageProto.TrustChainBlock block = completeBlockProposal(DBHelper, linkedBlock, keyPair.getPublicKeyPair().toBytes());
 
         final MessageProto.TrustChainBlock signedBlock = sign(block, keyPair.getSigningKey());
 

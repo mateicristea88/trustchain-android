@@ -47,34 +47,28 @@ public class TrustChainBlockHelper {
         return block;
     }
 
-    /**
-     * Creates a TrustChainBlockHelper for the given input.
+    /** Creates a new block proposal (half block)
+     * @param transaction - Transaction payload of this block
      * @param transaction - Details the message of the block, can be null if there is a linked block
+     * Creates a new block proposal (half block)
+     * @param transaction - Transaction payload of this block
      * @param dbHelper - database helper for the database in which the previous blocks of this peer can be found
      * @param mypubk - the public key of this peer
-     * @param linkedBlock - The halfblock that is linked to this to be created half block, can be null
      * @param linkpubk - The public key of the linked peer
-     * @return a new half block
+     * @return a new block proposal
      */
-    public static MessageProto.TrustChainBlock createBlock(byte[] transaction, String format, TrustChainDBHelper dbHelper,
-                                                         byte[] mypubk, MessageProto.TrustChainBlock linkedBlock,
-                                                         byte[] linkpubk) {
+    public static MessageProto.TrustChainBlock createBlockProposal(byte[] transaction, String format, TrustChainDBHelper dbHelper,
+                                                         byte[] mypubk, byte[] linkpubk) {
         MessageProto.TrustChainBlock latestBlock = dbHelper.getLatestBlock(mypubk);
 
         MessageProto.TrustChainBlock.Builder builder = MessageProto.TrustChainBlock.newBuilder();
-        if(linkedBlock != null) {
-            builder.setTransaction(linkedBlock.getTransaction())
-                    .setLinkPublicKey(linkedBlock.getPublicKey())
-                    .setLinkSequenceNumber(linkedBlock.getSequenceNumber());
-        } else {
-            builder.setTransaction(
-                        Transaction.newBuilder()
-                                .setUnformatted(ByteString.copyFrom(transaction))
-                                .setFormat(format)
-                                .build())
-                    .setLinkPublicKey(ByteString.copyFrom(linkpubk))
-                    .setLinkSequenceNumber(TrustChainBlockHelper.UNKNOWN_SEQ);
-        }
+        builder.setTransaction(
+                    Transaction.newBuilder()
+                            .setUnformatted(ByteString.copyFrom(transaction))
+                            .setFormat(format)
+                            .build())
+                .setLinkPublicKey(ByteString.copyFrom(linkpubk))
+                .setLinkSequenceNumber(TrustChainBlockHelper.UNKNOWN_SEQ);
 
         // if a latest block was found set the correct fields, if not the block won't be validated
         // so it doesn't matter much that no exception is raised here.
@@ -89,6 +83,28 @@ public class TrustChainBlockHelper {
         return builder.build();
     }
 
+
+    public static MessageProto.TrustChainBlock completeBlockProposal(TrustChainDBHelper dbHelper,
+                                                                        MessageProto.TrustChainBlock linkedBlock,
+                                                                        byte[] mypubk) {
+        MessageProto.TrustChainBlock latestBlock = dbHelper.getLatestBlock(mypubk);
+
+        MessageProto.TrustChainBlock.Builder builder = MessageProto.TrustChainBlock.newBuilder();
+
+        builder.setTransaction(linkedBlock.getTransaction())
+                .setLinkPublicKey(linkedBlock.getPublicKey())
+                .setLinkSequenceNumber(linkedBlock.getSequenceNumber());
+
+        if(latestBlock != null) {
+            builder.setSequenceNumber(latestBlock.getSequenceNumber() + 1)
+                    .setPreviousHash(ByteString.copyFrom(hash(latestBlock)));
+        }
+
+        builder.setPublicKey(ByteString.copyFrom(mypubk));
+        builder.setSignature(EMPTY_SIG);
+
+        return builder.build();
+    }
     /**
      * Checks if the given block is a genesis block
      * @param block - TrustChainBlockHelper that we want to check

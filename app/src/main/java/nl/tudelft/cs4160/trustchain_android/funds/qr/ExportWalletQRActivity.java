@@ -111,24 +111,20 @@ public class ExportWalletQRActivity extends AppCompatActivity {
 
             JsonAdapter<QRTransaction> transactionAdapter = moshi.adapter(QRTransaction.class);
             MessageProto.TrustChainBlock blockAtoC =
-                    TrustChainBlockHelper.createBlock(
+                    TrustChainBlockHelper.createBlockProposal(
                             transactionAdapter.toJson(transaction).getBytes(),
-                            null,
+                            "",
                             dbHelper,
                             keyPairOfA.getPublicKeyPair().toBytes(),
-                            null,
                             keyPairOfC.getPublicKeyPair().toBytes()
                     );
             blockAtoC = TrustChainBlockHelper.sign(blockAtoC, keyPairOfA.getSigningKey());
 
             MessageProto.TrustChainBlock blockCtoA =
-                    TrustChainBlockHelper.createBlock(
-                            transactionAdapter.toJson(transaction).getBytes(),
-                            null,
+                    TrustChainBlockHelper.completeBlockProposal(
                             dbHelper,
-                            keyPairOfC.getPublicKeyPair().toBytes(),
                             blockAtoC,
-                            keyPairOfA.getPublicKeyPair().toBytes()
+                            keyPairOfC.getPublicKeyPair().toBytes()
                     );
             blockCtoA = TrustChainBlockHelper.sign(blockCtoA, keyPairOfC.getSigningKey());
 
