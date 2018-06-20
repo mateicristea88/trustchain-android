@@ -344,7 +344,7 @@ public class Network {
     /**
      * Show local ip address.
      */
-    private void showLocalIpAddress() {
+    public void showLocalIpAddress() {
         ShowLocalIPTask showLocalIPTask = new ShowLocalIPTask(port);
         showLocalIPTask.execute();
     }
@@ -463,10 +463,6 @@ public class Network {
     private static void addBlockToInbox(TrustChainBlock block, Context context) {
         InboxItemStorage.addHalfBlock(context, new PublicKeyPair(block.getPublicKey().toByteArray())
                 , block.getSequenceNumber());
-    }
-
-    public MessageHandler getMessageHandler() {
-        return messageHandler;
     }
 
     /**

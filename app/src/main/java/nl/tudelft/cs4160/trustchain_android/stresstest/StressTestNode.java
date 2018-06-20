@@ -22,9 +22,9 @@ import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.network.Network;
 import nl.tudelft.cs4160.trustchain_android.network.NetworkStatusListener;
-import nl.tudelft.cs4160.trustchain_android.network.peer.Peer;
-import nl.tudelft.cs4160.trustchain_android.network.peer.PeerHandler;
-import nl.tudelft.cs4160.trustchain_android.network.peer.PeerListener;
+import nl.tudelft.cs4160.trustchain_android.peer.Peer;
+import nl.tudelft.cs4160.trustchain_android.peer.PeerHandler;
+import nl.tudelft.cs4160.trustchain_android.peer.PeerListener;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.BootstrapIPStorage;
 
 public class StressTestNode implements PeerListener, NetworkStatusListener {
@@ -111,7 +111,7 @@ public class StressTestNode implements PeerListener, NetworkStatusListener {
         network = new Network(userName, keyPair.getPublicKeyPair(), context, port);
         network.getMessageHandler().setPeerHandler(getPeerHandler());
         network.setNetworkStatusListener(this);
-        network.updateConnectionType((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
+        updateConnectionType(network.getConnectionTypeString((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE)));
 //        ((TextView) findViewById(R.id.peer_id)).setText(peerHandler.getHashId());
     }
 
@@ -214,18 +214,18 @@ public class StressTestNode implements PeerListener, NetworkStatusListener {
         if (peerHandler.getWanVote().vote(socketAddress)) {
             wan = peerHandler.getWanVote().getAddress().toString();
         }
-//        setWanvote(wan.replace("/",""));
+    }
+
+    @Override
+    public void updateConnectionType(String connectionTypeStr) {
+        // No UI -> do nothing
     }
 
     @Override
     public void updateInternalSourceAddress(String address) {
-
+        // No UI -> do nothing
     }
 
-    @Override
-    public void updateConnectionType(int connectionType, String typename, String subtypename) {
-
-    }
 //
 //    @Override
 //    public void handleIntroductionRequest(Peer peer, MessageProto.IntroductionRequest request) throws IOException {
