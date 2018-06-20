@@ -54,15 +54,15 @@
             android:name=".chainExplorer.ChainExplorerInfoActivity"
             android:label="@string/title_activity_info_chain_explorer" />
         <activity
-            android:name=".main.BootstrapActivity"
+            android:name=".main.ChangeBootstrapActivity"
             android:windowSoftInputMode="adjustResize" />
         <activity android:name=".inbox.InboxActivity" />
         <activity
             android:name=".offline.SendOfflineActivity"
-            android:label="@string/title_activity_send_claim"></activity>
+            android:label="@string/title_activity_send_offline"></activity>
         <activity
             android:name=".offline.ReceiveOfflineActivity"
-            android:label="Attest claims"
+            android:label="@string/title_activity_receive_offline"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.nfc.action.NDEF_DISCOVERED" />

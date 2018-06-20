@@ -191,8 +191,9 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
                 startActivity(chainExplorerActivity);
                 return true;
             case R.id.receive_offline:
-                Intent attestActivity = new Intent(this, ReceiveOfflineActivity.class);
-                startActivity(attestActivity);
+                Intent intent = new Intent(this, ReceiveOfflineActivity.class);
+                intent.putExtra("return", true);
+                startActivity(intent);
                 return true;
             case R.id.connection_explanation_menu:
                 Intent ConnectionExplanationActivity = new Intent(this, ConnectionExplanationActivity.class);

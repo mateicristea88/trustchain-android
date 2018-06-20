@@ -6,23 +6,33 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import nl.tudelft.cs4160.trustchain_android.R;
 import nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper;
+import nl.tudelft.cs4160.trustchain_android.block.ValidationResult;
+import nl.tudelft.cs4160.trustchain_android.chainExplorer.ChainColor;
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
+import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
+import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
+import nl.tudelft.cs4160.trustchain_android.util.ByteArrayConverter;
+import nl.tudelft.cs4160.trustchain_android.util.OpenFileClickListener;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -36,7 +46,7 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
     private IntentFilter[] intentFiltersArray;
     private MessageProto.TrustChainBlock receivedBlock;
 
-    private TextView textView;
+    private TextView blockSigned;
     private Button signButton;
     public static final int SCAN_QR = 1;
 
@@ -66,7 +76,7 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
         intentFiltersArray = new IntentFilter[] { def };
 
         signButton = findViewById(R.id.sign_button);
-        textView = findViewById(R.id.textView);
+        blockSigned = findViewById(R.id.block_signed);
     }
 
     @Override
@@ -112,9 +122,148 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
             Log.e(TAG, "Could not parse received block!");
             return;
         }
-        String message = "Message: " + new String(receivedBlock.getTransaction().getUnformatted().toByteArray(), UTF_8);
-        textView.setText(message);
-        signButton.setVisibility(View.VISIBLE);
+        blockReceived(receivedBlock);
+    }
+
+    /**
+     * This methods is mostly a direct copy from ChainExplorerAdapter#getView, re-using the block layout used in ChainExplorer
+     * @param block
+     */
+    public void blockReceived(MessageProto.TrustChainBlock block) {
+        View convertView = findViewById(R.id.block_layout);
+
+        try {
+            ValidationResult validationResult = TrustChainBlockHelper.validate(block, new TrustChainDBHelper(this));
+            if(validationResult.getStatus() == ValidationResult.INVALID) {
+                signButton.setEnabled(false);
+                signButton.setFocusableInTouchMode(true);
+                signButton.setError(getString(R.string.invalid_block));
+                signButton.requestFocus();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            signButton.setEnabled(false);
+            signButton.setFocusableInTouchMode(true);
+            signButton.setError(getString(R.string.invalid_block));
+            signButton.requestFocus();
+        }
+
+        showBlockLayout(convertView);
+
+        new TrustChainDBHelper(this).insertInDB(receivedBlock);
+        if (getIntent().getBooleanExtra("return", true)) {
+            signButton.setVisibility(View.VISIBLE);
+        } else {
+            //TODO possible re-verification
+            signButton.setVisibility(View.GONE);
+            blockSigned.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void showBlockLayout(View convertView) {
+        convertView.setVisibility(View.VISIBLE);
+        setExpandArrowBehaviour(convertView);
+        // Check if we already know the peer, otherwise add it to the peerList
+        ByteString pubKeyByteStr = receivedBlock.getPublicKey();
+        ByteString linkPubKeyByteStr = receivedBlock.getLinkPublicKey();
+        String peerAlias = "not available"; //getPeerAlias(pubKeyByteStr);
+        String linkPeerAlias = "not available"; //getPeerAlias(linkPubKeyByteStr);
+
+        // Check if the sequence numbers are 0, which would mean that they are unknown
+        String seqNumStr;
+        String linkSeqNumStr;
+        if (receivedBlock.getSequenceNumber() == 0) {
+            seqNumStr = "Genesis Block";
+        } else {
+            seqNumStr = "seq: " + String.valueOf(receivedBlock.getSequenceNumber());
+        }
+
+        if (receivedBlock.getLinkSequenceNumber() == 0) {
+            linkSeqNumStr = "";
+        } else {
+            linkSeqNumStr = "seq: " + String.valueOf(receivedBlock.getLinkSequenceNumber());
+        }
+
+        // collapsed view
+        TextView peer = convertView.findViewById(R.id.peer);
+        TextView seqNum = convertView.findViewById(R.id.sequence_number);
+        TextView linkPeer = convertView.findViewById(R.id.link_peer);
+        TextView linkSeqNum = convertView.findViewById(R.id.link_sequence_number);
+        TextView transaction = convertView.findViewById(R.id.transaction);
+        View ownChainIndicator = convertView.findViewById(R.id.own_chain_indicator);
+        View linkChainIndicator = convertView.findViewById(R.id.link_chain_indicator);
+
+        // For the collapsed view, set the public keys to the aliases we gave them.
+        peer.setText(peerAlias);
+        seqNum.setText(seqNumStr);
+        linkPeer.setText(linkPeerAlias);
+        linkSeqNum.setText(linkSeqNumStr);
+
+        // expanded view
+        TextView pubKey = convertView.findViewById(R.id.pub_key);
+//        setOnClickListener(pubKey);
+        TextView linkPubKey = convertView.findViewById(R.id.link_pub_key);
+//        setOnClickListener(linkPubKey);
+        TextView prevHash = convertView.findViewById(R.id.prev_hash);
+        TextView signature = convertView.findViewById(R.id.signature);
+        TextView expTransaction = convertView.findViewById(R.id.expanded_transaction);
+
+        pubKey.setText(ByteArrayConverter.bytesToHexString(pubKeyByteStr.toByteArray()));
+        linkPubKey.setText(ByteArrayConverter.bytesToHexString(linkPubKeyByteStr.toByteArray()));
+        prevHash.setText(ByteArrayConverter.bytesToHexString(receivedBlock.getPreviousHash().toByteArray()));
+
+        signature.setText(ByteArrayConverter.bytesToHexString(receivedBlock.getSignature().toByteArray()));
+
+        if (TrustChainBlockHelper.containsBinaryFile(receivedBlock)) {
+            // If the block contains a file show the 'click to open' text
+            transaction.setText(getString(R.string.click_to_open_file, receivedBlock.getTransaction().getFormat()));
+            setOpenFileClickListener(transaction, receivedBlock);
+
+            expTransaction.setText(getString(R.string.click_to_open_file, receivedBlock.getTransaction().getFormat()));
+            setOpenFileClickListener(expTransaction, receivedBlock);
+        } else {
+            transaction.setText(receivedBlock.getTransaction().getUnformatted().toStringUtf8());
+            expTransaction.setText(receivedBlock.getTransaction().getUnformatted().toStringUtf8());
+        }
+
+        if (peerAlias.equals("me")) {
+            ownChainIndicator.setBackgroundColor(ChainColor.getMyColor(this));
+        } else {
+            ownChainIndicator.setBackgroundColor(ChainColor.getColor(this,ByteArrayConverter.bytesToHexString(pubKeyByteStr.toByteArray())));
+        }
+        if (linkPeerAlias.equals("me")) {
+            linkChainIndicator.setBackgroundColor(ChainColor.getMyColor(this));
+        } else {
+            linkChainIndicator.setBackgroundColor(ChainColor.getColor(this,ByteArrayConverter.bytesToHexString(pubKeyByteStr.toByteArray())));
+        }
+    }
+
+    private void setExpandArrowBehaviour(View layout) {
+        LinearLayout expandedItem = layout.findViewById(R.id.expanded_item);
+        ImageView expandArrow = layout.findViewById(R.id.expand_arrow);
+        layout.setOnClickListener(view -> {
+            // Expand the item when it is clicked
+            if (expandedItem.getVisibility() == View.GONE) {
+                expandedItem.setVisibility(View.VISIBLE);
+                Log.v(TAG, "Item height: " + expandedItem.getHeight());
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    expandArrow.setImageDrawable(getDrawable(R.drawable.ic_expand_less_black_24dp));
+                } else {
+                    expandArrow.setImageDrawable(getResources().getDrawable(R.drawable.ic_expand_less_black_24dp));
+                }
+            } else {
+                expandedItem.setVisibility(View.GONE);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    expandArrow.setImageDrawable(getDrawable(R.drawable.ic_expand_more_black_24dp));
+                } else {
+                    expandArrow.setImageDrawable(getResources().getDrawable(R.drawable.ic_expand_more_black_24dp));
+                }
+            }
+        });
+    }
+
+    private void setOpenFileClickListener(View view, final MessageProto.TrustChainBlock block) {
+        view.setOnClickListener(new OpenFileClickListener(this, block));
     }
 
     /**
@@ -131,6 +280,11 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
 
         final MessageProto.TrustChainBlock signedBlock = TrustChainBlockHelper.sign(block, keyPair.getSigningKey());
         DBHelper.insertInDB(signedBlock);
+
+        Intent intent = new Intent(this, SendOfflineActivity.class);
+        intent.putExtra("block", signedBlock);
+        intent.putExtra("return", false);
+        startActivity(intent);
     }
 
     /**
@@ -164,14 +318,11 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
                 byte[] bytes = result.getBytes(ISO_8859_1);
                 try {
                     receivedBlock = MessageProto.TrustChainBlock.newBuilder().mergeFrom(bytes).build();
+                    blockReceived(receivedBlock);
                 } catch (InvalidProtocolBufferException e) {
                     e.printStackTrace();
                     Log.e(TAG, "Could not parse received block!");
-                    return;
                 }
-                String message = "Message: " + new String(receivedBlock.getTransaction().getUnformatted().toByteArray(), UTF_8);
-                textView.setText(message);
-                signButton.setVisibility(View.VISIBLE);
             }
         }
     }

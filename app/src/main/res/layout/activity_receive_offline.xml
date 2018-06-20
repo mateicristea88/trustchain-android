@@ -18,7 +18,7 @@
             android:layout_gravity="center"
             android:textSize="20sp"
             android:padding="30dp"
-            android:text="@string/attest_claims_explanation"/>
+            android:text="@string/receive_offline_explanation"/>
 
         <Button
             android:id="@+id/start_qr_scan_button"
@@ -37,10 +37,10 @@
             android:layout_width="match_parent"
             android:layout_height="250dp">
 
-            <TextView
-                android:id="@+id/textView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+            <include
+                android:id="@+id/block_layout"
+                android:visibility="gone"
+                layout="@layout/item_trustchainblock" />
         </ScrollView>
 
         <Button
@@ -49,11 +49,23 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:padding="5dp"
+            android:layout_marginTop="10dp"
             style="@style/Widget.AppCompat.Button.Colored"
             android:background="@color/colorPrimary"
-            android:text="@string/sign_claim_block"
+            android:text="@string/sign_and_return_block"
             android:onClick="onClickSign"
             android:visibility="gone"
+            />
+
+        <TextView
+            android:id="@+id/block_signed"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            android:layout_marginTop="10dp"
+            android:layout_gravity="center"
+            android:textSize="16sp"
+            android:text="@string/block_signed"
             />
 
     </LinearLayout>

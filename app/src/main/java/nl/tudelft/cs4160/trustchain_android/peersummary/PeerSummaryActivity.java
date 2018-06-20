@@ -136,9 +136,6 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
      * such as local and external ip
      */
     private void initVariables() {
-        statusText = findViewById(R.id.status);
-        statusText.setMovementMethod(new ScrollingMovementMethod());
-
         messageEditText = findViewById(R.id.message_edit_text);
         mRecyclerView = findViewById(R.id.mutualBlocksRecyclerView);
         selectedFilePath = findViewById(R.id.selected_path);
@@ -269,6 +266,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
         if (sendOffline.isChecked()) {
             Intent intent = new Intent(this, SendOfflineActivity.class);
             intent.putExtra("block", signedBlock);
+            intent.putExtra("return", true);
             startActivity(intent);
         } else {
             new Thread(() -> {

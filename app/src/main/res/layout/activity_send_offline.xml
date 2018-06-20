@@ -21,27 +21,30 @@
             android:layout_height="wrap_content">
 
             <Button
-                android:id="@+id/send_claim_beam"
-                android:onClick="invokeBeam"
-                android:background="@color/colorPrimary"
+                android:id="@+id/send_beam"
                 style="@style/Widget.AppCompat.Button.Colored"
-                android:layout_margin="5dp"
-                android:padding="5dp"
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
-                android:text="Android Beam" />
+                android:layout_margin="5dp"
+                android:layout_marginBottom="10dp"
+                android:background="@color/colorPrimary"
+                android:onClick="invokeBeam"
+                android:padding="5dp"
+                android:text="@string/button_send_android_beam" />
 
             <Button
-                android:id="@+id/send_claim_qr"
-                android:onClick="showQRCode"
-                android:background="@color/colorPrimary"
+                android:id="@+id/send_qr"
                 style="@style/Widget.AppCompat.Button.Colored"
-                android:layout_margin="5dp"
-                android:padding="5dp"
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
-                android:text="QR Code" />
+                android:layout_margin="5dp"
+                android:layout_marginBottom="10dp"
+                android:background="@color/colorPrimary"
+                android:onClick="showQRCode"
+                android:padding="5dp"
+                android:text="@string/button_send_qr_code" />
         </LinearLayout>
+
         <ProgressBar
             android:id="@+id/qr_progress"
             style="?android:attr/progressBarStyle"
@@ -54,8 +57,21 @@
         <ImageView
             android:id="@+id/qr_image"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            />
 
+    <Button
+        android:id="@+id/receive_completed"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:layout_marginBottom="10dp"
+        android:background="@color/colorPrimary"
+        android:visibility="gone"
+        android:layout_gravity="center"
+        android:padding="5dp"
+        android:text="@string/receive_completed" />
 
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>

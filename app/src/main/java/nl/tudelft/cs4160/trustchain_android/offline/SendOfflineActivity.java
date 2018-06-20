@@ -1,6 +1,7 @@
 package nl.tudelft.cs4160.trustchain_android.offline;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -16,6 +17,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -37,54 +39,76 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
 public class SendOfflineActivity extends AppCompatActivity implements OnNdefPushCompleteCallback, NfcAdapter.CreateBeamUrisCallback {
 
+    public static final int MAX_QR_SIZE_BYTES = 2953;
     private static final String TAG = SendOfflineActivity.class.toString();
-    private static final String TITLE = "Send claim";
-    NfcAdapter mNfcAdapter;
-
+    private NfcAdapter mNfcAdapter;
     private ImageView QRImage;
     private ProgressBar QRProgress;
+    private Button sendQR;
+    private Button sendBeam;
+    private Button receiveCompleted;
+
+
+    private MessageProto.TrustChainBlock block;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_send_offline);
 
+        block = (MessageProto.TrustChainBlock) getIntent().getSerializableExtra("block");
+
         View layout = findViewById(R.id.layout_send_claim);
         QRImage = findViewById(R.id.qr_image);
         QRProgress = findViewById(R.id.qr_progress);
+        sendQR = findViewById(R.id.send_qr);
+        sendBeam = findViewById(R.id.send_beam);
+        receiveCompleted = findViewById(R.id.receive_completed);
+
+        if (getIntent().getBooleanExtra("return", true)) {
+            receiveCompleted.setOnClickListener(view -> {
+                Intent intent = new Intent(this, ReceiveOfflineActivity.class);
+                intent.putExtra("return", false);
+                startActivity(intent);
+            });
+        } else {
+            receiveCompleted.setVisibility(View.GONE);
+        }
 
         // NFC isn't available on the device
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_NFC)) {
             // NFC isn't supported
             showNotsupportedMessage();
+            sendBeam.setEnabled(false);
+            Toast.makeText(this, "NFC is not supported on your device.", Toast.LENGTH_LONG).show();
         } else {
             mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
 
             if (!mNfcAdapter.isEnabled()) {
                 Toast.makeText(this, "Please enable NFC via Settings.", Toast.LENGTH_LONG).show();
+                sendBeam.requestFocus();
+                sendBeam.setEnabled(false);
+                sendBeam.setFocusableInTouchMode(true);
+                sendBeam.setError(getString(R.string.enable_nfc));
             }
         }
 
-        setTitle(TITLE);
+        setTitle(getString(R.string.title_activity_send_offline));
         // Register callback
         mNfcAdapter.setOnNdefPushCompleteCallback(this, this);
         mNfcAdapter.setNdefPushMessage(createNdefMessage(), this);
-    }
 
-    @Override
-    protected void onPostResume() {
-        super.onPostResume();
-//        findViewById(R.id.layout_send_claim).postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                invokeBeam();
-//            }
-//        }, 100);
+        if (block.toByteArray().length > MAX_QR_SIZE_BYTES) {
+            sendQR.requestFocus();
+            sendQR.setFocusableInTouchMode(true);
+            sendQR.setError(getString(R.string.too_big_for_qr, block.toByteArray().length, MAX_QR_SIZE_BYTES));
+            sendQR.setEnabled(false);
+        }
     }
 
     public void invokeBeam(View v) {
         boolean success = mNfcAdapter.invokeBeam(this);
-        Log.i(TAG, "beam transfer invoke succes: " + success);
+        Log.v(TAG, "beam transfer invoke succes: " + success);
     }
 
     public void showQRCode(View v) {
@@ -99,8 +123,6 @@ public class SendOfflineActivity extends AppCompatActivity implements OnNdefPush
                 DisplayMetrics metrics = new DisplayMetrics();
                 getWindowManager().getDefaultDisplay().getMetrics(metrics);
                 int size = metrics.widthPixels;
-
-                MessageProto.TrustChainBlock block = (MessageProto.TrustChainBlock) getIntent().getSerializableExtra("block");
 
                 Log.e(TAG, block.toByteArray().length + " bytes");
                 try {
@@ -120,6 +142,9 @@ public class SendOfflineActivity extends AppCompatActivity implements OnNdefPush
                                       @Override
                                       public void run() {
                                           QRProgress.setVisibility(View.GONE);
+                                          if (getIntent().getBooleanExtra("return", true)) {
+                                              receiveCompleted.setVisibility(View.VISIBLE);
+                                          }
                                       }
                                   }
                     );
@@ -165,6 +190,9 @@ public class SendOfflineActivity extends AppCompatActivity implements OnNdefPush
             @Override
             public void run() {
 //                sendClaimText.setText(R.string.sending_claim_complete);
+                if (getIntent().getBooleanExtra("return", true)) {
+                    receiveCompleted.setVisibility(View.VISIBLE);
+                }
             }
         });
     }
