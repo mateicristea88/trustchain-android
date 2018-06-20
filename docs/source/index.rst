@@ -16,6 +16,7 @@ TrustChain Android
    protocolbuffers
    database
    inbox
+   chainexplorer
    crypto
    wallet
    tokens
