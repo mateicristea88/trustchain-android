@@ -9,7 +9,7 @@ In order to perform BAC the name, date of birth and the BSN should be sent to th
 
 .. figure:: ./images/passport_example.jpg
    :width: 300px
-   :alt: Fig. 4. Sending a block to a peer.
+   :alt: Fig. 1. Sending a block to a peer.
 
 
 EAC gives more privileges as BAC. With these privileges biometrics can be read from the passport, such as the fingerprint from the passport holder. However, to gain access to the biometrics the government has to supply a private key, which is only supplied to trusted parties.
@@ -20,7 +20,28 @@ Implementation
 A connection with the passport is setup by the open source library `jMRTD <https://jmrtd.org/>`_. The logic for opening the connection, performing BAC and AA are mainly implemented in the class PassportConnection, which is used by the class PassportConActivity. Reading the MRZ can be done in two different ways: OCR or manual input.
 The library that is used for OCR is called Tessarect. The package ocr (in the passport package) is responsible for handling all OCR related work, such as opening the camera and providing images to perform OCR.
 The class ManualInputActivity is responsible for handling the manual input of data for BAC. The ManualInputActivity can only be reached from the CameraActivity and when no MRZ has been successfully read by the OCR.
+The data of a passport holder is passed around via intents. The DocumentData class contains the data to perform BAC and is passed from either the CameraActivity or the ManualInputActivity to the PassportConActivity.
 
-The data about a passport holder is passed around via intents. The DocumentData class contains the data to perform BAC and is passed from either the CameraActivity or the ManualInputActivity to the PassportConActivity.
+
+
+..  image:: ./images/passport/CameraActivity.png
+   :width: 300px
+   :alt: Fig. 2. CameraActivity
+..  image:: ./images/passport/ManualActivity.png
+   :width: 300px
+   :alt: Fig. 3. ManualActivity
+
+The image on the left is the CameraActivity and the image on the right is the ManualActivity.
+
+..  image:: ./images/passport/PassportConActivity1.png
+   :width: 300px
+   :alt: Fig. 4. PassportConActivity before signing
+..  image:: ./images/passport/PassportConActivity2.png
+   :width: 300px
+   :alt: Fig. 5. ManualActivity after signing
+
+The image on the left shows the PassportConActivity with the hex number 'eab63f7d' is going to be signed. The right image shows the same Activity but with the resulting signature in hexadecimal.
+
+
 
 
