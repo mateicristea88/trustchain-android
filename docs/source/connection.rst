@@ -1,14 +1,16 @@
+.. _connection:
+
 ************************
 Connection to a peer
 ************************
 
-In order to be part of the network, you need to be connected to other people (peers). The underlying protocol for finding peers was taken from App-To-App Communicator <https://github.com/Tribler/app-to-app-communicator>. This protocol enables a peer to discover more peers through peers they are already connected with. By default firewalls will block incoming connections from unknown sources. The protocol makes use of `UDP hole punching <https://en.wikipedia.org/wiki/UDP_hole_punching>`_ to circumvent this and setup direct connections between peers. Basically this uses a mutual friend to initiate a connection between two peers who are unknown to each other.
+In order to be part of the network, you need to be connected to other people (peers). The underlying protocol for finding peers was taken from `App-To-App Communicator <https://github.com/Tribler/app-to-app-communicator>`_. This network overlay enables a peer to discover more peers through peers they are already connected with. By default firewalls will block incoming connections from unknown sources. The protocol makes use of `UDP hole punching <https://en.wikipedia.org/wiki/UDP_hole_punching>`_ to circumvent this and setup direct connections between peers. Basically this uses a mutual friend to initiate a connection between two peers who are unknown to each other.
 
 The protocol consists of the following messages:
-- IntroductionRequest - Request for an introduction to some new peer.
-- IntroductionResponse - Response with a new peer that could be connected to.
-- PunctureRequest - Request to send a puncture to some peer.
-- Puncture - A basically empty message, used to punch a hole in the NAT/firewall of the sender.
+- ``IntroductionRequest`` - Request for an introduction to some new peer.
+- ``IntroductionResponse`` - Response with a new peer that could be connected to.
+- ``PunctureRequest`` - Request to send a puncture to some peer.
+- ``Puncture`` - A basically empty message, used to punch a hole in the NAT/firewall of the sender.
 
 When a peer initially starts up the app, it needs to find other peers to connect to. For this initial peer discovery a bootstrap server is used. This bootstrap server resides on a fixed IP and introduces new peers to each other when they initially connect to the network.
 
@@ -53,7 +55,7 @@ The UI shows when messages are send to a peer by displaying an orange bar below 
 
 Background handling of peers
 ============================
-All operation that are done on peers are done through or make use of the `PeerHandler class <TODO_add_link>`_. This class holds an arraylist of peers currently known and can split these peers into two lists of active peers and new peers. Peers are kept in memory for now, so each time the app is closed all peers have to be rediscovered through the bootstrap server.
+All operation that are done on peers are done through or make use of the `PeerHandler class <https://github.com/klikooo/CS4160-trustchain-android/blob/master/app/src/main/java/nl/tudelft/cs4160/trustchain_android/peer/PeerHandler.java>`_. This class holds an arraylist of peers currently known and can split these peers into two lists of active peers and new peers. Peers are kept in memory for now, so each time the app is closed all peers have to be rediscovered through the bootstrap server.
 
 There are two ways the host can hear about new peers:
 - When a message is received, the sending peer becomes known
@@ -86,7 +88,7 @@ Since all messages are created using protocolbuffers, it is easy to rebuild them
 
 Networking classes and their responsibilities
 =============================================
-There are two main classes which have to do with networking. `Network <TODO_add_link>`_ and `OverviewConnectionsActivity <TODO_add_link>`_.
+There are two main classes which have to do with networking. `Network <https://github.com/klikooo/CS4160-trustchain-android/blob/master/app/src/main/java/nl/tudelft/cs4160/trustchain_android/network/Network.java>`_ and `OverviewConnectionsActivity <https://github.com/klikooo/CS4160-trustchain-android/blob/master/app/src/main/java/nl/tudelft/cs4160/trustchain_android/main/OverviewConnectionsActivity.java>`_.
 
 The Network class is a singleton class and is responsible for sending and receiving messages. It has a datagram channel which has a socket bound to a local port (default 1873). Through this channel messages are send and received to and from peers. The network class has methods to build the different messages of the protocol.
 
