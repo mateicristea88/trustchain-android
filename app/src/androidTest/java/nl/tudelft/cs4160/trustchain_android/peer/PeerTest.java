@@ -73,14 +73,7 @@ public class PeerTest extends TestCase {
         assertTrue(peer1.isReceivedFrom());
     }
 
-    @Test
-    public void testToString(){
-        Peer peer1 = new Peer(address, publicKeyPair, "firstPEER");
-        peer1.setConnectionType(1);
-        assertEquals("Peer{" + "address=" + address + ", name='" + "firstPEER" + '\'' +
-                        ", isReceivedFrom=" + false + ", connectionType=" + 1 + '}'
-                ,peer1.toString());
-    }
+
 
     @Test
     public void testChangeParameters() {
