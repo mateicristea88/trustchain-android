@@ -5,17 +5,23 @@ import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.design.widget.Snackbar;
 import android.util.Log;
+import android.view.View;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
@@ -40,6 +46,7 @@ public class StressTestNode implements PeerListener, NetworkStatusListener {
 
     private String userName;
     private DualSecret keyPair;
+    private boolean networkRunning;
 
     int port;
 
@@ -105,6 +112,7 @@ public class StressTestNode implements PeerListener, NetworkStatusListener {
 //     * @param savedInstanceState
      */
     private void initVariables() {
+        networkRunning = true;
         peerHandler = new PeerHandler(keyPair.getPublicKeyPair(), userName);
         getPeerHandler().setPeerListener(this);
 
@@ -119,36 +127,65 @@ public class StressTestNode implements PeerListener, NetworkStatusListener {
 //     * Start the thread send thread responsible for sending a {@link IntroductionRequest} to a random inboxItem every 5 seconds.
      */
     private void startSendThread() {
-        Thread sendThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                do {
-                    try {
-                        if (peerHandler.size() > 0) {
-                            Peer peer = peerHandler.getEligiblePeer(new ArrayList<>());
-                            if (peer != null) {
+        Thread sendThread = new Thread(() -> {
+            boolean snackbarVisible = false;
+//            View view = findViewById(android.R.id.content);
+//            Snackbar networkUnreachableSnackbar = Snackbar.make(view, "Network unavailable", Snackbar.LENGTH_INDEFINITE);
+
+            // wait max one second for the CreateInetSocketAddressTask to finish, indicated by that the bootstrap is added to the peerlist
+            int t = 0;
+            while(peerHandler.size() == 0 && t < 100) {
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                t++;
+            }
+
+            while(!Thread.interrupted() && networkRunning) {
+                try {
+                    // update connection type and internal ip address
+                    updateConnectionType(network.getConnectionTypeString((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE)));
+                    network.showLocalIpAddress();
+                    if (peerHandler.size() > 0) {
+                        // select 10 random peers to send an introduction request to
+                        int limit = 10;
+                        ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+                        lock.readLock().lock();
+                        List<Peer> connectedPeers = new ArrayList<>(peerHandler.getPeerList());
+                        lock.readLock().unlock();
+                        if(connectedPeers.size() <= limit) {
+                            for(Peer peer : connectedPeers){
                                 network.sendIntroductionRequest(peer);
-//                                messagesSent++;
-//                                introductionRequestsSent++;
-//                                statistics.messageSent();
-                                //  sendBlockMessage(peer);
+                            }
+                        } else {
+                            Random rand = new Random();
+                            for (int i = 0; i < limit; i++) {
+                                int index = rand.nextInt(connectedPeers.size());
+                                network.sendIntroductionRequest(connectedPeers.get(index));
+                                connectedPeers.remove(index);
                             }
                         }
-                    } catch (IOException e) {
-                        e.printStackTrace();
                     }
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        break;
-                    }
-                } while (!Thread.interrupted());
-                Log.d("App-To-App Log", "Send thread stopped");
+                    // if the network is reachable again, remove the snackbar
+                } catch (SocketException e) {
+                    Log.i(TAG, "network unreachable");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
+            Log.d(TAG, "Send thread stopped");
         });
         sendThread.start();
-        Log.d("App-To-App Log", "Send thread started");
+        Log.d(TAG, "Send thread started");
     }
+
 
     /**
      * Update the showed inboxItem lists.
@@ -173,32 +210,22 @@ public class StressTestNode implements PeerListener, NetworkStatusListener {
      * InetSocketAddress)} for each incoming datagram.
      */
     private void startListenThread() {
-        final Context context = this.context;
-
-        Thread listenThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    ByteBuffer inputBuffer = ByteBuffer.allocate(BUFFER_SIZE);
-                    while (!Thread.interrupted()) {
-                        inputBuffer.clear();
-                        SocketAddress address = network.receive(inputBuffer);
-                        Log.e("TESTTEST", "received from " + address.toString());
-
-//                        bytesReceived += inputBuffer.position();
-//                        statistics.bytesReceived(inputBuffer.position());
-
-                        inputBuffer.flip();
-                        network.dataReceived(context, inputBuffer, (InetSocketAddress) address);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Log.d("App-To-App Log", "Listen thread stopped");
+        Thread listenThread = new Thread(() -> {
+            try {
+                ByteBuffer inputBuffer = ByteBuffer.allocate(BUFFER_SIZE);
+                while (!Thread.interrupted() && networkRunning) {
+                    inputBuffer.clear();
+                    SocketAddress address = network.receive(inputBuffer);
+                    inputBuffer.flip();
+                    network.dataReceived(context, inputBuffer, (InetSocketAddress) address);
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+            Log.d(TAG, "Listen thread stopped");
         });
         listenThread.start();
-        Log.d("App-To-App Log", "Listen thread started");
+        Log.d(TAG, "Listen thread started");
     }
 
     /**
@@ -365,5 +392,6 @@ public class StressTestNode implements PeerListener, NetworkStatusListener {
 
     public void stopNode() {
         network.closeChannel();
+        networkRunning = false;
     }
 }
