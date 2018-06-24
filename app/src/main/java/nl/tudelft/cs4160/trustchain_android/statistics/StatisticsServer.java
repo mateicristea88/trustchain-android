@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 
 import nl.tudelft.cs4160.trustchain_android.network.NetworkStatusListener;
@@ -15,22 +16,22 @@ import nl.tudelft.cs4160.trustchain_android.stresstest.StressTestNode;
 
 public class StatisticsServer implements NodeStatistics {
 
-    public Map<NetworkStatusListener, Integer> messagesReceived = new HashMap<>();
-    public Map<NetworkStatusListener, Integer> messagesSent = new HashMap<>();
-    public Map<NetworkStatusListener, Long> bytesReceivedCount = new HashMap<>();
-    public Map<NetworkStatusListener, Long> bytesSentCount = new HashMap<>();
-    public Map<NetworkStatusListener, Integer> introductionRequestsSent = new HashMap<>();
-    public Map<NetworkStatusListener, Integer> introductionRequestsReceived = new HashMap<>();
-    public Map<NetworkStatusListener, Integer> introductionResponsesSent = new HashMap<>();
-    public Map<NetworkStatusListener, Integer> introductionResponsesReceived = new HashMap<>();
-    public Map<NetworkStatusListener, Integer> puncturesSent = new HashMap<>();
-    public Map<NetworkStatusListener, Integer> puncturesReceived = new HashMap<>();
-    public Map<NetworkStatusListener, Integer> punctureRequestsSent = new HashMap<>();
-    public Map<NetworkStatusListener, Integer> punctureRequestsReceived = new HashMap<>();
-    public Map<NetworkStatusListener, Integer> blockMessagesSent = new HashMap<>();
-    public Map<NetworkStatusListener, Integer> blockMessagesReceived = new HashMap<>();
-    public Map<NetworkStatusListener, Integer> crawlRequestsReceived = new HashMap<>();
-    public static Map<NetworkStatusListener, Long> startTime = new HashMap<>();
+    public Map<NetworkStatusListener, Integer> messagesReceived = new ConcurrentHashMap<>();
+    public Map<NetworkStatusListener, Integer> messagesSent = new ConcurrentHashMap<>();
+    public Map<NetworkStatusListener, Long> bytesReceivedCount = new ConcurrentHashMap<>();
+    public Map<NetworkStatusListener, Long> bytesSentCount = new ConcurrentHashMap<>();
+    public Map<NetworkStatusListener, Integer> introductionRequestsSent = new ConcurrentHashMap<>();
+    public Map<NetworkStatusListener, Integer> introductionRequestsReceived = new ConcurrentHashMap<>();
+    public Map<NetworkStatusListener, Integer> introductionResponsesSent = new ConcurrentHashMap<>();
+    public Map<NetworkStatusListener, Integer> introductionResponsesReceived = new ConcurrentHashMap<>();
+    public Map<NetworkStatusListener, Integer> puncturesSent = new ConcurrentHashMap<>();
+    public Map<NetworkStatusListener, Integer> puncturesReceived = new ConcurrentHashMap<>();
+    public Map<NetworkStatusListener, Integer> punctureRequestsSent = new ConcurrentHashMap<>();
+    public Map<NetworkStatusListener, Integer> punctureRequestsReceived = new ConcurrentHashMap<>();
+    public Map<NetworkStatusListener, Integer> blockMessagesSent = new ConcurrentHashMap<>();
+    public Map<NetworkStatusListener, Integer> blockMessagesReceived = new ConcurrentHashMap<>();
+    public Map<NetworkStatusListener, Integer> crawlRequestsReceived = new ConcurrentHashMap<>();
+    public static Map<NetworkStatusListener, Long> startTime = new ConcurrentHashMap<>();
     private boolean logInitialized = false;
 
     private static StatisticsServer statistics;
@@ -64,11 +65,9 @@ public class StatisticsServer implements NodeStatistics {
         crawlRequestsReceived.put(node, 0);
 
         Timer timer = new Timer();
-        timer.scheduleAtFixedRate( new TimerTask() {
+        timer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
-                for (NetworkStatusListener node : startTime.keySet()) {
-                    logStats(node);
-                }
+                logStats(node);
             }
         }, 0, 10000);
     }
@@ -79,7 +78,7 @@ public class StatisticsServer implements NodeStatistics {
                     "introductionRequestsSent,introductionRequestsReceived,introductionResponsesSent," +
                     "introductionResponsesReceived,puncturesSent,puncturesReceived," +
                     "punctureRequestsSent,punctureRequestsReceived,blockMessagesSent," +
-                    "blockMessagesReceived,bytesSentCount,bytesReceivedCount,activeConnections");
+                    "blockMessagesReceived,bytesSentCount,bytesReceivedCount,activeConnections,newConnections");
             logInitialized = true;
         }
         long runtime = System.currentTimeMillis() - StatisticsServer.startTime.get(node);
@@ -114,7 +113,9 @@ public class StatisticsServer implements NodeStatistics {
                 .append(",")
                 .append(bytesReceivedCount.get(node))
                 .append(",")
-                .append(node.getPeerHandler().getactivePeersList().size());
+                .append(node.getPeerHandler().getactivePeersList().size())
+                .append(",")
+                .append(node.getPeerHandler().getnewPeersList().size());
         Log.i("Statistics-" + node.getName(), sb.toString());
     }
 
