@@ -1,5 +1,6 @@
 package nl.tudelft.cs4160.trustchain_android.offline;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -186,14 +187,11 @@ public class SendOfflineActivity extends AppCompatActivity implements OnNdefPush
     @Override
     public void onNdefPushComplete(NfcEvent nfcEvent) {
         Log.d(TAG, "Beam transfer complete");
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-//                sendClaimText.setText(R.string.sending_claim_complete);
-                if (getIntent().getBooleanExtra("return", true)) {
-                    receiveCompleted.setVisibility(View.VISIBLE);
-                }
-            }
+        Activity thisActivity = this;
+        runOnUiThread(() -> {
+            Intent intent = new Intent(thisActivity, ReceiveOfflineActivity.class);
+            intent.putExtra("return", false);
+            startActivity(intent);
         });
     }
 
