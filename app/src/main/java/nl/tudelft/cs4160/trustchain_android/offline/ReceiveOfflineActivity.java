@@ -150,7 +150,11 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
 
         showBlockLayout(convertView);
 
-        new TrustChainDBHelper(this).insertInDB(receivedBlock);
+        try {
+            new TrustChainDBHelper(this).insertInDB(receivedBlock);
+        } catch (Exception ignored) {
+        }
+
         if (getIntent().getBooleanExtra("return", true)) {
             signButton.setVisibility(View.VISIBLE);
         } else {
