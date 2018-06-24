@@ -31,6 +31,7 @@ import nl.tudelft.cs4160.trustchain_android.network.NetworkStatusListener;
 import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.peer.PeerHandler;
 import nl.tudelft.cs4160.trustchain_android.peer.PeerListener;
+import nl.tudelft.cs4160.trustchain_android.statistics.StatisticsServer;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.BootstrapIPStorage;
 
 public class StressTestNode implements PeerListener, NetworkStatusListener {
@@ -44,7 +45,7 @@ public class StressTestNode implements PeerListener, NetworkStatusListener {
     private final static int BUFFER_SIZE = 65536;
     private Context context;
 
-    private String userName;
+    public String userName;
     private DualSecret keyPair;
     private boolean networkRunning;
 
@@ -55,10 +56,12 @@ public class StressTestNode implements PeerListener, NetworkStatusListener {
         addInitialPeer();
         startListenThread();
         startSendThread();
+        StatisticsServer.getInstance().start(this);
 
         Runnable refreshTask = () -> {
             while(true) {
-                updatePeerLists();
+                peerHandler.removeDeadPeers();
+                peerHandler.splitPeerList();
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
@@ -194,15 +197,14 @@ public class StressTestNode implements PeerListener, NetworkStatusListener {
      */
     @Override
     public void updatePeerLists() {
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
-            @Override
-            public void run() {
-                synchronized (this) {
-                    peerHandler.removeDeadPeers();
-                    peerHandler.splitPeerList();
-                }
-            }
-        });
+//        new Handler(Looper.getMainLooper()).post(new Runnable() {
+//            @Override
+//            public void run() {
+//                synchronized (this) {
+//
+//                }
+//            }
+//        });
     }
 
     /**
@@ -348,6 +350,11 @@ public class StressTestNode implements PeerListener, NetworkStatusListener {
     @Override
     public PeerHandler getPeerHandler() {
         return peerHandler;
+    }
+
+    @Override
+    public String getName() {
+        return userName;
     }
 
     @Override

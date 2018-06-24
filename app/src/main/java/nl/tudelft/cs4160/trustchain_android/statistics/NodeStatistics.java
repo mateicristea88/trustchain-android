@@ -1,24 +1,43 @@
 package nl.tudelft.cs4160.trustchain_android.statistics;
 
+import android.os.Build;
+import android.support.annotation.RequiresApi;
+
+import nl.tudelft.cs4160.trustchain_android.network.NetworkStatusListener;
+
 public interface NodeStatistics {
-    void messageSent();
-    void messageReceived();
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    void messageSent(NetworkStatusListener name);
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    void messageReceived(NetworkStatusListener name);
 
-    void introductionRequestSent();
-    void introductionRequestReceived();
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    void introductionRequestSent(NetworkStatusListener name);
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    void introductionRequestReceived(NetworkStatusListener name);
 
-    void introductionResponseSent();
-    void introductionResponseReceived();
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    void introductionResponseSent(NetworkStatusListener name);
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    void introductionResponseReceived(NetworkStatusListener name);
 
-    void punctureReceived();
-    void punctureSent();
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    void punctureReceived(NetworkStatusListener name);
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    void punctureSent(NetworkStatusListener name);
 
-    void punctureRequestReceived();
-    void punctureRequestSent();
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    void punctureRequestReceived(NetworkStatusListener name);
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    void punctureRequestSent(NetworkStatusListener name);
 
-    void blockMessageReceived();
-    void blockMessageSent();
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    void blockMessageReceived(NetworkStatusListener name);
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    void blockMessageSent(NetworkStatusListener name);
 
-    void bytesSent(int bytes);
-    void bytesReceived(int bytes);
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    void bytesSent(NetworkStatusListener name, int bytes);
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    void bytesReceived(NetworkStatusListener name, int bytes);
 }

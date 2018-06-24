@@ -3,6 +3,7 @@ package nl.tudelft.cs4160.trustchain_android.network;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.util.Log;
 
 import com.google.protobuf.ByteString;
@@ -40,7 +41,7 @@ public class Network {
     private final String TAG = this.getClass().getName();
     private static final int BUFFER_SIZE = 65536;
     private DatagramChannel channel;
-    private String name;
+    public String name;
     private int connectionType;
     private InetSocketAddress internalSourceAddress;
     private static Network network;
@@ -198,7 +199,9 @@ public class Network {
                 .setType(INTRODUCTION_REQUEST_ID)
                 .setPayload(MessageProto.Payload.newBuilder().setIntroductionRequest(request));
 
-        statistics.introductionRequestSent();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            statistics.introductionRequestSent(networkStatusListener);
+        }
         sendMessage(messageBuilder.build(), peer);
     }
 
@@ -218,6 +221,9 @@ public class Network {
                 .setPayload(MessageProto.Payload.newBuilder().setBlock(block))
                 .build();
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            statistics.blockMessageSent(networkStatusListener);
+        }
         sendMessage(message, peer);
     }
 
@@ -262,7 +268,9 @@ public class Network {
                 .setPayload(MessageProto.Payload.newBuilder().setPunctureRequest(pRequest))
                 .build();
 
-        statistics.punctureRequestSent();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            statistics.punctureRequestSent(networkStatusListener);
+        }
         sendMessage(message, peer);
     }
 
@@ -286,7 +294,9 @@ public class Network {
                 .setPayload(MessageProto.Payload.newBuilder().setPuncture(puncture))
                 .build();
 
-        statistics.punctureSent();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            statistics.punctureSent(networkStatusListener);
+        }
         sendMessage(message, peer);
     }
 
@@ -320,7 +330,9 @@ public class Network {
                 .setPayload(MessageProto.Payload.newBuilder().setIntroductionResponse(response))
                 .build();
 
-        statistics.introductionResponseSent();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            statistics.introductionResponseSent(networkStatusListener);
+        }
         sendMessage(message, peer);
     }
 
@@ -335,10 +347,12 @@ public class Network {
         ByteBuffer outputBuffer = ByteBuffer.allocate(BUFFER_SIZE);
         outputBuffer = outputBuffer.wrap(message.toByteArray());
         channel.send(outputBuffer, peer.getAddress());
-        statistics.bytesSent(outputBuffer.position());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            statistics.bytesSent(networkStatusListener, outputBuffer.position());
+            statistics.messageSent(networkStatusListener);
+        }
         Log.i(TAG, "Sending to " + peer.getName() + ":\n" + message);
         peer.sentData();
-        statistics.messageSent();
     }
 
     /**
@@ -378,8 +392,10 @@ public class Network {
                     return;
                 }
 
-                statistics.messageReceived();
-                statistics.bytesReceived(data.remaining());
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    statistics.messageReceived(networkStatusListener);
+                    statistics.bytesReceived(networkStatusListener, data.remaining());
+                }
                 peer.receivedData();
                 PubKeyAndAddressPairStorage.addPubkeyAndAddressPair(context, sourcePubKey, address);
                 handleMessage(peer, message, sourcePubKey, context);
@@ -401,23 +417,33 @@ public class Network {
     public void handleMessage(Peer peer, Message message, PublicKeyPair pubKeyPair, Context context) throws Exception {
         switch (message.getType()) {
             case INTRODUCTION_REQUEST_ID:
-                statistics.introductionRequestReceived();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    statistics.introductionRequestReceived(networkStatusListener);
+                }
                 messageHandler.handleIntroductionRequest(peer, message.getPayload().getIntroductionRequest());
                 break;
             case INTRODUCTION_RESPONSE_ID:
-                statistics.introductionResponseReceived();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    statistics.introductionResponseReceived(networkStatusListener);
+                }
                 messageHandler.handleIntroductionResponse(peer, message.getPayload().getIntroductionResponse());
                 break;
             case PUNCTURE_ID:
-                statistics.punctureReceived();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    statistics.punctureReceived(networkStatusListener);
+                }
                 messageHandler.handlePuncture(peer, message.getPayload().getPuncture());
                 break;
             case PUNCTURE_REQUEST_ID:
-                statistics.punctureRequestReceived();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    statistics.punctureRequestReceived(networkStatusListener);
+                }
                 messageHandler.handlePunctureRequest(peer, message.getPayload().getPunctureRequest());
                 break;
             case BLOCK_MESSAGE_ID:
-                statistics.blockMessageReceived();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    statistics.blockMessageReceived(networkStatusListener);
+                }
                 TrustChainBlock block = message.getPayload().getBlock();
 
                 // update the inbox
@@ -438,6 +464,10 @@ public class Network {
 
     public MessageHandler getMessageHandler() {
         return messageHandler;
+    }
+
+    public NetworkStatusListener getStatusListener() {
+        return networkStatusListener;
     }
 
     /**
