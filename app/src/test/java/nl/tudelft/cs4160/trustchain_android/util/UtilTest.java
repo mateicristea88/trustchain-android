@@ -42,7 +42,7 @@ public class UtilTest {
     String longStringFirst6;
     String shortString;
     String shortStringFirst6;
-    final String testAssets = "app/src/test/test_assets/";
+    final String testAssets = "src/test/test_assets/";
     final File testInput = new File(testAssets + "testInput.txt");
 
     @Mock
