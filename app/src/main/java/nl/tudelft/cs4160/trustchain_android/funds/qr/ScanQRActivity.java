@@ -38,12 +38,10 @@ public class ScanQRActivity extends AppCompatActivity {
     public static final int PERMISSIONS_REQUEST_CAMERA = 0;
     public static final String TAG = "ScanQRActivity";
 
-
-
     private Vibrator vibrator;
     private ZXingScannerView scannerView;
 
-    private TrustChainBlockFactory trustChainBlockFactory = new TrustChainBlockFactory();
+    private TrustChainBlockFactory trustChainQRBlockFactory = new TrustChainBlockFactory();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -70,7 +68,6 @@ public class ScanQRActivity extends AppCompatActivity {
                         requestCameraPermission();
                     }
                 };
-
 
                 new AlertDialog.Builder(this).setTitle(R.string.camera_permissions_required)
                         .setMessage(R.string.camera_permisions_required_long)
@@ -160,11 +157,11 @@ public class ScanQRActivity extends AppCompatActivity {
 
         DualSecret ownKeyPair = Key.loadKeys(this);
         TrustChainDBHelper helper = new TrustChainDBHelper(this);
-        MessageProto.TrustChainBlock block = trustChainBlockFactory.createBlock(wallet, helper, ownKeyPair);
+        MessageProto.TrustChainBlock block = trustChainQRBlockFactory.createBlock(wallet, helper, ownKeyPair);
 
         try {
 //            TrustChainBlock.validate(block, helper);
-            MessageProto.TrustChainBlock halfblock = trustChainBlockFactory.reconstructTemporaryIdentityHalfBlock(wallet);
+            MessageProto.TrustChainBlock halfblock = trustChainQRBlockFactory.reconstructTemporaryIdentityHalfBlock(wallet);
 
             helper.insertInDB(halfblock);
             helper.insertInDB(block);

@@ -1,9 +1,12 @@
 package nl.tudelft.cs4160.trustchain_android.main;
 
+import android.animation.ArgbEvaluator;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import nl.tudelft.cs4160.trustchain_android.R;
+import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
 import nl.tudelft.cs4160.trustchain_android.inbox.InboxItem;
 import nl.tudelft.cs4160.trustchain_android.peer.Peer;
@@ -34,8 +38,6 @@ public class PeerListAdapter extends ArrayAdapter<Peer> {
         TextView mLastReceived;
         TextView mDestinationAddress;
         TextView mStatusIndicator;
-        TextView mReceivedIndicator;
-        TextView mSentIndicator;
         TableLayout mTableLayoutConnection;
     }
 
@@ -60,8 +62,6 @@ public class PeerListAdapter extends ArrayAdapter<Peer> {
             holder.mLastSent = convertView.findViewById(R.id.last_sent);
             holder.mLastReceived = convertView.findViewById(R.id.last_received);
             holder.mDestinationAddress = convertView.findViewById(R.id.destination_address);
-            holder.mReceivedIndicator = convertView.findViewById(R.id.received_indicator);
-            holder.mSentIndicator = convertView.findViewById(R.id.sent_indicator);
             holder.mTableLayoutConnection = convertView.findViewById(R.id.tableLayoutConnection);
             convertView.setTag(holder);
         } else {
@@ -103,25 +103,39 @@ public class PeerListAdapter extends ArrayAdapter<Peer> {
             holder.mDestinationAddress.setText(String.format("%s:%d", peer.getIpAddress().toString().substring(1), peer.getPort()));
         }
 
-        if (System.currentTimeMillis() - peer.getLastSentTime() < 200) {
-            animate(holder.mSentIndicator);
-        }
         if (System.currentTimeMillis() - peer.getLastReceivedTime() < 200) {
-            animate(holder.mReceivedIndicator);
+            animate(holder.mLastReceived, context.getResources().getColor(R.color.colorReceived));
         }
+
+        if (System.currentTimeMillis() - peer.getLastSentTime() < 200) {
+            animate(holder.mLastSent, context.getResources().getColor(R.color.colorSent));
+
+        }
+
         setOnClickListener(holder.mTableLayoutConnection, position);
 
         if(peer.isReceivedFrom()) {
-            holder.mLastReceived.setText(Util.timeToString(System.currentTimeMillis() - peer.getLastReceivedTime()));
+            holder.mLastReceived.setText(context.getString(R.string.last_received,
+                    Util.timeToString(System.currentTimeMillis() - peer.getLastReceivedTime())));
         }
-        holder.mLastSent.setText(Util.timeToString(System.currentTimeMillis() - peer.getLastSentTime()));
+        holder.mLastSent.setText(context.getString(R.string.last_sent,
+                Util.timeToString(System.currentTimeMillis() - peer.getLastSentTime())));
 
         return convertView;
     }
 
-    private void animate(final View view) {
-        view.setAlpha(1);
-        view.animate().alpha(0).setDuration(500).start();
+    /**
+     * Animate the textview so it changes color for 500ms
+     * @param view The textview that will change color
+     * @param toColor The color that it will change to
+     */
+    private void animate(final TextView view, int toColor) {
+        ObjectAnimator colorAnim = ObjectAnimator.ofInt(view, "textColor",
+            toColor,
+            context.getResources().getColor(android.R.color.secondary_text_light));
+        colorAnim.setDuration(500);
+        colorAnim.setEvaluator(new ArgbEvaluator());
+        colorAnim.start();
     }
 
     private String connectionTypeString(int connectionType) {
@@ -163,6 +177,10 @@ public class PeerListAdapter extends ArrayAdapter<Peer> {
                     InboxItemStorage.addInboxItem(context, i);
                     Snackbar mySnackbar = Snackbar.make(coordinatorLayout,
                             context.getString(R.string.snackbar_peer_added,peer.getName()), Snackbar.LENGTH_SHORT);
+                    // set max lines so long peer names will still display properly
+                    TextView snackbarTextView = mySnackbar.getView().findViewById(android.support.design.R.id.snackbar_text);
+                    snackbarTextView.setMaxLines(1);
+                    snackbarTextView.setEllipsize(TextUtils.TruncateAt.MIDDLE);
                     mySnackbar.show();
                 } else {
                     Snackbar mySnackbar = Snackbar.make(coordinatorLayout,

@@ -15,8 +15,8 @@ import java.util.Arrays;
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
-import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.main.UserConfigurationActivity;
+import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    android:id="@+id/layout_send_claim"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="nl.tudelft.cs4160.trustchain_android.offline.SendOfflineActivity"
+    tools:showIn="@layout/activity_send_offline">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/send_beam"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:layout_marginBottom="10dp"
+                android:background="@color/colorPrimary"
+                android:onClick="invokeBeam"
+                android:padding="5dp"
+                android:text="@string/button_send_android_beam" />
+
+            <Button
+                android:id="@+id/send_qr"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:layout_marginBottom="10dp"
+                android:background="@color/colorPrimary"
+                android:onClick="showQRCode"
+                android:padding="5dp"
+                android:text="@string/button_send_qr_code" />
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/qr_progress"
+            android:layout_marginTop="40dp"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            />
+
+        <ImageView
+            android:id="@+id/qr_image"
+            android:layout_marginTop="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+
+    <!-- The view below pushes the button under it to the bottom -->
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+    <Button
+        android:id="@+id/receive_completed"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:background="@color/colorPrimary"
+        android:visibility="gone"
+        android:layout_gravity="center"
+        android:padding="5dp"
+        android:text="@string/receive_completed" />
+    <Button
+        android:id="@+id/return_home"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:background="@color/colorPrimary"
+        android:visibility="gone"
+        android:layout_gravity="center"
+        android:padding="5dp"
+        android:text="@string/return_home" />
+
+    </LinearLayout>
+</android.support.constraint.ConstraintLayout>

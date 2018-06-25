@@ -54,6 +54,7 @@ public class TrustChainBlockHelper {
      * @param mypubk - the public key of this peer
      * @param linkedBlock - The halfblock that is linked to this to be created half block, can be null
      * @param linkpubk - The public key of the linked peer
+     * @param claim - Clam object is this block contains a claim, null otherwise
      * @return a new half block
      */
     public static MessageProto.TrustChainBlock createBlock(byte[] transaction, String format, TrustChainDBHelper dbHelper,

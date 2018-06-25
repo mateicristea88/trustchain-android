@@ -43,6 +43,7 @@ public class Network {
     private int connectionType;
     private static InetSocketAddress internalSourceAddress;
     private static Network network;
+    private TrustChainDBHelper dbHelper;
     private PublicKeyPair publicKey;
     private MessageHandler messageHandler;
     private static NetworkStatusListener networkStatusListener;
@@ -81,7 +82,8 @@ public class Network {
      */
     private void initVariables(Context context) {
         publicKey = Key.loadKeys(context).getPublicKeyPair();
-        messageHandler = new MessageHandler(network, new TrustChainDBHelper(context),
+        dbHelper = new TrustChainDBHelper(context);
+        messageHandler = new MessageHandler(network, dbHelper,
                 new PeerHandler(publicKey,UserNameStorage.getUserName(context)));
         name = UserNameStorage.getUserName(context);
         openChannel();
@@ -142,22 +144,20 @@ public class Network {
     }
 
     /**
-     * Request and display the current connection type.
+     * Request and return the current connection type.
+     * @return a string representation of the current connection type
      */
-    public void updateConnectionType(ConnectivityManager cm) {
+    public String getConnectionTypeString(ConnectivityManager cm) {
+        String typename = "No connection";
+        String subtypeName = "";
         try {
-            cm.getActiveNetworkInfo().getType();
-        } catch (Exception e) {
-            return;
-        }
+            connectionType = cm.getActiveNetworkInfo().getType();
+            typename = cm.getActiveNetworkInfo().getTypeName();
+            subtypeName = cm.getActiveNetworkInfo().getSubtypeName();
+        } catch(Exception e) {
 
-        connectionType = cm.getActiveNetworkInfo().getType();
-        String typename = cm.getActiveNetworkInfo().getTypeName();
-        String subtypeName = cm.getActiveNetworkInfo().getSubtypeName();
-
-        if (networkStatusListener != null) {
-            networkStatusListener.updateConnectionType(connectionType, typename, subtypeName);
         }
+        return typename + " " + subtypeName;
     }
 
     /**
@@ -311,17 +311,14 @@ public class Network {
     private synchronized void sendMessage(Message message, Peer peer) throws IOException {
         ByteBuffer outputBuffer = ByteBuffer.allocate(BUFFER_SIZE);
         channel.send(outputBuffer.wrap(message.toByteArray()), peer.getAddress());
-        Log.d(TAG, "Sending " + message);
+        Log.v(TAG, "Sending " + message);
         peer.sentData();
-        if (networkStatusListener != null) {
-            networkStatusListener.updatePeerLists();
-        }
     }
 
     /**
      * Show local ip address.
      */
-    private void showLocalIpAddress() {
+    public void showLocalIpAddress() {
         ShowLocalIPTask showLocalIPTask = new ShowLocalIPTask();
         showLocalIPTask.execute();
     }
@@ -344,7 +341,7 @@ public class Network {
 
         try {
             Message message = Message.parseFrom(data);
-            Log.i(TAG, "Received " + message.toString());
+            Log.v(TAG, "Received " + message.toString());
 
             if (networkStatusListener != null) {
                 networkStatusListener.updateWan(message);
@@ -358,7 +355,6 @@ public class Network {
                 peer.receivedData();
                 PubKeyAndAddressPairStorage.addPubkeyAndAddressPair(context, sourcePubKey, address);
                 handleMessage(peer, message, sourcePubKey, context);
-                networkStatusListener.updatePeerLists();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -422,13 +418,19 @@ public class Network {
     }
 
     /**
-     * Add a block reference to the InboxItem and store this again locally.
+     * Add a block reference to the InboxItem and store this again locally if this block is
+     * addressed to us.
      * @param block the block of which the reference should be stored.
      * @param context needed for storage
      */
-    private static void addBlockToInbox(TrustChainBlock block, Context context) {
-        InboxItemStorage.addHalfBlock(context, new PublicKeyPair(block.getPublicKey().toByteArray())
-                , block.getSequenceNumber());
+    private void addBlockToInbox(TrustChainBlock block, Context context) {
+        PublicKeyPair blockLinkPubKey = new PublicKeyPair(block.getLinkPublicKey().toByteArray());
+        PublicKeyPair blockPubKey = new PublicKeyPair(block.getPublicKey().toByteArray());
+        // check if block is addressed to us and whether or not we have already received it.
+        if(blockLinkPubKey.equals(publicKey) &&
+                dbHelper.getBlock(blockPubKey.toBytes(),block.getSequenceNumber()) == null) {
+            InboxItemStorage.addHalfBlock(context, blockPubKey, block.getSequenceNumber());
+        }
     }
 
     public MessageHandler getMessageHandler() {

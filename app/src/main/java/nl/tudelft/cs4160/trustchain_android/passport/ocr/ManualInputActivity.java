@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -45,10 +44,9 @@ public class ManualInputActivity extends AppCompatActivity {
         final Activity thisActivity = this;
         submitBut.setOnClickListener(view -> {
             if(verifyInput()) {
-                Intent returnIntent = new Intent(thisActivity, PassportConActivity.class);
-                returnIntent.putExtra(DocumentData.identifier, getData());
-                setResult(Activity.RESULT_OK, returnIntent);
-                startActivity(returnIntent);
+                Intent intent = new Intent(thisActivity, PassportConActivity.class);
+                intent.putExtra(DocumentData.identifier, getData());
+                startActivity(intent);
             }
         });
         setupDOBSpinners();

@@ -9,6 +9,6 @@ public interface NetworkStatusListener {
     void updateInternalSourceAddress(String address);
     void updatePeerLists();
     void updateWan(MessageProto.Message message) throws UnknownHostException;
-    void updateConnectionType(int connectionType, String typename, String subtypename);
+    void updateConnectionType(String connectionTypeStr);
     PeerHandler getPeerHandler();
 }

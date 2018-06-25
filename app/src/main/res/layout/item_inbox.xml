@@ -7,90 +7,92 @@
     android:orientation="vertical">
 
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="1dp"
         android:background="@android:color/white"
         android:gravity="center_vertical">
 
-        <TextView
-            android:id="@+id/status_indicator"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:text="@string/circle_symbol"
-            android:textAlignment="center"
-            android:textColor="@color/colorAccent"
-            android:textSize="20sp" />
+            <TextView
+                android:id="@+id/status_indicator"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="10dp"
+                android:gravity="center_vertical"
+                android:text="@string/circle_symbol"
+                android:textColor="@color/colorAccent"
+                android:textSize="20sp" />
 
 
-        <TextView
-            android:id="@+id/userNameTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/activity_horizontal_margin"
-            android:textColor="#000000"
-            android:textStyle="bold"
-            tools:text="User Name" />
+            <TextView
+                android:id="@+id/userNameTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_toLeftOf="@id/addressTextView"
+                android:layout_toRightOf="@id/status_indicator"
+                android:layout_marginLeft="10dp"
+                android:gravity="center_vertical"
+                android:ellipsize="middle"
+                android:singleLine="true"
+                android:textColor="#000000"
+                android:textStyle="bold"
+                tools:hint="User Name" />
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+            <TextView
+                android:id="@+id/addressTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_toLeftOf="@id/message_notification"
+                android:gravity="center_vertical"
+                android:ellipsize="middle"
+                android:singleLine="true"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:textStyle="bold"
+                tools:hint="ip address" />
 
-        <TextView
-            android:id="@+id/addressTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/activity_horizontal_margin"
-            android:textStyle="bold"
-            tools:text="192.168.1.1:4242" />
-
-
-        <RelativeLayout
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:layout_marginEnd="@dimen/activity_horizontal_margin"
-            android:layout_marginStart="@dimen/activity_horizontal_margin"
-            android:gravity="center_vertical">
-
-            <ImageView
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:src="@drawable/ic_mail" />
 
             <RelativeLayout
-                android:id="@+id/counterRelativeLayout"
-                android:layout_width="17dp"
-                android:layout_height="17dp"
-                android:layout_marginStart="15dp"
-                android:layout_marginTop="12dp"
-                android:visibility="visible">
+                android:id="@+id/message_notification"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_alignParentRight="true"
+                android:gravity="center_vertical"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_marginRight="@dimen/activity_horizontal_margin">
 
                 <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/ic_mail" />
+
+                <RelativeLayout
+                    android:id="@+id/counterRelativeLayout"
                     android:layout_width="17dp"
                     android:layout_height="17dp"
-                    android:src="@drawable/circle" />
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="12dp"
+                    android:visibility="visible">
 
-                <TextView
-                    android:id="@+id/counterTextView"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="!"
-                    android:textColor="@android:color/white"
-                    android:textSize="10sp"
-                    android:textStyle="bold" />
+                    <ImageView
+                        android:layout_width="17dp"
+                        android:layout_height="17dp"
+                        android:src="@drawable/circle" />
+
+                    <TextView
+                        android:id="@+id/counterTextView"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="!"
+                        android:textColor="@android:color/white"
+                        android:textSize="10sp"
+                        android:textStyle="bold" />
+                </RelativeLayout>
+
             </RelativeLayout>
 
-        </RelativeLayout>
-
-    </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@android:color/black" />
+    </RelativeLayout>
 
 </LinearLayout>

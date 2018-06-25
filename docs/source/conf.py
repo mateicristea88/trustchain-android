@@ -177,6 +177,10 @@ texinfo_documents = [
      'Miscellaneous'),
 ]
 
+# This config value must be a dictionary of external sites, mapping unique short alias names to a base URL and a prefix. For example, to create an alias for the above mentioned issues, you would add
+# see: http://www.sphinx-doc.org/en/master/ext/extlinks.html
+extlinks = {'base_repo': ('https://github.com/klikooo/CS4160-trustchain-android/blob/master/app/src/main/java/nl/tudelft/cs4160/trustchain_android//%s',
+                      'link ')}
 
 
 
