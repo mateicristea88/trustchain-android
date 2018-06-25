@@ -118,13 +118,14 @@ public class InboxAdapter extends RecyclerView.Adapter<InboxAdapter.ViewHolder> 
                 h.mAddressTextView.setText(peer.getIpAddress().getHostAddress() + ":" + peer.getPort());
 
                 h.mStatusTextView.setTextColor(h.mAddressTextView.getContext().getResources().getColor(R.color.colorStatusCantConnect));
-                for (Peer curr : peerList) {
-                    if (peer.equals(curr)) {
-                        if (curr.isAlive()) {
-                            h.mStatusTextView.setTextColor(h.mAddressTextView.getContext().getResources().getColor(R.color.colorStatusConnected));
+                if(peerList != null)
+                    for (Peer curr : peerList) {
+                        if (peer.equals(curr)) {
+                            if (curr.isAlive()) {
+                                h.mStatusTextView.setTextColor(h.mAddressTextView.getContext().getResources().getColor(R.color.colorStatusConnected));
+                            }
                         }
                     }
-                }
             }
         }
     }

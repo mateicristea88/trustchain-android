@@ -40,6 +40,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import nl.tudelft.cs4160.trustchain_android.R;
 import nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper;
 import nl.tudelft.cs4160.trustchain_android.chainExplorer.ChainExplorerActivity;
+import nl.tudelft.cs4160.trustchain_android.offline.ReceiveOfflineActivity;
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.funds.FundsActivity;
@@ -194,6 +195,11 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
             case R.id.chain_menu:
                 Intent chainExplorerActivity = new Intent(this, ChainExplorerActivity.class);
                 startActivity(chainExplorerActivity);
+                return true;
+            case R.id.receive_offline:
+                Intent intent = new Intent(this, ReceiveOfflineActivity.class);
+                intent.putExtra("return", true);
+                startActivity(intent);
                 return true;
             case R.id.connection_explanation_menu:
                 Intent ConnectionExplanationActivity = new Intent(this, ConnectionExplanationActivity.class);

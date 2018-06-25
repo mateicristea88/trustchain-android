@@ -16,7 +16,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,6 +23,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,6 +46,8 @@ import nl.tudelft.cs4160.trustchain_android.inbox.InboxItem;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.network.CrawlRequestListener;
 import nl.tudelft.cs4160.trustchain_android.network.Network;
+import nl.tudelft.cs4160.trustchain_android.offline.ReceiveOfflineActivity;
+import nl.tudelft.cs4160.trustchain_android.offline.SendOfflineActivity;
 import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.InboxItemStorage;
 import nl.tudelft.cs4160.trustchain_android.util.FileDialog;
@@ -76,6 +78,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
     private File transactionDocument;
     private TextView selectedFilePath;
     private Button sendButton;
+    private CheckBox sendOffline;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,6 +117,10 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
                 Intent chainExplorerActivity = new Intent(this, ChainExplorerActivity.class);
                 startActivity(chainExplorerActivity);
                 return true;
+            case R.id.receive_offline:
+                Intent receiveOfflineActivity = new Intent(this, ReceiveOfflineActivity.class);
+                startActivity(receiveOfflineActivity);
+                return true;
             case R.id.close:
                 if (Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT) {
                     ((ActivityManager) getApplicationContext().getSystemService(ACTIVITY_SERVICE))
@@ -132,13 +139,11 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
      * such as local and external ip
      */
     private void initVariables() {
-        statusText = findViewById(R.id.status);
-        statusText.setMovementMethod(new ScrollingMovementMethod());
-
         messageEditText = findViewById(R.id.message_edit_text);
         mRecyclerView = findViewById(R.id.mutualBlocksRecyclerView);
         selectedFilePath = findViewById(R.id.selected_path);
         sendButton = findViewById(R.id.send_button);
+        sendOffline = findViewById(R.id.send_offline_checkbox);
 
         dbHelper = new TrustChainDBHelper(this);
         network = Network.getInstance(getApplicationContext());
@@ -249,7 +254,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
 
         final MessageProto.TrustChainBlock block = createBlock(transactionData, format, DBHelper, publicKey, null, inboxItemOtherPeer.getPeer().getPublicKeyPair().toBytes());
         final MessageProto.TrustChainBlock signedBlock = TrustChainBlockHelper.sign(block, Key.loadKeys(getApplicationContext()).getSigningKey());
-        Log.d(TAG, "Signed block is " + signedBlock.toByteArray().length + " bytes");
+
         messageEditText.setText("");
         messageEditText.clearFocus();
         InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -257,17 +262,23 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
         // insert the half block in your own chain
         new TrustChainDBHelper(this).insertInDB(signedBlock);
 
-
-        new Thread(() -> {
-            try {
-                network.sendBlockMessage(inboxItemOtherPeer.getPeer(), signedBlock);
-                Snackbar mySnackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout),"Half block send!", Snackbar.LENGTH_SHORT);
-                mySnackbar.show();
-            } catch (IOException e) {
-                e.printStackTrace();
-                Snackbar.make(findViewById(R.id.myCoordinatorLayout),e.getMessage(), Snackbar.LENGTH_LONG);
-            }
-        }).start();
+        if (sendOffline.isChecked()) {
+            Intent intent = new Intent(this, SendOfflineActivity.class);
+            intent.putExtra("block", signedBlock);
+            intent.putExtra("return", true);
+            startActivity(intent);
+        } else {
+            new Thread(() -> {
+                try {
+                    network.sendBlockMessage(inboxItemOtherPeer.getPeer(), signedBlock);
+                    Snackbar mySnackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout),"Half block send!", Snackbar.LENGTH_SHORT);
+                    mySnackbar.show();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Snackbar.make(findViewById(R.id.myCoordinatorLayout),e.getMessage(), Snackbar.LENGTH_LONG);
+                }
+            }).start();
+        }
     }
 
     /**
