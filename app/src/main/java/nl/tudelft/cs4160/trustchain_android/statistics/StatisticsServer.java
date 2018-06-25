@@ -8,6 +8,9 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import nl.tudelft.cs4160.trustchain_android.network.NetworkStatusListener;
 
@@ -61,12 +64,9 @@ public class StatisticsServer implements NodeStatistics {
         blockMessagesReceived.put(node, 0);
         crawlRequestsReceived.put(node, 0);
 
-        Timer timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            public void run() {
-                logStats(node);
-            }
-        }, 0, 10000);
+        ScheduledExecutorService scheduler =
+                Executors.newScheduledThreadPool(10);
+        scheduler.scheduleAtFixedRate(() -> logStats(node), 0, 10000, TimeUnit.MILLISECONDS);
     }
 
     private void logStats(NetworkStatusListener node) {
