@@ -13,13 +13,12 @@ TrustChain Android
    trustchain
    creating-block
    connection
-   protocolbuffers
-   database
    inbox
    chainexplorer
-   crypto
    wallet
-   tokens
    passport
+   protocolbuffers
+   database
+   crypto
    installation-instructions
    contact

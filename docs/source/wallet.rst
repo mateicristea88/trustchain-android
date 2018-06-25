@@ -2,7 +2,13 @@
 Wallet
 ************
 
-The wallet management works with a new `Tribler <https://www.tribler.org>`_ concept, called the reputation of each user. This reputation is based on the amount of data uploaded and downloaded, and the simple subtraction of these two quantities provides a number representing it. This number gives a positive value when the user is uploading more content than downloading, therefore contributing positively to the overall system. It will be referred in terms of tokens, that account for the reputation of the user, and can be transferred.
+The wallet management works with a new `Tribler <https://www.tribler.org>`_ concept, called the reputation of each user. This reputation is based on the amount of data uploaded and downloaded, and the simple subtraction of these two quantities provides a number representing it. This number gives a positive value when the user is uploading more content than downloading, therefore contributing positively to the overall system. It will be referred in terms of :ref:`tokens <tokens>`, that account for the reputation of the user, and can be transferred.
+
+.. _tokens:
+
+Tokens
+======
+Each transaction holds the values up, down, total_up and total_down. When receiving the first half of a block, the receiver flips up and down, and sets the total_up and total_down for itself based on the content of the transaction.
 
 Import of tokens from PC
 ========================
@@ -52,3 +58,7 @@ Which will result in the following QR code:
 .. figure:: ./images/example-qr.jpg 
 	:width: 300px
 
+Links to code
+=============
+* :base-repo:`The funds package <funds>` - holds the main wallet classes
+* :base-repo:`Classes for importing and exporting funds using QR codes <funds/qr>`

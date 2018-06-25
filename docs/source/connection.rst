@@ -1,7 +1,7 @@
 .. _connection:
 
 ************************
-Connection to a peer
+Connection between peers
 ************************
 
 In order to be part of the network, you need to be connected to other people (peers). The underlying protocol for finding peers was taken from `App-To-App Communicator <https://github.com/Tribler/app-to-app-communicator>`_. This network overlay enables a peer to discover more peers through peers they are already connected with. By default firewalls will block incoming connections from unknown sources. The protocol makes use of `UDP hole punching <https://en.wikipedia.org/wiki/UDP_hole_punching>`_ to circumvent this and setup direct connections between peers. Basically this uses a mutual friend to initiate a connection between two peers who are unknown to each other.
@@ -109,8 +109,16 @@ Therefore the offline send feature should only be used when there is no network 
 
 Networking classes and their responsibilities
 =============================================
-There are two main classes which have to do with networking. :base-repo:`Network <network/Network.java>` and :base-repo:`OverviewConnectionsActivity <main/OverviewConnectionsActivity.java>`.
+There are two main classes which have to do with networking. :base-repo:`Network <network/Network.java>` and :base-repo:`MessageHandler <network/MessageHandler.java>`.
 
 The Network class is a singleton class and is responsible for sending and receiving messages. It has a datagram channel which has a socket bound to a local port (default 1873). Through this channel messages are send and received to and from peers. The network class has methods to build the different messages of the protocol.
 
-The OverviewConnectionsActivity class is responsible for handling the messages after they have been deserialized. Furthermore it updates the information in the UI based on the messages it receives. This includes adding and removing peers and updating the connection information.
+The MessageHandler is responsible for handling the messages after they have been deserialized. It decides on how to respond to a received message.
+
+=============
+Links to code
+=============
+* :base-repo: `Network class (Network.java) <network/Network.java>`
+* :base-repo: `Message handling (MessageHandler.java) <network/MessageHandler.java>`
+* :base-repo:`Offline sending and receiving <offline>`
+

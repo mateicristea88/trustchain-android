@@ -63,3 +63,7 @@ The user can also see all the blocks that they have sent to a peer and blocks th
 
 	Viewing received blocks and signing of a block
 
+Links to code
+=============
+* :base-repo:`The inbox package <inbox>`
+

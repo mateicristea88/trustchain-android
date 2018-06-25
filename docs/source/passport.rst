@@ -44,6 +44,14 @@ The image on the left is the CameraActivity and the image on the right is the Ma
 
 The image on the left shows the PassportConActivity with the hex number 'eab63f7d' is going to be signed. The right image shows the same Activity with the resulting signature in hexadecimal as response from the passport.
 
+=============
+Links to code
+=============
+* :base-repo:`OCR scanner (TesseractOCR.java) <passport/ocr/TesseractOCR.java>`
+* :base-repo:`Passport nfc connection <passport/nfc>`
+
+
+
 
 
 
