@@ -92,11 +92,22 @@ The Network class is a singleton class and is responsible for sending and receiv
 
 The OverviewConnectionsActivity class is responsible for handling the messages after they have been deserialized. Furthermore it updates the information in the UI based on the messages it receives. This includes adding and removing peers and updating the connection information.
 
-Statistics
-==========
-The Network class logs al its sent and received messages into the singleton `Statistics <TODO_add_link>` class. Messages are logged by type. Additionally, the number of sent and receives bytes are also tallied.
-
 Stress Testing
-==============
+===============
 The stress testing feature allows to spin up any desired number of nodes. These nodes start in the `StressTestNode <TODO_add_link>` class, they use their own instances of the `Network` class and provide the `StressTestNode` instance as a PeerListener, instead of the normal `OverviewconnectionActivity`.
 They act just like a normal node, except having no visual displays and generating a new temporary keypair.
+
+Statistics
+===========
+The Network class logs al its sent and received messages into the singleton `StatisticsServer <TODO_add_link>` class. Messages are logged by type and separate statistics are kept for al running nodes. Additional logged data is the number of sent and received bytes and the number of active and new connections.
+
+The StatisticsServer class runs a logging task that prints all statistics, in csv format, to the console at a fixed time interval.
+This csv data can be used to generate graphs to visually show the data using generategraph.py from the python folder, using the following steps:
+
+1. Get data of the desired node by filtering the log output on 'Statistics-<username>'
+2. Copy the data to the text file in the python folder (the timestamps an be left in)
+3. Run 'python generategraph.py <column name>' to generate a graph for the given node and column
+
+example: 'python generategraph.py activeConnections'
+
+

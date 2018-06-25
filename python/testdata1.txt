@@ -1,0 +1,22 @@
+: runtime,messagesSent,messagesReceived,introductionRequestsSent,introductionRequestsReceived,introductionResponsesSent,introductionResponsesReceived,puncturesSent,puncturesReceived,punctureRequestsSent,punctureRequestsReceived,blockMessagesSent,blockMessagesReceived,bytesSentCount,bytesReceivedCount,activeConnections,newConnections
+06-25 16:12:05.074 18805-19070/nl.tudelft.cs4160.trustchain_android I/Statistics-stress_test_user_0: 3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+06-25 16:12:15.073 18805-19070/nl.tudelft.cs4160.trustchain_android I/Statistics-stress_test_user_0: 10002,32,27,7,9,9,7,7,1,9,10,0,0,9258,10187,15,0
+06-25 16:12:25.073 18805-19071/nl.tudelft.cs4160.trustchain_android I/Statistics-stress_test_user_0: 20002,72,46,27,18,18,13,9,1,18,14,0,0,28863,23221,13,3
+06-25 16:12:35.075 18805-19070/nl.tudelft.cs4160.trustchain_android I/Statistics-stress_test_user_0: 30004,121,75,47,34,32,17,10,1,32,23,0,0,56542,34025,14,1
+06-25 16:12:45.074 18805-19202/nl.tudelft.cs4160.trustchain_android I/Statistics-stress_test_user_0: 40002,163,94,67,42,41,23,14,1,41,28,0,0,75960,48776,14,0
+06-25 16:12:55.073 18805-19071/nl.tudelft.cs4160.trustchain_android I/Statistics-stress_test_user_0: 50002,212,120,87,56,55,29,15,1,55,34,0,0,102428,60555,14,0
+06-25 16:13:05.074 18805-19071/nl.tudelft.cs4160.trustchain_android I/Statistics-stress_test_user_0: 60003,251,143,107,65,64,36,16,1,64,41,0,0,120385,72481,14,0
+06-25 16:13:15.073 18805-19070/nl.tudelft.cs4160.trustchain_android I/Statistics-stress_test_user_0: 70002,300,178,127,77,76,46,21,2,76,53,0,0,141562,91264,13,0
+06-25 16:13:25.073 18805-19265/nl.tudelft.cs4160.trustchain_android I/Statistics-stress_test_user_0: 80002,352,216,147,92,91,59,23,4,91,61,0,0,166991,115493,10,0
+06-25 16:13:35.075 18805-19202/nl.tudelft.cs4160.trustchain_android I/Statistics-stress_test_user_0: 90002,421,275,167,114,111,74,32,10,111,77,0,0,201609,147837,12,0
+06-25 16:13:45.073 18805-19202/nl.tudelft.cs4160.trustchain_android I/Statistics-stress_test_user_0: 100002,469,309,187,124,122,81,38,13,122,91,0,0,221834,164908,10,1
+06-25 16:13:55.073 18805-19202/nl.tudelft.cs4160.trustchain_android I/Statistics-stress_test_user_0: 110002,546,380,207,145,143,95,53,17,143,123,0,0,260614,196780,11,1
+06-25 16:14:05.073 18805-19202/nl.tudelft.cs4160.trustchain_android I/Statistics-stress_test_user_0: 120002,579,404,227,151,149,104,54,19,149,130,0,0,273939,213397,13,0
+06-25 16:14:15.079 18805-19202/nl.tudelft.cs4160.trustchain_android I/Statistics-stress_test_user_0: 130008,627,439,237,167,165,113,60,20,165,139,0,0,304554,231514,12,0
+06-25 16:14:25.073 18805-19202/nl.tudelft.cs4160.trustchain_android I/Statistics-stress_test_user_0: 140002,674,472,257,176,174,121,69,20,174,155,0,0,323087,249161,12,0
+06-25 16:14:35.073 18805-19202/nl.tudelft.cs4160.trustchain_android I/Statistics-stress_test_user_0: 150002,727,503,277,190,188,126,74,21,188,166,0,0,348177,262159,11,1
+06-25 16:14:45.073 18805-19202/nl.tudelft.cs4160.trustchain_android I/Statistics-stress_test_user_0: 160002,777,539,297,203,201,137,78,22,201,177,0,0,372290,281464,11,0
+06-25 16:14:55.073 18805-19202/nl.tudelft.cs4160.trustchain_android I/Statistics-stress_test_user_0: 170002,838,579,317,221,219,148,83,23,219,187,0,0,404987,302646,11,0
+06-25 16:15:05.073 18805-19202/nl.tudelft.cs4160.trustchain_android I/Statistics-stress_test_user_0: 180002,882,601,337,233,231,154,83,25,231,189,0,0,426094,313555,11,0
+06-25 16:15:15.073 18805-19202/nl.tudelft.cs4160.trustchain_android I/Statistics-stress_test_user_0: 190002,942,643,357,251,249,162,87,29,249,201,0,0,458782,330942,11,0
+06-25 16:15:25.076 18805-19202/nl.tudelft.cs4160.trustchain_android I/Statistics-stress_test_user_0: 200004,996,682,377,264,262,173,95,32,262,213,0,0,483599,351934,11,0
