@@ -28,6 +28,7 @@ import nl.tudelft.cs4160.trustchain_android.chainExplorer.ChainColor;
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
+import nl.tudelft.cs4160.trustchain_android.main.OverviewConnectionsActivity;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
@@ -35,7 +36,6 @@ import nl.tudelft.cs4160.trustchain_android.util.ByteArrayConverter;
 import nl.tudelft.cs4160.trustchain_android.util.OpenFileClickListener;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class ReceiveOfflineActivity extends AppCompatActivity {
     //TODO check for NFC availability, show settings snackbar
@@ -48,6 +48,7 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
 
     private TextView blockSigned;
     private Button signButton;
+    private Button returnHome;
     public static final int SCAN_QR = 1;
 
     @Override
@@ -77,6 +78,12 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
 
         signButton = findViewById(R.id.sign_button);
         blockSigned = findViewById(R.id.block_signed);
+        returnHome = findViewById(R.id.return_home_button);
+        returnHome.setOnClickListener(view -> {
+            Intent i = new Intent(this, OverviewConnectionsActivity.class);
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(i);
+        });
     }
 
     @Override
@@ -161,6 +168,7 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
             //TODO possible re-verification
             signButton.setVisibility(View.GONE);
             blockSigned.setVisibility(View.VISIBLE);
+            returnHome.setVisibility(View.VISIBLE);
         }
     }
 

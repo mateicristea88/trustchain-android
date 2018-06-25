@@ -34,8 +34,9 @@
             />
 
         <ScrollView
+            android:layout_weight="1"
             android:layout_width="match_parent"
-            android:layout_height="250dp">
+            android:layout_height="0dp">
 
             <include
                 android:id="@+id/block_layout"
@@ -50,6 +51,7 @@
             android:layout_gravity="center"
             android:padding="5dp"
             android:layout_marginTop="10dp"
+            android:layout_marginBottom="20dp"
             style="@style/Widget.AppCompat.Button.Colored"
             android:background="@color/colorPrimary"
             android:text="@string/sign_and_return_block"
@@ -68,5 +70,15 @@
             android:text="@string/block_signed"
             />
 
+        <Button
+            android:id="@+id/return_home_button"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            android:visibility="gone"
+            android:layout_gravity="center"
+            android:padding="5dp"
+            android:text="@string/return_home" />
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>

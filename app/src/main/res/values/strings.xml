@@ -198,4 +198,5 @@
     <string name="receive_completed">Receive completed block</string>
 
     <string name="deny_permission">Deny</string>
+    <string name="return_home">Return</string>
 </resources>

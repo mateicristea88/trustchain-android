@@ -1,7 +1,6 @@
 package nl.tudelft.cs4160.trustchain_android.offline;
 
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -33,6 +32,7 @@ import java.util.HashMap;
 
 import nl.tudelft.cs4160.trustchain_android.R;
 import nl.tudelft.cs4160.trustchain_android.funds.qr.QRGenerator;
+import nl.tudelft.cs4160.trustchain_android.main.OverviewConnectionsActivity;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 
 import static android.nfc.NdefRecord.createMime;
@@ -48,7 +48,7 @@ public class SendOfflineActivity extends AppCompatActivity implements OnNdefPush
     private Button sendQR;
     private Button sendBeam;
     private Button receiveCompleted;
-
+    private Button returnHome;
 
     private MessageProto.TrustChainBlock block;
 
@@ -65,6 +65,12 @@ public class SendOfflineActivity extends AppCompatActivity implements OnNdefPush
         sendQR = findViewById(R.id.send_qr);
         sendBeam = findViewById(R.id.send_beam);
         receiveCompleted = findViewById(R.id.receive_completed);
+        returnHome = findViewById(R.id.return_home_button);
+        returnHome.setOnClickListener(view -> {
+            Intent i = new Intent(this, OverviewConnectionsActivity.class);
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(i);
+        });
 
         if (getIntent().getBooleanExtra("return", true)) {
             receiveCompleted.setOnClickListener(view -> {
@@ -114,42 +120,31 @@ public class SendOfflineActivity extends AppCompatActivity implements OnNdefPush
 
     public void showQRCode(View v) {
         QRProgress.setVisibility(View.VISIBLE);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                QRCodeWriter writer = new QRCodeWriter();
-                HashMap hints = new HashMap();
-                hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
-                hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
-                DisplayMetrics metrics = new DisplayMetrics();
-                getWindowManager().getDefaultDisplay().getMetrics(metrics);
-                int size = metrics.widthPixels;
+        new Thread(() -> {
+            QRCodeWriter writer = new QRCodeWriter();
+            HashMap hints = new HashMap();
+            hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
+            hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
+            DisplayMetrics metrics = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(metrics);
+            int size = metrics.widthPixels;
 
-                Log.e(TAG, block.toByteArray().length + " bytes");
-                try {
-                    BitMatrix matrix = writer.encode(new String(block.toByteArray(), ISO_8859_1), BarcodeFormat.QR_CODE, size, size, hints);
-                    final Bitmap image = QRGenerator.GenerateQRCode(size, matrix);
-                    runOnUiThread(new Runnable() {
-                                      @Override
-                                      public void run() {
-                                          QRImage.setImageBitmap(image);
-                                      }
-                                  }
-                    );
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    runOnUiThread(new Runnable() {
-                                      @Override
-                                      public void run() {
-                                          QRProgress.setVisibility(View.GONE);
-                                          if (getIntent().getBooleanExtra("return", true)) {
-                                              receiveCompleted.setVisibility(View.VISIBLE);
-                                          }
-                                      }
-                                  }
-                    );
-                }
+            Log.e(TAG, block.toByteArray().length + " bytes");
+            try {
+                BitMatrix matrix = writer.encode(new String(block.toByteArray(), ISO_8859_1), BarcodeFormat.QR_CODE, size, size, hints);
+                final Bitmap image = QRGenerator.GenerateQRCode(size, matrix);
+                runOnUiThread(() -> QRImage.setImageBitmap(image));
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                runOnUiThread(() -> {
+                    QRProgress.setVisibility(View.GONE);
+                    if (getIntent().getBooleanExtra("return", true)) {
+                        receiveCompleted.setVisibility(View.VISIBLE);
+                    } else {
+                        returnHome.setVisibility(View.VISIBLE);
+                    }
+                });
             }
         }).start();
     }
@@ -163,11 +158,7 @@ public class SendOfflineActivity extends AppCompatActivity implements OnNdefPush
         }
         builder.setTitle("NFC not supported")
                 .setMessage("NFC or Android Beam is not supported on this device, claims cannot be sent")
-                .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        finish();
-                    }
-                })
+                .setNeutralButton(android.R.string.ok, (dialog, which) -> finish())
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .show();
     }
@@ -189,9 +180,13 @@ public class SendOfflineActivity extends AppCompatActivity implements OnNdefPush
         Log.d(TAG, "Beam transfer complete");
         Activity thisActivity = this;
         runOnUiThread(() -> {
-            Intent intent = new Intent(thisActivity, ReceiveOfflineActivity.class);
-            intent.putExtra("return", false);
-            startActivity(intent);
+            if (getIntent().getBooleanExtra("return", true)) {
+                Intent intent = new Intent(thisActivity, ReceiveOfflineActivity.class);
+                intent.putExtra("return", false);
+                startActivity(intent);
+            } else {
+                returnHome.setVisibility(View.VISIBLE);
+            }
         });
     }
 

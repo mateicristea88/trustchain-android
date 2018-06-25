@@ -47,6 +47,7 @@
 
         <ProgressBar
             android:id="@+id/qr_progress"
+            android:layout_marginTop="40dp"
             style="?android:attr/progressBarStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -61,7 +62,7 @@
             android:layout_height="wrap_content"
             />
 
-
+    <!-- The view below pushes the button under it to the bottom -->
     <View
         android:layout_width="wrap_content"
         android:layout_height="0dp"
@@ -77,6 +78,17 @@
         android:layout_gravity="center"
         android:padding="5dp"
         android:text="@string/receive_completed" />
+    <Button
+        android:id="@+id/return_home"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:background="@color/colorPrimary"
+        android:visibility="gone"
+        android:layout_gravity="center"
+        android:padding="5dp"
+        android:text="@string/return_home" />
 
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>
