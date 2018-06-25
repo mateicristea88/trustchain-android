@@ -11,7 +11,7 @@ For students of the CS4160 Blockchain Engineering course of the TU Delft. You ca
 
 Useful links
 ============
-* `App source code on GitHub <https://github.com/wkmeijer/CS4160-trustchain-android>`_
+* :repo:`App source code on GitHub <>`
 * `TrustChain source code on IPv8 GitHub <https://github.com/qstokkink/py-ipv8/tree/master/ipv8/attestation/trustchain>`_
 * `Dispersy ReadTheDocs <https://dispersy.readthedocs.io/en/devel/>`_
 * `Tribler GitHub <https://github.com/Tribler/tribler>`_

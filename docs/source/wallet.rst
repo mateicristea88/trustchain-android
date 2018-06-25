@@ -25,7 +25,7 @@ QR code
 
 The QR code has to be able to transfer the throw-away identity, while having a total size small enough to make it readable. To that effect, only the essential information is included in it: 
 
-* Private key of the throw-away identity, which includes the private key special crypto format (explained in the :ref:`crypto-label` section).
+* Private key of the throw-away identity, which includes the private key special crypto format (explained in the :ref:`crypto` section).
 * Transaction object, with the up and down quantities.
 * Block hash and sequence number belonging to the half block of the transaction between the sender identity and the throw away one. 
 

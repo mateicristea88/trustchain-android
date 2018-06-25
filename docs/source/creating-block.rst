@@ -23,7 +23,7 @@ Note that ``link_sequence_number`` will be unknown for the created block proposa
 
 Create block
 ============
-There are two situation that require creating a block. Initiating the creation of a transaction with another peer and completing a block that was sent to you by another peer. This is both done using the `TrustChainBlockHelper <https://github.com/klikooo/CS4160-trustchain-android/blob/master/app/src/main/java/nl/tudelft/cs4160/trustchain_android/block/TrustChainBlockHelper.java>`_. This class contains methods for creating, signing, and validating blocks.
+There are two situation that require creating a block. Initiating the creation of a transaction with another peer and completing a block that was sent to you by another peer. This is both done using the :base-repo:`TrustChainBlockHelper <block/TrustChainBlockHelper.java>`. This class contains methods for creating, signing, and validating blocks.
 
 Initiating a transaction
 ------------------------
@@ -57,7 +57,7 @@ For a more detailed explanation of the validation function, please take a look i
 
 Sending a block
 ===============
-There are two methods for sending a block to another party: (TODO: add link to new paragraph message-transmission in connection.rst on branch offline-sending)
+There are :ref:`two methods <message-transmission>` for sending a block to another party:
 
 * Via Internet, using the network overlay
 * Offline, using either QR codes or Android beam
@@ -67,8 +67,8 @@ Note that offline sending will add block to the regular chain, so they will get 
 
 Links to code
 =============
-* `Block structure in ProtocolBuffers (Message.proto) <https://github.com/klikooo/CS4160-trustchain-android/blob/master/app/src/main/java/nl/tudelft/cs4160/trustchain_android/message/Message.proto>`_
-* `All block related methods (TrustChainBlockHelper.java) <https://github.com/klikooo/CS4160-trustchain-android/blob/master/app/src/main/java/nl/tudelft/cs4160/trustchain_android/block/TrustChainBlockHelper.java>`_
+* :base-repo:`Block structure in ProtocolBuffers (Message.proto) <message/Message.proto>`
+* :base-repo:`All block related methods (TrustChainBlockHelper.java) <block/TrustChainBlockHelper.java>`
 
-Also see the `readme on the ipv8 github <https://github.com/qstokkink/py-ipv8/blob/master/doc/trustchain.md>`_
+Also see the :ipv8-repo:`readme on the ipv8 github <doc/trustchain.md>`
 

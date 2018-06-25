@@ -93,5 +93,5 @@ The complete structure of all parsable objects as defined in protocolbuffers.
 
 Links to code
 =============
- * `Structure of message (Message.proto) <https://github.com/klikooo/CS4160-trustchain-android/blob/develop/app/src/main/java/nl/tudelft/cs4160/trustchain_android/message/Message.proto>`_ 
+ * :base-repo:`Structure of message (Message.proto) <message/Message.proto>`
 

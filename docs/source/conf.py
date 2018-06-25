@@ -38,7 +38,8 @@ extensions = ['sphinx.ext.autodoc',
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
-    'sphinx.ext.viewcode']
+    'sphinx.ext.viewcode',
+	'sphinx.ext.extlinks']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['.templates']
@@ -179,8 +180,14 @@ texinfo_documents = [
 
 # This config value must be a dictionary of external sites, mapping unique short alias names to a base URL and a prefix. For example, to create an alias for the above mentioned issues, you would add
 # see: http://www.sphinx-doc.org/en/master/ext/extlinks.html
-extlinks = {'base_repo': ('https://github.com/klikooo/CS4160-trustchain-android/blob/master/app/src/main/java/nl/tudelft/cs4160/trustchain_android//%s',
-                      'link ')}
+extlinks = {
+	'base-repo': 
+		('https://github.com/klikooo/CS4160-trustchain-android/blob/master/app/src/main/java/nl/tudelft/cs4160/trustchain_android/%s', 'url'),
+	'repo':
+	('https://github.com/klikooo/CS4160-trustchain-android/%s', 'url'),
+	'ipv8-repo':
+		('https://github.com/qstokkink/py-ipv8/blob/master/%s', 'url')
+}
 
 
 

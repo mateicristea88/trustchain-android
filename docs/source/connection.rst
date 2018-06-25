@@ -55,7 +55,7 @@ The UI shows when messages are send to a peer by displaying an orange bar below 
 
 Background handling of peers
 ============================
-All operation that are done on peers are done through or make use of the `PeerHandler class <https://github.com/klikooo/CS4160-trustchain-android/blob/master/app/src/main/java/nl/tudelft/cs4160/trustchain_android/peer/PeerHandler.java>`_. This class holds an arraylist of peers currently known and can split these peers into two lists of active peers and new peers. Peers are kept in memory for now, so each time the app is closed all peers have to be rediscovered through the bootstrap server.
+All operation that are done on peers are done through or make use of the :base-repo:`PeerHandler class <peer/PeerHandler.java>`. This class holds an arraylist of peers currently known and can split these peers into two lists of active peers and new peers. Peers are kept in memory for now, so each time the app is closed all peers have to be rediscovered through the bootstrap server.
 
 There are two ways the host can hear about new peers:
 - When a message is received, the sending peer becomes known
@@ -80,12 +80,11 @@ For each peer the following information is stored:
 
 Every second the peer list is checked for dead peers. Dead peers are peers from which no message was received in the last 25 seconds. These dead peers are removed from the peerlist.
 
-
-.. _message-transmission:
-
 Background handling of messages
 ===============================
 Since all messages are created using protocolbuffers, it is easy to rebuild them on reception. When a message is received, the message type is checked and the appropriate functions are called to further handle the message. Messages not build with (the correct) protocolbuffers will simply be discarded.
+
+.. _message-transmission:
 
 Message transmission
 ====================
@@ -110,7 +109,7 @@ Therefore the offline send feature should only be used when there is no network 
 
 Networking classes and their responsibilities
 =============================================
-There are two main classes which have to do with networking. `Network <https://github.com/klikooo/CS4160-trustchain-android/blob/master/app/src/main/java/nl/tudelft/cs4160/trustchain_android/network/Network.java>`_ and `OverviewConnectionsActivity <https://github.com/klikooo/CS4160-trustchain-android/blob/master/app/src/main/java/nl/tudelft/cs4160/trustchain_android/main/OverviewConnectionsActivity.java>`_.
+There are two main classes which have to do with networking. :base-repo:`Network <network/Network.java>` and :base-repo:`OverviewConnectionsActivity <main/OverviewConnectionsActivity.java>`.
 
 The Network class is a singleton class and is responsible for sending and receiving messages. It has a datagram channel which has a socket bound to a local port (default 1873). Through this channel messages are send and received to and from peers. The network class has methods to build the different messages of the protocol.
 
