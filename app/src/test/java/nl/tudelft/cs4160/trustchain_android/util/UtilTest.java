@@ -10,13 +10,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.AdditionalAnswers;
 import org.mockito.Mock;
-import org.mockito.internal.util.io.IOUtil;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -45,7 +42,7 @@ public class UtilTest {
     String longStringFirst6;
     String shortString;
     String shortStringFirst6;
-    final String testAssets = "src/test/test_assets/";
+    final String testAssets = "app/src/test/test_assets/";
     final File testInput = new File(testAssets + "testInput.txt");
 
     @Mock
@@ -98,6 +95,14 @@ public class UtilTest {
         String expected = "12";
         Assert.assertEquals(expected,ellipsize(input,5));
     }
+
+    @Test
+    public void ellipsizeTestZero() throws Exception {
+        String input = "12";
+        String expected = "12";
+        Assert.assertEquals(expected, ellipsize(input, 0));
+    }
+
     @Test
     public void testEllipsizeShort() {
         String a = Util.ellipsize(shortString, 6);

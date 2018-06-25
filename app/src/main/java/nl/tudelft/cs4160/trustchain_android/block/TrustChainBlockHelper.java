@@ -364,10 +364,10 @@ public class TrustChainBlockHelper {
     public static String toString(MessageProto.TrustChainBlock block){
         String res = "Trustchainblock: {\n";
         res += "\tPublic key: " + ByteArrayConverter.bytesToHexString(block.getPublicKey().toByteArray()) + "\n";
-        res += "\tSequence Number: " + block.getSequenceNumber() + "\n";
-        res += "\tLink Public Key: " + ByteArrayConverter.bytesToHexString(block.getLinkPublicKey().toByteArray()) + "\n";
-        res += "\tLink Sequence Number: " + block.getLinkSequenceNumber() + "\n";
-        res += "\tPrevious Hash: " + ByteArrayConverter.bytesToHexString(block.getPreviousHash().toByteArray()) + "\n";
+        res += "\tSequence number: " + block.getSequenceNumber() + "\n";
+        res += "\tLink public key: " + ByteArrayConverter.bytesToHexString(block.getLinkPublicKey().toByteArray()) + "\n";
+        res += "\tLink sequence number: " + block.getLinkSequenceNumber() + "\n";
+        res += "\tPrevious hash: " + ByteArrayConverter.bytesToHexString(block.getPreviousHash().toByteArray()) + "\n";
         res += "\tSignature: " + ByteArrayConverter.bytesToHexString(block.getSignature().toByteArray()) + "\n";
         res += "\tTransaction: \n" + block.getTransaction().getUnformatted().toStringUtf8() + "\n";
         res += "}";
@@ -383,9 +383,9 @@ public class TrustChainBlockHelper {
     public static String toShortString(MessageProto.TrustChainBlock block){
         String res = "Trustchainblock: {\n";
         res += "\tPublic key: " + pubKeyToString(block.getPublicKey().toByteArray(),32) + "\n";
-        res += "\tSequence Number: " + block.getSequenceNumber() + "\n";
-        res += "\tLink Public Key: " + pubKeyToString(block.getLinkPublicKey().toByteArray(),32) + "\n";
-        res += "\tLink Sequence Number: " + block.getLinkSequenceNumber() + "\n";
+        res += "\tSequence number: " + block.getSequenceNumber() + "\n";
+        res += "\tLink public key: " + pubKeyToString(block.getLinkPublicKey().toByteArray(),32) + "\n";
+        res += "\tLink sequence number: " + block.getLinkSequenceNumber() + "\n";
         res += "}";
         return res;
     }
@@ -393,7 +393,7 @@ public class TrustChainBlockHelper {
     public static String transferDataToString(MessageProto.TrustChainBlock block){
         String res = "Trustchainblock: { ";
         try {
-            res += " data: " + block.getTransaction().getUnformatted().toString("UTF-8") + "\n";
+            res += "data: " + block.getTransaction().getUnformatted().toString("UTF-8") + "\n";
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -409,6 +409,9 @@ public class TrustChainBlockHelper {
      * @return
      */
     public static String pubKeyToString(byte[] pubKey, int maxLength){
+        if(pubKey == null) {
+            return "";
+        }
         String res;
         int length = pubKey.length;
         res = ellipsize(ByteArrayConverter.bytesToHexString(pubKey), maxLength);
