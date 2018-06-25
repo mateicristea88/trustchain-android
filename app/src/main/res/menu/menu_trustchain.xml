@@ -6,6 +6,10 @@
         android:title="@string/menu_chainexplorer"
         app:showAsAction="never" />
     <item
+        android:id="@+id/receive_offline"
+        android:title="@string/menu_receive_offline"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/close"
         android:title="@string/close_connection"
         app:showAsAction="never" />

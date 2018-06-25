@@ -16,7 +16,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -41,13 +40,14 @@ import nl.tudelft.cs4160.trustchain_android.R;
 import nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper;
 import nl.tudelft.cs4160.trustchain_android.block.ValidationResult;
 import nl.tudelft.cs4160.trustchain_android.chainExplorer.ChainExplorerActivity;
-import nl.tudelft.cs4160.trustchain_android.offline.SendOfflineActivity;
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.inbox.InboxItem;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.network.CrawlRequestListener;
 import nl.tudelft.cs4160.trustchain_android.network.Network;
+import nl.tudelft.cs4160.trustchain_android.offline.ReceiveOfflineActivity;
+import nl.tudelft.cs4160.trustchain_android.offline.SendOfflineActivity;
 import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.InboxItemStorage;
 import nl.tudelft.cs4160.trustchain_android.util.FileDialog;
@@ -116,6 +116,10 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
             case R.id.chain_menu:
                 Intent chainExplorerActivity = new Intent(this, ChainExplorerActivity.class);
                 startActivity(chainExplorerActivity);
+                return true;
+            case R.id.receive_offline:
+                Intent receiveOfflineActivity = new Intent(this, ReceiveOfflineActivity.class);
+                startActivity(receiveOfflineActivity);
                 return true;
             case R.id.close:
                 if (Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT) {
