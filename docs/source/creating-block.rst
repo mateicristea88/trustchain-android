@@ -5,7 +5,7 @@ Creating a block
 ****************
 In order to complete a transaction with a peer, we need to create a block. A block in TrustChain is a little different than in bitcoin-style blockchains. In bitcoin-style blockchains, a block is a collection of transactions that happened in the network. A block is created by a node and is propagated through the network. All connected nodes validate the block and the transactions. In TrustChain a block is formed by two peers who wish to agree on a transaction. Therefore a TrustChainBlock only has one transaction.
 
-Both parties need to agree on a transaction, so there has to be some interaction between peers. The way this is done in TrustChain is to first create an incomplete block, called a half block. This half block is then send to the second peer, which creates a full block from the half block and sends it back to the first peer. This process is explained in more detail below.
+Both parties need to agree on a transaction, so there has to be some interaction between peers. The way this is done in TrustChain is to first create an incomplete block, called a block proposal. This block proposal is send to the second peer, who completes the block and sends it back to the first peer. This process is explained in more detail below.
 
 Structure of blocks
 ===================
@@ -16,30 +16,30 @@ A block has the following attributes:
 * ``link_public_key`` - The public key of the other party
 * ``link_sequence_number`` - The position the connected block has in the chain of the other party
 * ``previous_hash`` - A hash of the previous block in the chain
-* ``signature`` - The signature of the hash of this block
+* ``signature`` - The signature of the first peer on the hash of this block
 * ``transaction`` - The data that both parties need to agree on, this can be anything, from text to documents to monetary transactions
 
-Note that ``link_sequence_number`` will be unknown for the first half block created, because peer A won't be sure when peer B inserts the linked block in his chain. This will stay unknown, as updating a block already in the chain is not desirable, since it might invalidate later blocks. When an interaction is completed peer A will have the block of peer B in its database as well, so it can always find out the position of the linked block in peer B's chain.
+Note that ``link_sequence_number`` will be unknown for the created block proposal because peer A won't be sure when peer B inserts the linked block in his chain. This will stay unknown, as updating a block already in the chain is not desirable, since it might invalidate later blocks. When the block is completed peer A will have the block of peer B in its database as well, so it can always find out the position of the linked block in peer B's chain.
 
 Create block
 ============
-There are two situation that require creating a block. Initiating the creation of a transaction with another peer and completing a block send to you by another peer. This is both done by calling the ``signBlock`` method in `Communication.java <https://github.com/wkmeijer/CS4160-trustchain-android/blob/develop/app/src/main/java/nl/tudelft/cs4160/trustchain_android/connection/Communication.java>`_. This method calls the ``createBlock`` method in `TrustChainBlock.java <https://github.com/wkmeijer/CS4160-trustchain-android/blob/master/app/src/main/java/nl/tudelft/cs4160/trustchain_android/block/TrustChainBlock.java>`_, signs the block, and validates the correctness of the block, before it gets added to the chain and send.
+There are two situation that require creating a block. Initiating the creation of a transaction with another peer and completing a block that was sent to you by another peer. This is both done by calling the ``signBlock`` method in `Communication.java <https://github.com/klikooo/CS4160-trustchain-android/blob/master/app/src/main/java/nl/tudelft/cs4160/trustchain_android/connection/Communication.java>`_. This method calls the ``createBlock`` method in `TrustChainBlock.java <https://github.com/klikooo/CS4160-trustchain-android/blob/master/app/src/main/java/nl/tudelft/cs4160/trustchain_android/block/TrustChainBlock.java>`_, signs the block, and validates the correctness of the block, before it gets added to the chain and is sent.
 
 Initiating a transaction
 ------------------------
-When you want to initiate a transaction, you need to provide the bytes of the transaction, your public key, and the public key of the other party, and a link to the database containing your chain to ``createBlock``. The latest block in your chain will be retrieved from the database, to be able to set ``sequence_number`` and ``prev_hash``. The other attributes will be set according to the input, ``signature`` will remain empty for now.
+To initiate a transaction some information is needed: the bytes of the transaction, the initiating party's public key, the public key of the other party, and a link to the database containing your chain to ``createBlock``. The latest block in your chain will be retrieved from the database, to be able to set ``sequence_number`` and ``prev_hash``. The other attributes will be set according to the input.
 
-Received a half block
----------------------
-A half block was received and it contains a transaction that we agree with. In this Android implementation we always want to complete the block, regardless of the transaction, so we don't need to check the transaction. The attributes are again set according to the input, with as difference that we now retrieve ``transaction`` and ``link_sequence_number`` from the linked block. ``signature`` will again remain empty.
+Responding to a block proposal
+------------------------------
+When a block proposal is received the receiving party B can decide whether or not they agree with the transaction in the block and choose to either sign the block or ignore it. After the block is validated, the party B knows that this proposal is consistent with what it known of the sending party A. In order to complete the block, a new block is created. ``public_key`` and ``sequence_number`` from the block proposal will now be ``link_public_key`` and ``link_sequence_number``. ``public_key``, ``sequence_number``, and ``prev_hash`` will be set according to the current state of party B's chain. ``transaction`` will remain the same and a new hash is calculated that will be signed by party B.
 
 Sign block
 ==========
-The next step is signing the block. This is as simple as creating a sha256 hash of the block and giving this digest to the build-in signing function of the crypto library.
+Signing a block is as simple as creating a sha256 hash of the block and giving this digest to the build-in signing function of the cryptographic library.
 
 Validate block
 ==============
-Block validation is the most important step here, as this ensures the validity of the blockchain. The validation function is located in `TrustChainBlock.java <https://github.com/wkmeijer/CS4160-trustchain-android/blob/master/app/src/main/java/nl/tudelft/cs4160/trustchain_android/block/TrustChainBlock.java>`_. There are 6 different validation results:
+Block validation is the most important step here, as this ensures the validity of the blockchain. The validation function is located in `TrustChainBlock.java <https://github.com/klikooo/CS4160-trustchain-android/blob/master/app/src/main/java/nl/tudelft/cs4160/trustchain_android/block/TrustChainBlock.java>`_. There are 6 different validation results:
 
 * ``VALID``
 * ``PARTIAL`` - There are gaps between this block and the previous and next
@@ -62,10 +62,10 @@ For a more detailed explanation of the validation function, please take a look i
 
 Links to code
 =============
-* `Block structure in ProtocolBuffers (Message.proto) <https://github.com/wkmeijer/CS4160-trustchain-android/blob/master/app/src/main/java/nl/tudelft/cs4160/trustchain_android/Message.proto>`_
-* `All block related methods (TrustChainBlock.java) <https://github.com/wkmeijer/CS4160-trustchain-android/blob/master/app/src/main/java/nl/tudelft/cs4160/trustchain_android/block/TrustChainBlock.java>`_
-* `Sign block method (Communication.java) <https://github.com/wkmeijer/CS4160-trustchain-android/blob/master/app/src/main/java/nl/tudelft/cs4160/trustchain_android/connection/Communication.java>`_
-* `Validation result (ValidationResult.java) <https://github.com/wkmeijer/CS4160-trustchain-android/blob/master/app/src/main/java/nl/tudelft/cs4160/trustchain_android/block/ValidationResult.java>`_
+* `Block structure in ProtocolBuffers (Message.proto) <https://github.com/klikooo/CS4160-trustchain-android/blob/master/app/src/main/java/nl/tudelft/cs4160/trustchain_android/Message.proto>`_
+* `All block related methods (TrustChainBlock.java) <https://github.com/klikooo/CS4160-trustchain-android/blob/master/app/src/main/java/nl/tudelft/cs4160/trustchain_android/block/TrustChainBlock.java>`_
+* `Sign block method (Communication.java) <https://github.com/klikooo/CS4160-trustchain-android/blob/master/app/src/main/java/nl/tudelft/cs4160/trustchain_android/connection/Communication.java>`_
+* `Validation result (ValidationResult.java) <https://github.com/klikooo/CS4160-trustchain-android/blob/master/app/src/main/java/nl/tudelft/cs4160/trustchain_android/block/ValidationResult.java>`_
 
 Also see the `readme on the ipv8 github <https://github.com/qstokkink/py-ipv8/blob/master/doc/trustchain.md>`_
 
