@@ -69,6 +69,7 @@ public class SendOfflineActivity extends AppCompatActivity implements OnNdefPush
         returnHome.setOnClickListener(view -> {
             Intent i = new Intent(this, OverviewConnectionsActivity.class);
             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(i);
         });
 
