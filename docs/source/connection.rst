@@ -81,6 +81,8 @@ For each peer the following information is stored:
 Every second the peer list is checked for dead peers. Dead peers are peers from which no message was received in the last 25 seconds. These dead peers are removed from the peerlist.
 
 
+.. _message-transmission:
+
 Background handling of messages
 ===============================
 Since all messages are created using protocolbuffers, it is easy to rebuild them on reception. When a message is received, the message type is checked and the appropriate functions are called to further handle the message. Messages not build with (the correct) protocolbuffers will simply be discarded.
