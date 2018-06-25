@@ -172,14 +172,23 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
         }
     }
 
+    private String getPeerAlias(PublicKeyPair keyPair) {
+        String alias = UserNameStorage.getPeerByPublicKey(getApplicationContext(), keyPair);
+        if (alias == null)
+            alias = "unknown";
+        if (Key.loadKeys(getApplicationContext()).getPublicKeyPair().equals(keyPair))
+            alias = "me";
+        return alias;
+    }
+
     private void showBlockLayout(View convertView) {
         convertView.setVisibility(View.VISIBLE);
         setExpandArrowBehaviour(convertView);
         // Check if we already know the peer, otherwise add it to the peerList
         ByteString pubKeyByteStr = receivedBlock.getPublicKey();
         ByteString linkPubKeyByteStr = receivedBlock.getLinkPublicKey();
-        String peerAlias = "not available"; //getPeerAlias(pubKeyByteStr);
-        String linkPeerAlias = "not available"; //getPeerAlias(linkPubKeyByteStr);
+        String peerAlias = getPeerAlias(new PublicKeyPair(pubKeyByteStr.toByteArray()));
+        String linkPeerAlias = getPeerAlias(new PublicKeyPair(linkPubKeyByteStr.toByteArray()));
 
         // Check if the sequence numbers are 0, which would mean that they are unknown
         String seqNumStr;
@@ -213,9 +222,7 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
 
         // expanded view
         TextView pubKey = convertView.findViewById(R.id.pub_key);
-//        setOnClickListener(pubKey);
         TextView linkPubKey = convertView.findViewById(R.id.link_pub_key);
-//        setOnClickListener(linkPubKey);
         TextView prevHash = convertView.findViewById(R.id.prev_hash);
         TextView signature = convertView.findViewById(R.id.signature);
         TextView expTransaction = convertView.findViewById(R.id.expanded_transaction);
