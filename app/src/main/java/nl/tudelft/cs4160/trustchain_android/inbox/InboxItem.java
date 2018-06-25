@@ -20,7 +20,6 @@ public class InboxItem implements Serializable {
         this.halfBlockSequenceNumbers = halfBlockSequenceNumbers;
     }
 
-
     public ArrayList<Integer> getHalfBlocks() {
         return halfBlockSequenceNumbers;
     }

@@ -44,14 +44,12 @@ public class InboxActivity extends AppCompatActivity  {
     synchronized private void getInboxItems() {
         final Context currContext = this;
 
-        runOnUiThread(() -> {
-            inboxItems = new ArrayList<>();
-            inboxItems = InboxItemStorage.getInboxItems(currContext);
-            Collections.reverse(inboxItems);
-            mAdapter = new InboxAdapter(inboxItems);
-            ((InboxAdapter) mAdapter).setPeerList(peerList);
-            mRecyclerView.setAdapter(mAdapter);
-        });
+        inboxItems = new ArrayList<>();
+        inboxItems = InboxItemStorage.getInboxItems(currContext);
+        Collections.reverse(inboxItems);
+        mAdapter = new InboxAdapter(inboxItems);
+        ((InboxAdapter) mAdapter).setPeerList(peerList);
+        mRecyclerView.setAdapter(mAdapter);
     }
 
     @Override
@@ -59,6 +57,7 @@ public class InboxActivity extends AppCompatActivity  {
         super.onStart();
         getInboxItems();
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
