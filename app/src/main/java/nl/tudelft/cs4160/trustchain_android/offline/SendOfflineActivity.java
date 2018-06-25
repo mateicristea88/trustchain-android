@@ -65,7 +65,7 @@ public class SendOfflineActivity extends AppCompatActivity implements OnNdefPush
         sendQR = findViewById(R.id.send_qr);
         sendBeam = findViewById(R.id.send_beam);
         receiveCompleted = findViewById(R.id.receive_completed);
-        returnHome = findViewById(R.id.return_home_button);
+        returnHome = findViewById(R.id.return_home);
         returnHome.setOnClickListener(view -> {
             Intent i = new Intent(this, OverviewConnectionsActivity.class);
             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
