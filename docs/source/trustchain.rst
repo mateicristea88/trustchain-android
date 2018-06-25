@@ -1,3 +1,5 @@
+.. _trustchain:
+
 *******************
 What is TrustChain?
 *******************

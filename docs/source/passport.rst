@@ -1,3 +1,5 @@
+.. _passport:
+
 ******************************
 Passport
 ******************************
@@ -5,7 +7,7 @@ Passport
 Every Dutch passport contains a RF chip which contains personal data of the passport holder, such as name, address, date of birth and a photo. Next to these, the chip is equipped with an unique private-public keypair and is able to sign an array of eight bytes long. Such a signature can be used to verify the authenticity of a passport, which is called Active Authentication (AA). To prevent that the chip can be read by anyone without physical access, some access control measures are implemented in the passport. There are two levels of access control, Basic Acces Control (BAC) and Extended Access Control (EAC), each allow for different permissions on what can be read from the passport.
 
 
-In order to perform BAC the name, date of birth and the BSN should be sent to the passport and the passport will verify if these are correct and will provide access to the AA and other personal data correspondingly. The data necessary for BAC could be entered manually or via OCR by reading the Machine Readable Zone (MRZ). The MRZ is the text at the bottom (which starts with P<NLD) in the figure shown below. The MRZ contains all data that is needed for BAC and contains some additional data to ensure that the MRZ was read correctly by OCR (checksums).
+In order to perform BAC the name, date of birth and the BSN should be sent to the passport and the passport will verify if these are correct and will provide access to the AA and other personal data correspondingly. The data necessary for BAC could be entered manually or via Optical Character Recognition (OCR) by reading the Machine Readable Zone (MRZ). The MRZ is the text at the bottom (which starts with P<NLD) in the figure shown below. The MRZ contains all data that is needed for BAC and contains some additional data to ensure that the MRZ was read correctly by OCR (checksums).
 
 .. figure:: ./images/passport_example.jpg
    :width: 300px
@@ -40,7 +42,7 @@ The image on the left is the CameraActivity and the image on the right is the Ma
    :width: 300px
    :alt: Fig. 5. ManualActivity after signing
 
-The image on the left shows the PassportConActivity with the hex number 'eab63f7d' is going to be signed. The right image shows the same Activity but with the resulting signature in hexadecimal.
+The image on the left shows the PassportConActivity with the hex number 'eab63f7d' is going to be signed. The right image shows the same Activity with the resulting signature in hexadecimal as response from the passport.
 
 
 
