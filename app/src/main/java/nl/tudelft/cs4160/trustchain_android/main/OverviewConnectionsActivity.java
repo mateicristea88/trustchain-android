@@ -59,7 +59,6 @@ import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.BootstrapI
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.SharedPreferencesStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
 import nl.tudelft.cs4160.trustchain_android.stresstest.StressTestActivity;
-import nl.tudelft.cs4160.trustchain_android.stresstest.StressTestNode;
 import nl.tudelft.cs4160.trustchain_android.util.RequestCode;
 
 import static nl.tudelft.cs4160.trustchain_android.main.UserConfigurationActivity.VERSION_NAME_KEY;
