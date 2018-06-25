@@ -86,20 +86,23 @@ Since all messages are created using protocolbuffers, it is easy to rebuild them
 Message transmission
 ====================
 Network
--------
-Messages are sent over the network using UDP datagrams. Currently, one message is sent in one datagram, putting an upper limit on teh message size of 65KB, the maximum UDP datagram size.
+--------
+Messages are sent over the network using UDP datagrams. Currently, one message is sent in one datagram, putting an upper limit on the message size of 65KB, the maximum UDP datagram size.
 The message is sent in the `Network` class' `sendMessage` method.
 
 Offline transmission
---------------------
+---------------------
 The app also provides functionality to transmit blocks offline. A checkbox in the `PeerSummaryActivity` activates this functionality.
 Offline sending can be performed in two ways, one is using QR codes and the other is using `Android Beam`.
 
 QR code transmission uses the QR generator located in the funds.qr package.
 The maximum size of data contained in a QR code is limited to about 3 kilobytes, so this has an even stricter maximum size then the network's UDP transmissions.
 
-Android Beam transmits data using either NFC or Bluetooth, allowing a practically infinite maximum message size, providing both the sending and receiving party support the required technologies.
+Android Beam transmits data using either NFC or Bluetooth, allowing a practically infinite maximum message size (no physical maximum has been identified), although anything above 65KB will create problems when announcing the chain to other peers.
+Of course both the sending and receiving party need to support the required technologies.
 
+As hinted above, the blocks exchanged offline do not stay offline, but are automatically shared with all connected peers if there is an internet connection.
+Therefore the offline send feature should only be used when there is no network connection available, not for keeping the exchanged block secret from other peers.
 
 Networking classes and their responsibilities
 =============================================
