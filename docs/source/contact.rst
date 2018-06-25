@@ -4,10 +4,7 @@ Contact and links
 
 Contact
 =======
-For students of the CS4160 Blockchain Engineering course of the TU Delft. You can contact us with questions about the code via e-mail.
-
-* Wilko Meijer (w.k.meijer@student.tudelft.nl)
-* Rico Tubbing (r.tubbing@student.tudelft.nl)
+For questions about the code please use Github.
 
 Useful links
 ============
