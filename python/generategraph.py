@@ -6,6 +6,14 @@ import numpy as np
 import sys
 import math
 
+FILE_NAME = '10nodes-lg_g4-1650sec-one.txt'
+# Insert custom ticks on the axes or use default settings
+CUSTOM_TICKS = True
+# Indication of number of ticks that will be put on both axis.
+# note that the actual number of ticks may be off by about 2 in order to make the offsets round numbers
+Y_TICK_NUM = 8
+X_TICK_NUM = 8
+
 # runtime,messagesSent,messagesReceived,introductionRequestsSent,introductionRequestsReceived,
 # introductionResponsesSent,introductionResponsesReceived,puncturesSent,puncturesReceived,
 # punctureRequestsSent,punctureRequestsReceived,blockMessagesSent,blockMessagesReceived,
@@ -13,7 +21,7 @@ import math
 
 time = []
 
-with open('testdata1.txt', 'r') as datafile:
+with open(FILE_NAME, 'r') as datafile:
 	header = next(datafile).split(': ')[1].rstrip().split(',')
 	lines = datafile.readlines()
 	data = np.zeros(shape=(len(lines),len(sys.argv[1:])))
@@ -40,17 +48,18 @@ for i in range(0, len(sys.argv[1:])):
 	ax.plot(time, data[:,i], '.-', label=name)
 
 # Set some sane x and y axis ticks
-starty, endy = ax.get_ylim()
-firstdigit = data.max() // 10 ** int(math.log(data.max(), 10))
-num_zeros = len(str(int(data.max()))) - 1
-maxnum_rounded = firstdigit * (10 ** num_zeros)
-ax.yaxis.set_ticks(np.arange(0, endy, maxnum_rounded/8))
+if CUSTOM_TICKS:
+	starty, endy = ax.get_ylim()
+	firstdigit = data.max() // 10 ** int(math.log(data.max(), 10))
+	num_zeros = len(str(int(data.max()))) - 1
+	maxnum_rounded = firstdigit * (10 ** num_zeros)
+	ax.yaxis.set_ticks(np.arange(0, endy, maxnum_rounded/Y_TICK_NUM))
 
-startx, endx = ax.get_xlim()
-firstdigit = max(time) // 10 ** int(math.log(max(time), 10))
-num_zeros = len(str(int(max(time)))) - 1
-maxnum_rounded = firstdigit * (10 ** num_zeros)
-ax.xaxis.set_ticks(np.arange(0, endx, maxnum_rounded/8))
+	startx, endx = ax.get_xlim()
+	firstdigit = max(time) // 10 ** int(math.log(max(time), 10))
+	num_zeros = len(str(int(max(time)))) - 1
+	maxnum_rounded = firstdigit * (10 ** num_zeros)
+	ax.xaxis.set_ticks(np.arange(0, endx, maxnum_rounded/X_TICK_NUM))
 
 plt.legend(loc='upper center', shadow=False, fontsize='large')
 plt.ylim(ymin=0)
