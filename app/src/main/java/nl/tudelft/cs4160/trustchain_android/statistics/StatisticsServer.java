@@ -31,8 +31,8 @@ public class StatisticsServer implements NodeStatistics {
     public Map<NetworkStatusListener, Integer> blockMessagesSent = new ConcurrentHashMap<>();
     public Map<NetworkStatusListener, Integer> blockMessagesReceived = new ConcurrentHashMap<>();
     public Map<NetworkStatusListener, Integer> crawlRequestsReceived = new ConcurrentHashMap<>();
+    private Map<NetworkStatusListener, Boolean> logInitialized = new ConcurrentHashMap<>();
     public static Map<NetworkStatusListener, Long> startTime = new ConcurrentHashMap<>();
-    private boolean logInitialized = false;
 
     private static StatisticsServer statistics;
 
@@ -63,6 +63,7 @@ public class StatisticsServer implements NodeStatistics {
         blockMessagesSent.put(node, 0);
         blockMessagesReceived.put(node, 0);
         crawlRequestsReceived.put(node, 0);
+        logInitialized.put(node, false);
 
         ScheduledExecutorService scheduler =
                 Executors.newScheduledThreadPool(10);
@@ -70,13 +71,13 @@ public class StatisticsServer implements NodeStatistics {
     }
 
     private void logStats(NetworkStatusListener node) {
-        if (!logInitialized) {
-            Log.i("Statistics-" + node.getName(), "runtime,messagesSent,messagesReceived," +
+        if (!logInitialized.get(node)) {
+            Log.i("Statistics-" + node.getName() + "-header", "runtime,messagesSent,messagesReceived," +
                     "introductionRequestsSent,introductionRequestsReceived,introductionResponsesSent," +
                     "introductionResponsesReceived,puncturesSent,puncturesReceived," +
                     "punctureRequestsSent,punctureRequestsReceived,blockMessagesSent," +
                     "blockMessagesReceived,bytesSentCount,bytesReceivedCount,activeConnections,newConnections");
-            logInitialized = true;
+            logInitialized.put(node, true);
         }
         long runtime = System.currentTimeMillis() - StatisticsServer.startTime.get(node);
         StringBuilder sb = new StringBuilder()
