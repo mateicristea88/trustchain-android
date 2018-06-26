@@ -31,11 +31,11 @@ import nl.tudelft.cs4160.trustchain_android.message.MessageProto.TrustChainBlock
 import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.peer.PeerHandler;
 import nl.tudelft.cs4160.trustchain_android.peersummary.PeerSummaryActivity;
+import nl.tudelft.cs4160.trustchain_android.statistics.StatisticsServer;
 import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.InboxItemStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.PubKeyAndAddressPairStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
-import nl.tudelft.cs4160.trustchain_android.statistics.StatisticsServer;
 
 public class Network {
     private final String TAG = this.getClass().getName();
@@ -199,9 +199,7 @@ public class Network {
                 .setType(INTRODUCTION_REQUEST_ID)
                 .setPayload(MessageProto.Payload.newBuilder().setIntroductionRequest(request));
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            statistics.introductionRequestSent(networkStatusListener);
-        }
+        statistics.introductionRequestSent(networkStatusListener);
         sendMessage(messageBuilder.build(), peer);
     }
 
@@ -221,9 +219,7 @@ public class Network {
                 .setPayload(MessageProto.Payload.newBuilder().setBlock(block))
                 .build();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            statistics.blockMessageSent(networkStatusListener);
-        }
+        statistics.blockMessageSent(networkStatusListener);
         sendMessage(message, peer);
     }
 
@@ -268,9 +264,7 @@ public class Network {
                 .setPayload(MessageProto.Payload.newBuilder().setPunctureRequest(pRequest))
                 .build();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            statistics.punctureRequestSent(networkStatusListener);
-        }
+        statistics.punctureRequestSent(networkStatusListener);
         sendMessage(message, peer);
     }
 
@@ -294,9 +288,7 @@ public class Network {
                 .setPayload(MessageProto.Payload.newBuilder().setPuncture(puncture))
                 .build();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            statistics.punctureSent(networkStatusListener);
-        }
+        statistics.punctureSent(networkStatusListener);
         sendMessage(message, peer);
     }
 
@@ -330,9 +322,7 @@ public class Network {
                 .setPayload(MessageProto.Payload.newBuilder().setIntroductionResponse(response))
                 .build();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            statistics.introductionResponseSent(networkStatusListener);
-        }
+        statistics.introductionResponseSent(networkStatusListener);
         sendMessage(message, peer);
     }
 
@@ -347,10 +337,8 @@ public class Network {
         ByteBuffer outputBuffer = ByteBuffer.allocate(BUFFER_SIZE);
         outputBuffer = outputBuffer.wrap(message.toByteArray());
         channel.send(outputBuffer, peer.getAddress());
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            statistics.bytesSent(networkStatusListener, outputBuffer.position());
-            statistics.messageSent(networkStatusListener);
-        }
+        statistics.bytesSent(networkStatusListener, outputBuffer.position());
+        statistics.messageSent(networkStatusListener);
         Log.i(TAG, "Sending to " + peer.getName() + ":\n" + message);
         peer.sentData();
     }
@@ -392,10 +380,8 @@ public class Network {
                     return;
                 }
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    statistics.messageReceived(networkStatusListener);
-                    statistics.bytesReceived(networkStatusListener, data.remaining());
-                }
+                statistics.messageReceived(networkStatusListener);
+                statistics.bytesReceived(networkStatusListener, data.remaining());
                 peer.receivedData();
                 PubKeyAndAddressPairStorage.addPubkeyAndAddressPair(context, sourcePubKey, address);
                 handleMessage(peer, message, sourcePubKey, context);
@@ -417,33 +403,23 @@ public class Network {
     public void handleMessage(Peer peer, Message message, PublicKeyPair pubKeyPair, Context context) throws Exception {
         switch (message.getType()) {
             case INTRODUCTION_REQUEST_ID:
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    statistics.introductionRequestReceived(networkStatusListener);
-                }
+                statistics.introductionRequestReceived(networkStatusListener);
                 messageHandler.handleIntroductionRequest(peer, message.getPayload().getIntroductionRequest());
                 break;
             case INTRODUCTION_RESPONSE_ID:
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    statistics.introductionResponseReceived(networkStatusListener);
-                }
+                statistics.introductionResponseReceived(networkStatusListener);
                 messageHandler.handleIntroductionResponse(peer, message.getPayload().getIntroductionResponse());
                 break;
             case PUNCTURE_ID:
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    statistics.punctureReceived(networkStatusListener);
-                }
+                statistics.punctureReceived(networkStatusListener);
                 messageHandler.handlePuncture(peer, message.getPayload().getPuncture());
                 break;
             case PUNCTURE_REQUEST_ID:
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    statistics.punctureRequestReceived(networkStatusListener);
-                }
+                statistics.punctureRequestReceived(networkStatusListener);
                 messageHandler.handlePunctureRequest(peer, message.getPayload().getPunctureRequest());
                 break;
             case BLOCK_MESSAGE_ID:
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    statistics.blockMessageReceived(networkStatusListener);
-                }
+                statistics.blockMessageReceived(networkStatusListener);
                 TrustChainBlock block = message.getPayload().getBlock();
 
                 // update the inbox
