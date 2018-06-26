@@ -9,6 +9,7 @@ import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -50,13 +51,18 @@ public class StressTestActivity extends AppCompatActivity {
     private TextView nodesRunning;
 
     private Handler uptimeUpdateHandler;
+    private static final int STAT_UPDATE_DELAY_MILLIS = 300;
+
+    /**
+     * Updates all text views that show statistic information.
+     * Makes use of some functions that are API 24+
+     */
     private Runnable statisticsUpdateTask = new Runnable() {
         @TargetApi(Build.VERSION_CODES.N)
         @Override
         public void run() {
             StatisticsServer stats = StatisticsServer.getInstance();
             runOnUiThread(() -> {
-                long time = System.currentTimeMillis();
                 long runtime = System.currentTimeMillis() - StatisticsServer.startTime.get(Network.getInstance(getApplicationContext()).getStatusListener());
                 uptime.setText(Util.timeToString(runtime));
                 messagesSent.setText(String.valueOf(stats.messagesSent.values().stream().mapToInt((i) -> i).sum()));
@@ -73,8 +79,7 @@ public class StressTestActivity extends AppCompatActivity {
                 blockMessagesSent.setText(String.valueOf(stats.blockMessagesSent.values().stream().mapToInt((i) -> i).sum()));
                 bytesReceived.setText(Util.readableSize(stats.bytesReceivedCount.values().stream().mapToLong((i) -> i).sum()));
                 bytesSent.setText(Util.readableSize(stats.bytesSentCount.values().stream().mapToLong((i) -> i).sum()));
-                uptimeUpdateHandler.postDelayed(statisticsUpdateTask, 990);
-                Log.v("Statistics", "Update completed, took " + (System.currentTimeMillis() - time) + " millis");
+                uptimeUpdateHandler.postDelayed(statisticsUpdateTask, STAT_UPDATE_DELAY_MILLIS);
             });
         }
     };
@@ -94,7 +99,6 @@ public class StressTestActivity extends AppCompatActivity {
         });
         startStressTestButton = findViewById(R.id.start_stress_test);
         stopStressTestButton = findViewById(R.id.stop_stress_test);
-
         startStressTestButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -125,7 +129,6 @@ public class StressTestActivity extends AppCompatActivity {
         nodesRunning = findViewById(R.id.nodes_running);
         uptime = findViewById(R.id.run_time);
 
-
         HandlerThread updateThread = new HandlerThread("StatUpdater");
         updateThread.start();
         uptimeUpdateHandler = new Handler(updateThread.getLooper());
@@ -141,10 +144,16 @@ public class StressTestActivity extends AppCompatActivity {
     
     protected void onStart() {
         super.onStart();
-//        StatisticsServer.getInstance().setStatisticsDisplay(this);
-        uptimeUpdateHandler.postDelayed(statisticsUpdateTask, 200);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            uptimeUpdateHandler.post(statisticsUpdateTask);
+        }
     }
 
+    /**
+     * onDestroy stops the stress test nodes when the activity is destroyed.
+     * This is required because the contents of the nodes list is destroyed.
+     * In order to keep the nodes running this would need to be saved in a separate class.
+     */
     @Override
     protected void onDestroy() {
         stopNodes();
@@ -160,7 +169,6 @@ public class StressTestActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-//        StatisticsServer.getInstance().removeStatisticsDisplay();
         uptimeUpdateHandler.removeCallbacks(statisticsUpdateTask);
     }
 
@@ -170,6 +178,14 @@ public class StressTestActivity extends AppCompatActivity {
             StressTestNode node = new StressTestNode(this, port);
             nodes.add(node);
             node.startNode();
+            if (nodes.size() == 1) {
+                try {
+                    // Sleep after starting the first stress test to make sure its log is always first
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         runOnUiThread(() -> nodesRunning.setText(String.valueOf(nodes.size())));
     }

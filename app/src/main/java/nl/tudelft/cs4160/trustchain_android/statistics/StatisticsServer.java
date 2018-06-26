@@ -117,86 +117,72 @@ public class StatisticsServer implements NodeStatistics {
     }
 
     @Override
-    @RequiresApi(api = Build.VERSION_CODES.N)
     public synchronized void messageSent(NetworkStatusListener name) {
-        messagesSent.compute(name, (key, integer) -> integer + 1);
+        messagesSent.put(name, messagesSent.get(name) + 1);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public synchronized void messageReceived(NetworkStatusListener name) {
-        messagesReceived.compute(name, (key, integer) -> integer + 1);
+        messagesReceived.put(name, messagesReceived.get(name) + 1);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public synchronized void introductionRequestSent(NetworkStatusListener name) {
-        introductionRequestsSent.compute(name, (key, integer) -> integer + 1);
+        introductionRequestsSent.put(name, introductionRequestsSent.get(name) + 1);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public synchronized void introductionRequestReceived(NetworkStatusListener name) {
-        introductionRequestsReceived.compute(name, (key, integer) -> integer + 1);
+        introductionRequestsReceived.put(name, introductionRequestsReceived.get(name) + 1);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public synchronized void introductionResponseSent(NetworkStatusListener name) {
-        introductionResponsesSent.compute(name, (key, integer) -> integer + 1);
+        introductionResponsesSent.put(name, introductionResponsesSent.get(name) + 1);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public synchronized void introductionResponseReceived(NetworkStatusListener name) {
-        introductionResponsesReceived.compute(name, (key, integer) -> integer + 1);
+        introductionResponsesReceived.put(name, introductionResponsesReceived.get(name) + 1);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public synchronized void punctureReceived(NetworkStatusListener name) {
-        puncturesReceived.compute(name, (key, integer) -> integer + 1);
+        puncturesReceived.put(name, puncturesReceived.get(name) + 1);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public synchronized void punctureSent(NetworkStatusListener name) {
-        puncturesSent.compute(name, (key, integer) -> integer + 1);
+        puncturesSent.put(name, puncturesSent.get(name) + 1);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public synchronized void punctureRequestReceived(NetworkStatusListener name) {
-        punctureRequestsReceived.compute(name, (key, integer) -> integer + 1);
+        punctureRequestsReceived.put(name, punctureRequestsReceived.get(name) + 1);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public synchronized void punctureRequestSent(NetworkStatusListener name) {
-        punctureRequestsSent.compute(name, (key, integer) -> integer + 1);
+        punctureRequestsSent.put(name, punctureRequestsSent.get(name) + 1);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public synchronized void blockMessageReceived(NetworkStatusListener name) {
-        blockMessagesReceived.compute(name, (key, integer) -> integer + 1);
+        blockMessagesReceived.put(name, blockMessagesReceived.get(name) + 1);
     }
 
     @Override
-    @RequiresApi(api = Build.VERSION_CODES.N)
     public synchronized void blockMessageSent(NetworkStatusListener name) {
-        blockMessagesSent.compute(name, (key, integer) -> integer + 1);
+        blockMessagesSent.put(name, blockMessagesSent.get(name) + 1);
     }
 
     @Override
-    @RequiresApi(api = Build.VERSION_CODES.N)
     public synchronized void bytesSent(NetworkStatusListener name, int bytes) {
-        bytesSentCount.compute(name, (key, aLong) -> aLong + bytes);
+        bytesSentCount.put(name, bytesSentCount.get(name) + bytes);
     }
 
     @Override
-    @RequiresApi(api = Build.VERSION_CODES.N)
     public synchronized void bytesReceived(NetworkStatusListener name, int bytes) {
-        bytesReceivedCount.compute(name, (key, aLong) -> aLong + bytes);
+        bytesReceivedCount.put(name, bytesReceivedCount.get(name) + bytes);
     }
 }
