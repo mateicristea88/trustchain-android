@@ -16,12 +16,12 @@ import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
  * The peer is identified by its unique public key pair, and keeps track of the last sent and received time.
  */
 public class Peer implements Serializable {
-    final private static int TIMEOUT = 15000;
-    final private static int REMOVE_TIMEOUT = 25000;
-    private MessageProto.Peer protoPeer;
-    private long lastSentTime = -1;
-    private long lastReceiveTime = -1;
-    private long creationTime;
+    final static int TIMEOUT = 15000;
+    final static int REMOVE_TIMEOUT = 25000;
+    MessageProto.Peer protoPeer;
+    long lastSentTime = -1;
+    long lastReceiveTime = -1;
+    long creationTime;
 
     /**
      * Create a peer, for consistency protocolbuffers is used for this too, instead of simply serializing this.
@@ -31,7 +31,7 @@ public class Peer implements Serializable {
      */
     public Peer(InetSocketAddress address, PublicKeyPair publicKeyPair, String name) {
         ByteString ipAddress = null;
-        int port = 0;
+        int port = OverviewConnectionsActivity.DEFAULT_PORT;
         ByteString publicKey = ByteString.EMPTY;
         if(address != null && address.getAddress() != null) {
             ipAddress = ByteString.copyFrom(address.getAddress().getAddress());
@@ -155,7 +155,7 @@ public class Peer implements Serializable {
 
     public void setAddress(InetSocketAddress address) {
         ByteString ipAddress = ByteString.EMPTY;
-        int port = 0;
+        int port = OverviewConnectionsActivity.DEFAULT_PORT;
         if(address != null) {
             ipAddress = ByteString.copyFrom(address.getAddress().getAddress());
             port = address.getPort();
