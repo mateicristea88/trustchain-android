@@ -120,8 +120,9 @@ public class Network {
         this.statistics = StatisticsServer.getInstance();
         if (name == null) name = UserNameStorage.getUserName(context);
         if (publicKey == null) publicKey = Key.loadKeys(context).getPublicKeyPair();
+        dbHelper = new TrustChainDBHelper(context);
         messageHandler = new MessageHandler(this,
-                dbAccess ? new TrustChainDBHelper(context) : null,
+                dbAccess ? dbHelper : null,
                 new PeerHandler(publicKey,name));
         openChannel();
         showLocalIpAddress();
@@ -341,7 +342,7 @@ public class Network {
         channel.send(outputBuffer, peer.getAddress());
         statistics.bytesSent(networkStatusListener, outputBuffer.position());
         statistics.messageSent(networkStatusListener);
-        Log.v(TAG, "Sending to " + peer.getName() + ":\n" + message);
+        Log.i(TAG, "Sending to " + peer.getName() + ":\n" + message);
         peer.sentData();
     }
 

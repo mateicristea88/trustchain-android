@@ -18,6 +18,7 @@ import java.io.IOException;
 
 import nl.tudelft.cs4160.trustchain_android.R;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.InboxItemStorage;
+import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.PubKeyAndAddressPairStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.SharedPreferencesStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
 
@@ -108,8 +109,11 @@ public class UserConfigurationActivity extends AppCompatActivity {
         }
 
         // The way inboxitems are stored was changed, so this storage needs to be cleared
-        if(storedVersion < 10) {
+        // Also there are some bugs with serialization, so all pubkey/address bindings need to be removed
+        if(storedVersion < 20) {
             InboxItemStorage.deleteAll(this);
+            SharedPreferencesStorage.removeAllWithKey(this, PubKeyAndAddressPairStorage.ADDRESS_KEY_PREFIX);
+            SharedPreferencesStorage.removeAllWithKey(this, PubKeyAndAddressPairStorage.PUBKEY_KEY_PREFIX);
             Log.i(TAG, "Old version detected, cleared inbox for compatibility purposes");
         }
 

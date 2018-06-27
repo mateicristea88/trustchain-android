@@ -8,7 +8,7 @@ import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 public class InboxItem implements Serializable {
     private Peer peer;
     private ArrayList<Integer> halfBlockSequenceNumbers;
-    long serialVersionUID = -5061379998789838600L;
+    final static long serialVersionUID = -7045891844696683093L;
 
     /**
      * Inbox item constructor
