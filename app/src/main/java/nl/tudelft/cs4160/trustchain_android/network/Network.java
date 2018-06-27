@@ -120,8 +120,9 @@ public class Network {
         this.statistics = StatisticsServer.getInstance();
         if (name == null) name = UserNameStorage.getUserName(context);
         if (publicKey == null) publicKey = Key.loadKeys(context).getPublicKeyPair();
+        dbHelper = new TrustChainDBHelper(context);
         messageHandler = new MessageHandler(this,
-                dbAccess ? new TrustChainDBHelper(context) : null,
+                dbAccess ? dbHelper : null,
                 new PeerHandler(publicKey,name));
         openChannel();
         showLocalIpAddress();

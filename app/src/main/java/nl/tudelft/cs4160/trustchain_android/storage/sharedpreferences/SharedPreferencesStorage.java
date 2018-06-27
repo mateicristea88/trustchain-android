@@ -25,6 +25,7 @@ public final class SharedPreferencesStorage {
 
     /**
      * Returns the string value that should be stored under some given key.
+     *
      * @param context
      * @param key
      * @return
@@ -42,6 +43,7 @@ public final class SharedPreferencesStorage {
 
     /**
      * Stores a given String value under a given key.
+     *
      * @param context
      * @param key
      * @param value
@@ -55,6 +57,7 @@ public final class SharedPreferencesStorage {
 
     /**
      * Gets all locally stored values.
+     *
      * @param context
      * @return
      */
@@ -66,12 +69,12 @@ public final class SharedPreferencesStorage {
 
     public static <T> T readSharedPreferences(Context context, String key, Class<T> type) throws IOException, ClassNotFoundException {
         SharedPreferences settings = context.getSharedPreferences(PREFS_NAME, 0);
-        if(settings.contains(key)) {
+        if (settings.contains(key)) {
             String object = settings.getString(key, null);
             // when we deal with an InboxItem list serialize it instead of json because of some dumb thing
             // where gson can't deal with ByteStrings.
-            if(key.equals(INBOX_ITEM_KEY)) {
-                ByteArrayInputStream in = new ByteArrayInputStream(Base64.decode(object,Base64.DEFAULT));
+            if (key.equals(INBOX_ITEM_KEY)) {
+                ByteArrayInputStream in = new ByteArrayInputStream(Base64.decode(object, Base64.DEFAULT));
                 ObjectInputStream is = new ObjectInputStream(in);
                 return (T) is.readObject();
             }
@@ -91,7 +94,7 @@ public final class SharedPreferencesStorage {
 
         // when we deal with an InboxItem list serialize it instead of json because of some dumb thing
         // where gson can't deal with ByteStrings.
-        if(key.equals(INBOX_ITEM_KEY)) {
+        if (key.equals(INBOX_ITEM_KEY)) {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             ObjectOutputStream os = new ObjectOutputStream(out);
             os.writeObject(value);
@@ -104,5 +107,25 @@ public final class SharedPreferencesStorage {
         }
         editor.putString(key, a);
         editor.apply();
+    }
+
+    /**
+     * Loops through all entries in SharedPreferences and checks if the entry matches the key.
+     * If it does it removes it. This makes it easier to remove all entries with a certain prefix.
+     * @param context
+     * @param key - the key that needs to be matched
+     */
+    public static void removeAllWithKey(Context context, String key) {
+        SharedPreferences settings = context.getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+
+        Map<String, ?> allEntries = settings.getAll();
+        for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
+            String k = entry.getKey();
+            if (k.contains(key)) {
+                editor.remove(k);
+            }
+            editor.commit();
+        }
     }
 }
