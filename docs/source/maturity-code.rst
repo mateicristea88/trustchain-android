@@ -1,7 +1,7 @@
 ****************
 Maturity of Code
 ****************
-This project has had quite a few developers contributing to it. This has caused the codebase to become a mess in the past. After a few major refactors the codebase is much more structured now. This has the added advantage of easier identifying bugs and generally being much easier to understand. Because of the issues lined out in :ref:code-coverage and because writing tests for Android is generally quite time consuming. The code isn't automatically tested as well as would be desired. However, due to pull-based development the quality of the code and the operation of the app is tested by hand quite often by the developers.
+This project has had quite a few developers contributing to it. This has caused the codebase to become a mess in the past. After a few major refactors the codebase is much more structured now. This has the added advantage of easier identifying bugs and generally being much easier to understand. Because of the issues lined out in :ref:`code-coverage` and because writing tests for Android is generally quite time consuming. The code isn't automatically tested as well as would be desired. However, due to pull-based development the quality of the code and the operation of the app is tested by hand quite often by the developers.
 
 So to put a label on it the code `(kinda) works <https://wiki.opencog.org/w/Code_Maturity_Guide>`_. It is definitely not production quality code, however it does work quite well and can demonstrate the possibilities on a small scale. The major bottleneck at the moment is the network overlay. While the TrustChain is scalable, the network overlay has some problems with scalability, limiting the scalability of the app. There are also some problems with the UI when the network is under load, as it can't update the network information.
 
@@ -14,7 +14,7 @@ It is quite hard to get a good idea of the code coverage for Android projects. T
 Unfortunately we haven't been able to get codecov to work with the AndroidTests, due to a combination of build errors and difficulties with getting AndroidTests to properly run on Travis. Therefore the codecov report below only reflects part of the coverage that can be done with unit tests. However, it must be said that adding the coverage of the AndroidTests wouldn't spectacularly increase the coverage.
 
 .. _coverage-grid:
-.. figure:: https://codecov.io/gh/klikooo/CS4160-trustchain-android/branch/56_tests/graphs/tree.svg
+.. figure:: https://codecov.io/gh/klikooo/CS4160-trustchain-android/branch/master/graphs/tree.svg
 	:width: 400px
 	:alt: Coverage Grid
 
