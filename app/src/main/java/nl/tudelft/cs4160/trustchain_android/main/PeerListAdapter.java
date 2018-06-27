@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import nl.tudelft.cs4160.trustchain_android.R;
-import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
 import nl.tudelft.cs4160.trustchain_android.inbox.InboxItem;
 import nl.tudelft.cs4160.trustchain_android.peer.Peer;
@@ -103,11 +102,11 @@ public class PeerListAdapter extends ArrayAdapter<Peer> {
             holder.mDestinationAddress.setText(String.format("%s:%d", peer.getIpAddress().toString().substring(1), peer.getPort()));
         }
 
-        if (System.currentTimeMillis() - peer.getLastReceivedTime() < 200) {
+        if (System.currentTimeMillis() - peer.getLastReceivedTime() < 500) {
             animate(holder.mLastReceived, context.getResources().getColor(R.color.colorReceived));
         }
 
-        if (System.currentTimeMillis() - peer.getLastSentTime() < 200) {
+        if (System.currentTimeMillis() - peer.getLastSentTime() < 500) {
             animate(holder.mLastSent, context.getResources().getColor(R.color.colorSent));
 
         }

@@ -11,4 +11,5 @@ public interface NetworkStatusListener {
     void updateWan(MessageProto.Message message) throws UnknownHostException;
     void updateConnectionType(String connectionTypeStr);
     PeerHandler getPeerHandler();
+    String getName();
 }

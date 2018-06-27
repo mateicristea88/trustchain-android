@@ -102,8 +102,12 @@ public class MessageHandler {
      */
     public void handleReceivedBlock(Peer peer, MessageProto.TrustChainBlock block) {
         try {
-            if (TrustChainBlockHelper.validate(block,dbHelper).getStatus() != ValidationResult.INVALID ) {
+            if (dbHelper != null && TrustChainBlockHelper.validate(block,dbHelper).getStatus() != ValidationResult.INVALID ) {
                 dbHelper.replaceInDB(block);
+            } else if (dbHelper == null) {
+                Log.w(TAG, "Not adding block in database because dbHelper is null");
+            } else if (TrustChainBlockHelper.validate(block,dbHelper).getStatus() == ValidationResult.INVALID) {
+                Log.w(TAG, "Not adding block in database because it is invalid");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -118,8 +122,12 @@ public class MessageHandler {
      */
     public void handleCrawlRequest(Peer peer, MessageProto.CrawlRequest request) throws IOException {
         //ToDo for future application sending the entire chain is a bit too much
-        for (MessageProto.TrustChainBlock block : dbHelper.getAllBlocks()) {
-            network.sendBlockMessage(peer, block);
+        if (dbHelper != null) {
+            for (MessageProto.TrustChainBlock block : dbHelper.getAllBlocks()) {
+                network.sendBlockMessage(peer, block);
+            }
+        } else {
+            Log.w(TAG, "Cannot answer crawl request because dbHelper is null");
         }
     }
 

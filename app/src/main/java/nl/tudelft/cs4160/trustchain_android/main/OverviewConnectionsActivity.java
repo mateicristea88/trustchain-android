@@ -40,7 +40,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import nl.tudelft.cs4160.trustchain_android.R;
 import nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper;
 import nl.tudelft.cs4160.trustchain_android.chainExplorer.ChainExplorerActivity;
-import nl.tudelft.cs4160.trustchain_android.offline.ReceiveOfflineActivity;
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.funds.FundsActivity;
@@ -50,10 +49,12 @@ import nl.tudelft.cs4160.trustchain_android.inbox.InboxActivity;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.network.Network;
 import nl.tudelft.cs4160.trustchain_android.network.NetworkStatusListener;
+import nl.tudelft.cs4160.trustchain_android.offline.ReceiveOfflineActivity;
 import nl.tudelft.cs4160.trustchain_android.passport.ocr.camera.CameraActivity;
 import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.peer.PeerHandler;
 import nl.tudelft.cs4160.trustchain_android.peer.PeerListener;
+import nl.tudelft.cs4160.trustchain_android.statistics.StatisticsServer;
 import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.BootstrapIPStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.SharedPreferencesStorage;
@@ -102,8 +103,8 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
             while(true) {
                 updatePeerLists();
                 try {
-                    // update every 198 ms, because we want to display a sent/received message cue when a message was received less than 200ms ago.
-                    Thread.sleep(198);
+                    // update every 498 ms, because we want to display a sent/received message cue when a message was received less than 500ms ago.
+                    Thread.sleep(498);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -122,6 +123,7 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
         dbHelper = new TrustChainDBHelper(this);
         initKey();
         peerHandler = new PeerHandler(Key.loadKeys(this).getPublicKeyPair(), UserNameStorage.getUserName(this));
+        StatisticsServer.getInstance().start(this);
 
         if (savedInstanceState != null) {
             ArrayList<Peer> list = (ArrayList<Peer>) savedInstanceState.getSerializable("peers");
@@ -405,6 +407,7 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
             Log.d(TAG, "Send thread stopped");
         });
         sendThread.start();
+//        Looper.getMainLooper().getThread().setUncaughtExceptionHandler(((thread, throwable) -> {}));
         Log.d(TAG, "Send thread started");
     }
 
@@ -555,6 +558,10 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
         return peerHandler;
     }
 
+    @Override
+    public String getName() {
+        return UserNameStorage.getUserName(this);
+    }
 
     /**
      * Show a toast when the user presses the home button. Since this activity is always running,

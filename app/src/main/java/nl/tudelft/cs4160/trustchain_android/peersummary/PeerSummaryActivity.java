@@ -3,7 +3,6 @@ package nl.tudelft.cs4160.trustchain_android.peersummary;
 import android.Manifest;
 import android.app.ActivityManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
