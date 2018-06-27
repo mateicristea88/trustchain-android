@@ -1,3 +1,5 @@
+.. _crypto:
+
 ************
 Crypto
 ************
@@ -17,3 +19,7 @@ During transmission and storage, keys are serialized and deserialized in the fol
 * Private key pair: ``LibNaCLSk:`` + encryption seed + signing seed
 
 The signing key is then generated using the signing seed. The private key can be generated from the encryption seed.
+
+Links to code
+=============
+* :base-repo:`The crypto package <crypto>`

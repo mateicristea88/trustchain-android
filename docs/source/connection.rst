@@ -1,14 +1,17 @@
+.. _connection:
+
 ************************
-Connection to a peer
+Connection between peers
 ************************
 
-In order to be part of the network, you need to be connected to other people (peers). The underlying protocol for finding peers was taken from App-To-App Communicator <https://github.com/Tribler/app-to-app-communicator>. This protocol enables a peer to discover more peers through peers they are already connected with. By default firewalls will block incoming connections from unknown sources. The protocol makes use of `UDP hole punching <https://en.wikipedia.org/wiki/UDP_hole_punching>`_ to circumvent this and setup direct connections between peers. Basically this uses a mutual friend to initiate a connection between two peers who are unknown to each other.
+In order to be part of the network, you need to be connected to other people (peers). The underlying protocol for finding peers was taken from `App-To-App Communicator <https://github.com/Tribler/app-to-app-communicator>`_. This network overlay enables a peer to discover more peers through peers they are already connected with. By default firewalls will block incoming connections from unknown sources. The protocol makes use of `UDP hole punching <https://en.wikipedia.org/wiki/UDP_hole_punching>`_ to circumvent this and setup direct connections between peers. Basically this uses a mutual friend to initiate a connection between two peers who are unknown to each other.
 
 The protocol consists of the following messages:
-- IntroductionRequest - Request for an introduction to some new peer.
-- IntroductionResponse - Response with a new peer that could be connected to.
-- PunctureRequest - Request to send a puncture to some peer.
-- Puncture - A basically empty message, used to punch a hole in the NAT/firewall of the sender.
+
+* ``IntroductionRequest`` - Request for an introduction to some new peer.
+* ``IntroductionResponse`` - Response with a new peer that could be connected to.
+* ``PunctureRequest`` - Request to send a puncture to some peer.
+* ``Puncture`` - A basically empty message, used to punch a hole in the NAT/firewall of the sender.
 
 When a peer initially starts up the app, it needs to find other peers to connect to. For this initial peer discovery a bootstrap server is used. This bootstrap server resides on a fixed IP and introduces new peers to each other when they initially connect to the network.
 
@@ -31,57 +34,52 @@ In order to prevent sending messages indefinitely to peers who aren't responding
 
 For each peer the following information is displayed and updated every second:
 
-Status light
- - green when a message was received in the last 15 seconds
- - orange when peer is new, but hasn't responded yet
- - red when no message was received in the last 15 seconds, a strong indicator that the connection is lost
+* Status light
 
-Username
-The username the peer chose when first starting the app
-
-Connection indicator 
-Information about the type of connection, e.g. WiFi or mobile. In case the peer is set as a bootstrap server next to the username the word "Server" is displayed
-
-Ip address
-The public ip address of the peer, plus the port of the connection
-
-Last received and sent
-In the bottom row two timers can be found indicating the time since the last message was received from and when the last message was sent to the peer.
-
-Received and sent indicators
-The UI shows when messages are send to a peer by displaying an orange bar below the status 'light' of the peer. A blue bar is shown when a message is received from the peer.
+	* green when a message was received in the last 15 seconds
+	* orange when peer is new, but hasn't responded yet
+	* red when no message was received in the last 15 seconds, a strong indicator that the connection is lost
+* Username - The username the peer chose when first starting the app
+* Connection indicator - Information about the type of connection, e.g. WiFi or mobile. In case the peer is set as a bootstrap server next to the username the word "Server" is displayed
+* Ip address - public ip address of the peer, plus the port of the connection
+* Last received and sent - In the bottom row two timers can be found indicating the time since the last message was received from and when the last message was sent to the peer.
+* Received and sent indicators - The UI shows when messages are send to a peer by changing the color of the last recieved and last sent timers when a message is received in the past 500 ms.
 
 Background handling of peers
 ============================
-All operation that are done on peers are done through or make use of the `PeerHandler class <TODO_add_link>`_. This class holds an arraylist of peers currently known and can split these peers into two lists of active peers and new peers. Peers are kept in memory for now, so each time the app is closed all peers have to be rediscovered through the bootstrap server.
+All operation that are done on peers are done through or make use of the :base-repo:`PeerHandler class <peer/PeerHandler.java>`. This class holds an arraylist of peers currently known and can split these peers into two lists of active peers and new peers. Peers are kept in memory for now, so each time the app is closed all peers have to be rediscovered through the bootstrap server.
 
 There are two ways the host can hear about new peers:
-- When a message is received, the sending peer becomes known
-- An introductionResponse message, which contains a list of peers that the sending peer is connected with
+
+* When a message is received, the sending peer becomes known
+* An introductionResponse message, which contains a list of peers that the sending peer is connected with
 
 Note that in the latter case a puncture request is still only sent to one peer (the invitee). 
 
 Each time a peer is 'introduced' through either method the ``getOrMakePeer`` function of the PeerHandler is called. This function does one of four things:
-- The peer is already known, so the object associated with this known peer is returned
-- The peer is already known based on its id, but with a different InetAddress, the associated object is updated and returned
-- The peer is already known based on its address, but with a different id, the associated object is updated and returned
-- The peer is unknown, a new Peer object is created, added to the PeerList and returned
+
+* The peer is already known, so the object associated with this known peer is returned
+* The peer is already known based on its id, but with a different InetAddress, the associated object is updated and returned
+* The peer is already known based on its address, but with a different id, the associated object is updated and returned
+* The peer is unknown, a new Peer object is created, added to the PeerList and returned
 
 This way a host keeps track of all peers that ever interacted with them and keeps the information up-to-date.
 
 For each peer the following information is stored:
- - address - the InetSocketAddress where this peer can be reached
- - peerId - the identifier of this peer
- - lastSendTime - the last time a message was send to this peer
- - lastReceiveTime - the last time a message was received from this peer
- - long creationTime - the time this peer was first introduced to this host
+
+* address - the InetSocketAddress where this peer can be reached
+* peerId - the identifier of this peer
+* lastSendTime - the last time a message was send to this peer
+* lastReceiveTime - the last time a message was received from this peer
+* long creationTime - the time this peer was first introduced to this host
 
 Every second the peer list is checked for dead peers. Dead peers are peers from which no message was received in the last 25 seconds. These dead peers are removed from the peerlist.
-
 
 Background handling of messages
 ===============================
 Since all messages are created using protocolbuffers, it is easy to rebuild them on reception. When a message is received, the message type is checked and the appropriate functions are called to further handle the message. Messages not build with (the correct) protocolbuffers will simply be discarded.
+
+.. _message-transmission:
 
 Message transmission
 ====================
@@ -106,11 +104,11 @@ Therefore the offline send feature should only be used when there is no network 
 
 Networking classes and their responsibilities
 =============================================
-There are two main classes which have to do with networking. `Network <TODO_add_link>`_ and `OverviewConnectionsActivity <TODO_add_link>`_.
+There are two main classes which have to do with networking. :base-repo:`Network <network/Network.java>` and :base-repo:`MessageHandler <network/MessageHandler.java>`.
 
 The Network class is a singleton class and is responsible for sending and receiving messages. It has a datagram channel which has a socket bound to a local port (default 1873). Through this channel messages are send and received to and from peers. The network class has methods to build the different messages of the protocol.
 
-The OverviewConnectionsActivity class is responsible for handling the messages after they have been deserialized. Furthermore it updates the information in the UI based on the messages it receives. This includes adding and removing peers and updating the connection information.
+The MessageHandler is responsible for handling the messages after they have been deserialized. It decides on how to respond to a received message.
 
 Stress Testing
 ===============
@@ -143,3 +141,23 @@ This script takes a data file that contains the logs of an arbitrary number of n
 - Make sure that the resulting file used to create the graph contains only one header line containing the column names.
 
 The steps to create graphs are the same as above, except that the recommended filter is 'Statistics-stress_test' in order to filter out the main node (including it will cause some issues since this node is started much earlier than the rest)
+
+
+Conclusion
+*************
+
+A problem of the current implementation is that each connected peer sends around one kilobyte of data every 10 seconds. Suppose we have 100 clients which are all connected, then this would mean we would send 100 * 1 * 6 = 600 kilobytes every minute. If a device is on a 4G connection this would consume too much data.
+
+A solution to this problem could be to send less messages. For example, it is possible to send every minute a message to a peer instead of every 10 seconds. This could work since it is not necessary to check if a peer is alive every 10 seconds. 
+Another solution is to send smaller messages over the network. However, protocol buffers is used to generate, send, and receive the messages, removing protocol buffers means a lot of new code has to be added to generate, send, and receive the messages.
+
+
+Another problem is that messages are send to 10 random peers. A better solution is to send messages to peers we have not send a message in a while. A further improvement could be to send a message to more than 10 peers every 10 seconds, but ultimately this does not scale well.
+
+
+
+Links to code
+=============
+* :base-repo:`Network class (Network.java) <network/Network.java>`
+* :base-repo:`Message handling (MessageHandler.java) <network/MessageHandler.java>`
+* :base-repo:`Offline sending and receiving <offline>`
