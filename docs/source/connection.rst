@@ -142,6 +142,20 @@ This script takes a data file that contains the logs of an arbitrary number of n
 
 The steps to create graphs are the same as above, except that the recommended filter is 'Statistics-stress_test' in order to filter out the main node (including it will cause some issues since this node is started much earlier than the rest)
 
+
+Conclusion
+*************
+
+A problem of the current implementation is that each connected peer sends around one kilobyte of data every 10 seconds. Suppose we have 100 clients which are all connected, then this would mean we would send 100 * 1 * 6 = 600 kilobytes every minute. If a device is on a 4G connection this would consume too much data.
+
+A solution to this problem could be to send less messages. For example, it is possible to send every minute a message to a peer instead of every 10 seconds. This could work since it is not necessary to check if a peer is alive every 10 seconds. 
+Another solution is to send smaller messages over the network. However, protocol buffers is used to generate, send, and receive the messages, removing protocol buffers means a lot of new code has to be added to generate, send, and receive the messages.
+
+
+Another problem is that messages are send to 10 random peers. A better solution is to send messages to peers we have not send a message in a while. A further improvement could be to send a message to more than 10 peers every 10 seconds, but ultimately this does not scale well.
+
+
+
 Links to code
 =============
 * :base-repo:`Network class (Network.java) <network/Network.java>`
