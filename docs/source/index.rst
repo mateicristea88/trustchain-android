@@ -20,5 +20,6 @@ TrustChain Android
    protocolbuffers
    database
    crypto
+   maturity-code
    installation-instructions
    contact
