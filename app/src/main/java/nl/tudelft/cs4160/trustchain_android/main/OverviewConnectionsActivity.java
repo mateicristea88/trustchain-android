@@ -54,10 +54,12 @@ import nl.tudelft.cs4160.trustchain_android.passport.ocr.camera.CameraActivity;
 import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.peer.PeerHandler;
 import nl.tudelft.cs4160.trustchain_android.peer.PeerListener;
+import nl.tudelft.cs4160.trustchain_android.statistics.StatisticsServer;
 import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.BootstrapIPStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.SharedPreferencesStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
+import nl.tudelft.cs4160.trustchain_android.stresstest.StressTestActivity;
 import nl.tudelft.cs4160.trustchain_android.util.RequestCode;
 
 import static nl.tudelft.cs4160.trustchain_android.main.UserConfigurationActivity.VERSION_NAME_KEY;
@@ -122,6 +124,7 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
         dbHelper = new TrustChainDBHelper(this);
         initKey();
         peerHandler = new PeerHandler(Key.loadKeys(this).getPublicKeyPair(), UserNameStorage.getUserName(this));
+        StatisticsServer.getInstance().start(this);
 
         if (savedInstanceState != null) {
             ArrayList<Peer> list = (ArrayList<Peer>) savedInstanceState.getSerializable("peers");
@@ -405,6 +408,7 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
             Log.d(TAG, "Send thread stopped");
         });
         sendThread.start();
+//        Looper.getMainLooper().getThread().setUncaughtExceptionHandler(((thread, throwable) -> {}));
         Log.d(TAG, "Send thread started");
     }
 
@@ -555,6 +559,10 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
         return peerHandler;
     }
 
+    @Override
+    public String getName() {
+        return UserNameStorage.getUserName(this);
+    }
 
     /**
      * Show a toast when the user presses the home button. Since this activity is always running,

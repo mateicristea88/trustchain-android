@@ -66,6 +66,7 @@
     <string name="menu_funds">Funds</string>
     <string name="menu_transactions">Transactions</string>
     <string name="menu_scan_passport">Scan Passport</string>
+    <string name="menu_stress_test">Stats / Stress Test</string>
 
     <!--- app to app strings -->
     <string name="start_connection">Attempt connection</string>
@@ -179,6 +180,26 @@
 
     <string name="type_file">%s file</string>
     <string name="click_to_open_file">%s file\nClick to open</string>
+
+    <!-- Stress test  -->
+    <string name="nodes_to_start">Start additional peers</string>
+    <string name="nodes_running">Number of additional peers</string>
+    <string name="default_nodes_num">1</string>
+    <string name="button_start_nodes">Start peers</string>
+    <string name="button_stop_nodes">Stop peers</string>
+
+    <!-- Stats -->
+    <string name="stats_received_title">Received Stats</string>
+    <string name="stats_messages_received">Total messages received:</string>
+    <string name="stats_punctures">Punctures:</string>
+    <string name="stats_puncture_requests">Puncture requests:</string>
+    <string name="stats_introduction_requests">Introduction requests:</string>
+    <string name="stats_introduction_responses">Introduction responses:</string>
+    <string name="stats_block_messages">Block messages:</string>
+    <string name="stats_sent">Sent Stats</string>
+    <string name="stats_messages_sent">Total messages sent:</string>
+    <string name="stats_uptime">Uptime:</string>
+    <string name="stats_api_too_low">Stats will not be displayed because your API level is to low!</string>
 
     <!-- Offline block signing -->
     <string name="title_activity_send_offline">Send block offline</string>

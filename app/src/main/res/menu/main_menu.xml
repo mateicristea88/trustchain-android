@@ -37,5 +37,4 @@
         android:id="@+id/passport_scan"
         android:title="@string/menu_scan_passport"
         app:showAsAction="never"/>
-
 </menu>

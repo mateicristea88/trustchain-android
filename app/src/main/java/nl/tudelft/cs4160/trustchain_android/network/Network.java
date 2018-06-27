@@ -3,6 +3,7 @@ package nl.tudelft.cs4160.trustchain_android.network;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.util.Log;
 
 import com.google.protobuf.ByteString;
@@ -30,6 +31,7 @@ import nl.tudelft.cs4160.trustchain_android.message.MessageProto.TrustChainBlock
 import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.peer.PeerHandler;
 import nl.tudelft.cs4160.trustchain_android.peersummary.PeerSummaryActivity;
+import nl.tudelft.cs4160.trustchain_android.statistics.StatisticsServer;
 import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.InboxItemStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.PubKeyAndAddressPairStorage;
@@ -39,15 +41,17 @@ public class Network {
     private final String TAG = this.getClass().getName();
     private static final int BUFFER_SIZE = 65536;
     private DatagramChannel channel;
-    private String name;
+    public String name;
     private int connectionType;
-    private static InetSocketAddress internalSourceAddress;
+    private InetSocketAddress internalSourceAddress;
     private static Network network;
     private TrustChainDBHelper dbHelper;
     private PublicKeyPair publicKey;
     private MessageHandler messageHandler;
-    private static NetworkStatusListener networkStatusListener;
-    private static PeerSummaryActivity mutualBlockListener;
+    private NetworkStatusListener networkStatusListener;
+    private int port = OverviewConnectionsActivity.DEFAULT_PORT;
+    private PeerSummaryActivity mutualBlockListener;
+    private StatisticsServer statistics;
 
     public final static int INTRODUCTION_REQUEST_ID = 1;
     public final static int INTRODUCTION_RESPONSE_ID = 2;
@@ -63,6 +67,22 @@ public class Network {
     }
 
     /**
+     * Non-singleton version of Network _specifically for stress tests_.
+     * Allows to overwrite the node's name, keypair and port number.
+     * @param username
+     * @param publicKey
+     * @param context
+     * @param port
+     */
+    public Network(String username, PublicKeyPair publicKey, Context context, int port) {
+        this.name = username;
+        this.publicKey = publicKey;
+        this.port = port;
+        initVariables(context, false);
+    }
+
+
+    /**
      * Get the network instance.
      * If the network isn't initialized create a network and set the variables.
      * @param context
@@ -71,23 +91,9 @@ public class Network {
     public synchronized static Network getInstance(Context context) {
         if (network == null) {
             network = new Network();
-            network.initVariables(context);
+            network.initVariables(context, true);
         }
         return network;
-    }
-
-    /**
-     * Initialize the variables.
-     * @param context is for retrieving from storage.
-     */
-    private void initVariables(Context context) {
-        publicKey = Key.loadKeys(context).getPublicKeyPair();
-        dbHelper = new TrustChainDBHelper(context);
-        messageHandler = new MessageHandler(network, dbHelper,
-                new PeerHandler(publicKey,UserNameStorage.getUserName(context)));
-        name = UserNameStorage.getUserName(context);
-        openChannel();
-        showLocalIpAddress();
     }
 
     /**
@@ -95,7 +101,7 @@ public class Network {
      * @param networkStatusListener
      */
     public void setNetworkStatusListener(NetworkStatusListener networkStatusListener) {
-        Network.networkStatusListener = networkStatusListener;
+        this.networkStatusListener = networkStatusListener;
     }
 
     /**
@@ -103,7 +109,23 @@ public class Network {
      * @param mutualBlockListener
      */
     public void setMutualBlockListener(PeerSummaryActivity mutualBlockListener) {
-        Network.mutualBlockListener = mutualBlockListener;
+        this.mutualBlockListener = mutualBlockListener;
+    }
+
+    /**
+     * Initialize local variables including opening the channel.
+     * name and publicKey are only set if that wasn't already done by the constructor.
+     * @param dbAccess whether or not the message handler for this network instance should access the database.
+     */
+    private void initVariables(Context context, boolean dbAccess) {
+        this.statistics = StatisticsServer.getInstance();
+        if (name == null) name = UserNameStorage.getUserName(context);
+        if (publicKey == null) publicKey = Key.loadKeys(context).getPublicKeyPair();
+        messageHandler = new MessageHandler(this,
+                dbAccess ? new TrustChainDBHelper(context) : null,
+                new PeerHandler(publicKey,name));
+        openChannel();
+        showLocalIpAddress();
     }
 
     /**
@@ -112,7 +134,7 @@ public class Network {
     private void openChannel() {
         try {
             channel = DatagramChannel.open();
-            channel.socket().bind(new InetSocketAddress(OverviewConnectionsActivity.DEFAULT_PORT));
+            channel.socket().bind(new InetSocketAddress(port));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -135,6 +157,7 @@ public class Network {
      * Close the channel
      */
     public void closeChannel() {
+        Log.i("Network", "Closing channel");
         channel.socket().close();
         try {
             channel.close();
@@ -179,6 +202,7 @@ public class Network {
                 .setType(INTRODUCTION_REQUEST_ID)
                 .setPayload(MessageProto.Payload.newBuilder().setIntroductionRequest(request));
 
+        statistics.introductionRequestSent(networkStatusListener);
         sendMessage(messageBuilder.build(), peer);
     }
 
@@ -198,6 +222,7 @@ public class Network {
                 .setPayload(MessageProto.Payload.newBuilder().setBlock(block))
                 .build();
 
+        statistics.blockMessageSent(networkStatusListener);
         sendMessage(message, peer);
     }
 
@@ -242,6 +267,7 @@ public class Network {
                 .setPayload(MessageProto.Payload.newBuilder().setPunctureRequest(pRequest))
                 .build();
 
+        statistics.punctureRequestSent(networkStatusListener);
         sendMessage(message, peer);
     }
 
@@ -265,6 +291,7 @@ public class Network {
                 .setPayload(MessageProto.Payload.newBuilder().setPuncture(puncture))
                 .build();
 
+        statistics.punctureSent(networkStatusListener);
         sendMessage(message, peer);
     }
 
@@ -298,6 +325,7 @@ public class Network {
                 .setPayload(MessageProto.Payload.newBuilder().setIntroductionResponse(response))
                 .build();
 
+        statistics.introductionResponseSent(networkStatusListener);
         sendMessage(message, peer);
     }
 
@@ -310,8 +338,11 @@ public class Network {
      */
     private synchronized void sendMessage(Message message, Peer peer) throws IOException {
         ByteBuffer outputBuffer = ByteBuffer.allocate(BUFFER_SIZE);
-        channel.send(outputBuffer.wrap(message.toByteArray()), peer.getAddress());
-        Log.v(TAG, "Sending " + message);
+        outputBuffer = outputBuffer.wrap(message.toByteArray());
+        channel.send(outputBuffer, peer.getAddress());
+        statistics.bytesSent(networkStatusListener, outputBuffer.position());
+        statistics.messageSent(networkStatusListener);
+        Log.i(TAG, "Sending to " + peer.getName() + ":\n" + message);
         peer.sentData();
     }
 
@@ -319,7 +350,7 @@ public class Network {
      * Show local ip address.
      */
     public void showLocalIpAddress() {
-        ShowLocalIPTask showLocalIPTask = new ShowLocalIPTask();
+        ShowLocalIPTask showLocalIPTask = new ShowLocalIPTask(port);
         showLocalIPTask.execute();
     }
 
@@ -352,6 +383,8 @@ public class Network {
                     return;
                 }
 
+                statistics.messageReceived(networkStatusListener);
+                statistics.bytesReceived(networkStatusListener, data.remaining());
                 peer.receivedData();
                 PubKeyAndAddressPairStorage.addPubkeyAndAddressPair(context, sourcePubKey, address);
                 handleMessage(peer, message, sourcePubKey, context);
@@ -373,18 +406,23 @@ public class Network {
     public void handleMessage(Peer peer, Message message, PublicKeyPair pubKeyPair, Context context) throws Exception {
         switch (message.getType()) {
             case INTRODUCTION_REQUEST_ID:
+                statistics.introductionRequestReceived(networkStatusListener);
                 messageHandler.handleIntroductionRequest(peer, message.getPayload().getIntroductionRequest());
                 break;
             case INTRODUCTION_RESPONSE_ID:
+                statistics.introductionResponseReceived(networkStatusListener);
                 messageHandler.handleIntroductionResponse(peer, message.getPayload().getIntroductionResponse());
                 break;
             case PUNCTURE_ID:
+                statistics.punctureReceived(networkStatusListener);
                 messageHandler.handlePuncture(peer, message.getPayload().getPuncture());
                 break;
             case PUNCTURE_REQUEST_ID:
+                statistics.punctureRequestReceived(networkStatusListener);
                 messageHandler.handlePunctureRequest(peer, message.getPayload().getPunctureRequest());
                 break;
             case BLOCK_MESSAGE_ID:
+                statistics.blockMessageReceived(networkStatusListener);
                 TrustChainBlock block = message.getPayload().getBlock();
 
                 // update the inbox
@@ -397,9 +435,18 @@ public class Network {
                 }
                 break;
             case CRAWL_REQUEST_ID:
+                // Crawl messages not logged
                 messageHandler.handleCrawlRequest(peer, message.getPayload().getCrawlRequest());
                 break;
         }
+    }
+
+    public MessageHandler getMessageHandler() {
+        return messageHandler;
+    }
+
+    public NetworkStatusListener getStatusListener() {
+        return networkStatusListener;
     }
 
     /**
@@ -433,16 +480,19 @@ public class Network {
         }
     }
 
-    public MessageHandler getMessageHandler() {
-        return messageHandler;
-    }
-
     /**
      * Show local ip visually to the user.
      */
-    private static class ShowLocalIPTask extends AsyncTask<Void, Void, InetAddress> {
+    private class ShowLocalIPTask extends AsyncTask<Void, Void, InetAddress> {
+        int port;
+
+        public ShowLocalIPTask(int port) {
+            super();
+            this.port = port;
+        }
+
         @Override
-        protected InetAddress doInBackground(Void... params) {
+        protected InetAddress doInBackground(Void... nothin) {
             try {
                 for (Enumeration en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements(); ) {
                     NetworkInterface intf = (NetworkInterface) en.nextElement();
@@ -463,7 +513,7 @@ public class Network {
         protected void onPostExecute(InetAddress inetAddress) {
             super.onPostExecute(inetAddress);
             if (inetAddress != null) {
-                internalSourceAddress = new InetSocketAddress(inetAddress, OverviewConnectionsActivity.DEFAULT_PORT);
+                internalSourceAddress = new InetSocketAddress(inetAddress, port);
                 if (networkStatusListener != null) {
                     networkStatusListener.updateInternalSourceAddress(internalSourceAddress.toString().replace("/",""));
                 }

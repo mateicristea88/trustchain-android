@@ -149,8 +149,10 @@ public class PeerHandler {
             public synchronized void run() {
                     peerList.add(peer);
                     splitPeerList();
-                peerListener.updateActivePeers();
-                peerListener.updateNewPeers();
+                    if (peerListener != null) {
+                        peerListener.updateActivePeers();
+                        peerListener.updateNewPeers();
+                    }
             }
         });
         return peer;
