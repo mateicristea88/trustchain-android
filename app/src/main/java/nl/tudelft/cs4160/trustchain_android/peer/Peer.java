@@ -23,6 +23,8 @@ public class Peer implements Serializable {
     private long lastReceiveTime = -1;
     private long creationTime;
 
+    final static long serialVersionUID = 6472812146100457751L;
+
     /**
      * Create a peer, for consistency protocolbuffers is used for this too, instead of simply serializing this.
      * @param address the address where the peer is located

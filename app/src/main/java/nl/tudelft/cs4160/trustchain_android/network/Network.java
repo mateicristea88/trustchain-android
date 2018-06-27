@@ -341,7 +341,7 @@ public class Network {
         channel.send(outputBuffer, peer.getAddress());
         statistics.bytesSent(networkStatusListener, outputBuffer.position());
         statistics.messageSent(networkStatusListener);
-        Log.i(TAG, "Sending to " + peer.getName() + ":\n" + message);
+        Log.v(TAG, "Sending to " + peer.getName() + ":\n" + message);
         peer.sentData();
     }
 
