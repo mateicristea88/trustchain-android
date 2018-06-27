@@ -1,4 +1,4 @@
-:: _chainexplorer:
+.. _chainexplorer:
 
 ******************
 Chain Explorer
@@ -6,10 +6,11 @@ Chain Explorer
 
 
 The chain explorer has several functionalities:
-- Show all (known) blocks in a chain
-- Show the content of a block such as public key, link public key and the transaction
-- Click on other public keys to expore other chains
-- Open files from a block with a file
+
+   - Show all (known) blocks in a chain
+   - Show the content of a block such as public key, link public key and the transaction
+   - Click on other public keys to expore other chains
+   - Open files from a block with a file
 
 
 ..  image:: ./images/chainExplorerNormal.jpg
@@ -36,6 +37,6 @@ Viewing another chain can be done by clicking on the arrow on the right side of 
 *****************
 Links to code
 *****************
-- `Chain explorere activity <https://github.com/klikooo/CS4160-trustchain-android/blob/develop/app/src/main/java/nl/tudelft/cs4160/trustchain_android/chainExplorer/ChainExplorerActivity.java>`_
+- `Chain explorer activity <https://github.com/klikooo/CS4160-trustchain-android/blob/develop/app/src/main/java/nl/tudelft/cs4160/trustchain_android/chainExplorer/ChainExplorerActivity.java>`_
 - `Chain explorer adapter <https://github.com/klikooo/CS4160-trustchain-android/blob/develop/app/src/main/java/nl/tudelft/cs4160/trustchain_android/chainExplorer/ChainExplorerAdapter.java>`_ 
 
