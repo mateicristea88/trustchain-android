@@ -219,9 +219,6 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
                 Intent cameraActivity = new Intent(this, CameraActivity.class);
                 startActivity(cameraActivity);
                 return true;
-            case R.id.stress_test:
-                startActivity(new Intent(this, StressTestActivity.class));
-                return true;
             default:
                 return false;
         }

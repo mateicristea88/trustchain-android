@@ -34,9 +34,4 @@
         android:id="@+id/passport_scan"
         android:title="@string/menu_scan_passport"
         app:showAsAction="never"/>
-
-    <item
-        android:id="@+id/stress_test"
-        android:title="@string/menu_stress_test"
-        app:showAsAction="never"/>
 </menu>

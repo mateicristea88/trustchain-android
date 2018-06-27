@@ -18,8 +18,19 @@
     <ListView
         android:id="@+id/connectionColorExplanationList"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
 
     </ListView>
+
+    <Button
+        android:id="@+id/stress_test"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="20dp"
+        android:background="@color/colorPrimary"
+        android:text="@string/menu_stress_test"
+        android:textColor="@android:color/white" />
 
 </LinearLayout>

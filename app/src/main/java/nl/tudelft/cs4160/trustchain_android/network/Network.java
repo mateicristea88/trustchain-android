@@ -77,7 +77,7 @@ public class Network {
         this.name = username;
         this.publicKey = publicKey;
         this.port = port;
-        initVariables(context);
+        initVariables(context, false);
     }
 
 
@@ -90,7 +90,7 @@ public class Network {
     public synchronized static Network getInstance(Context context) {
         if (network == null) {
             network = new Network();
-            network.initVariables(context);
+            network.initVariables(context, true);
         }
         return network;
     }
@@ -114,12 +114,14 @@ public class Network {
     /**
      * Initialize local variables including opening the channel.
      * name and publicKey are only set if that wasn't already done by the constructor.
+     * @param dbAccess whether or not the message handler for this network instance should access the database.
      */
-    private void initVariables(Context context) {
+    private void initVariables(Context context, boolean dbAccess) {
         this.statistics = StatisticsServer.getInstance();
         if (name == null) name = UserNameStorage.getUserName(context);
         if (publicKey == null) publicKey = Key.loadKeys(context).getPublicKeyPair();
-        messageHandler = new MessageHandler(this, new TrustChainDBHelper(context),
+        messageHandler = new MessageHandler(this,
+                dbAccess ? new TrustChainDBHelper(context) : null,
                 new PeerHandler(publicKey,name));
         openChannel();
         showLocalIpAddress();
