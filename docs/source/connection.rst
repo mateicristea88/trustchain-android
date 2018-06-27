@@ -136,12 +136,12 @@ example: 'python generategraph.py messagesSent messagesReceived'
 
 In order to take all nodes into account generategraph_aggregate.py is provided.
 This script takes a data file that contains the logs of an arbitrary number of nodes, and calculates the averages and standard deviations of the requested columns.
+
 - Please note that this script is more hacky than generategraph.py, may contain bugs and does not offer custom ticks on the x and y axis.
 - Please also note that this script has 'stress_test_user_0' hardcoded as node name and (ab)uses this on order to fill the array of x values. In order for this script to work reliably, the hardcoded username value should always be the first log in each series of log updates.
 - Make sure that the resulting file used to create the graph contains only one header line containing the column names.
 
 The steps to create graphs are the same as above, except that the recommended filter is 'Statistics-stress_test' in order to filter out the main node (including it will cause some issues since this node is started much earlier than the rest)
-
 
 Conclusion
 *************
