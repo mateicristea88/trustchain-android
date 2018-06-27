@@ -199,6 +199,7 @@
     <string name="stats_sent">Sent Stats</string>
     <string name="stats_messages_sent">Total messages sent:</string>
     <string name="stats_uptime">Uptime:</string>
+    <string name="stats_api_too_low">Stats will not be displayed because your API level is to low!</string>
 
     <!-- Offline block signing -->
     <string name="title_activity_send_offline">Send block offline</string>

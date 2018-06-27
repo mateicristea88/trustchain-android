@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -142,6 +143,8 @@ public class StressTestActivity extends AppCompatActivity {
         super.onStart();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             uptimeUpdateHandler.post(statisticsUpdateTask);
+        } else {
+            Toast.makeText(getApplicationContext(), getString(R.string.stats_api_too_low), Toast.LENGTH_SHORT).show();
         }
     }
 
