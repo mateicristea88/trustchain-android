@@ -174,8 +174,6 @@ public class ChainExplorerAdapter extends BaseAdapter {
         view.setOnClickListener(new OpenFileClickListener((Activity)context, block));
     }
 
-
-
     private String getPeerAlias(ByteString key) {
         if (peerList.containsKey(key)) {
             return peerList.get(key);

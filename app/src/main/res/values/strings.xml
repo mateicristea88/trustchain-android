@@ -59,6 +59,7 @@
     <string name="menu_chainexplorer">My Chain</string>
     <string name="menu_clear_inbox">Clear Entire Inbox</string>
     <string name="menu_info">Info</string>
+    <string name="menu_receive_offline">Receive offline</string>
     <string name="menu_change_bootstrap">Change bootstrap</string>
     <string name="menu_import_tokens">Import Tokens</string>
     <string name="menu_export_tokens">Export Tokens</string>
@@ -198,4 +199,24 @@
     <string name="stats_sent">Sent Stats</string>
     <string name="stats_messages_sent">Total messages sent:</string>
     <string name="stats_uptime">Uptime:</string>
+
+    <!-- Offline block signing -->
+    <string name="title_activity_send_offline">Send block offline</string>
+    <string name="sending_block_beam">Sending block, hold receiver close</string>
+    <string name="sending_block_beam_complete">Block was sent successfully</string>
+    <string name="send_offline_checkbox_text">Send offline</string>
+    <string name="qr_camera_permission_explanation">Camera permission is required in order to scan a QR code</string>
+    <string name="receive_offline_explanation">Tap a sending device to receive a claim. Or press the button below to scan one from a QR coe</string>
+    <string name="scan_qr_code">Scan a QR code</string>
+    <string name="too_big_for_qr">This block is too big for a QR code! (%d out of max %d bytes)</string>
+    <string name="enable_nfc">Enable NFC in your device settings before you can use Beam</string>
+    <string name="button_send_qr_code">QR Code</string>
+    <string name="button_send_android_beam">Android Beam</string>
+    <string name="block_signed">Block signed and saved!</string>
+    <string name="sign_and_return_block">Sign block and return to sender</string>
+    <string name="title_activity_receive_offline">Receive block offline</string>
+    <string name="receive_completed">Receive completed block</string>
+
+    <string name="deny_permission">Deny</string>
+    <string name="return_home">Return</string>
 </resources>

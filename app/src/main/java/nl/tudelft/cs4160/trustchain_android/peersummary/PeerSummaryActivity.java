@@ -16,7 +16,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,6 +23,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,6 +46,8 @@ import nl.tudelft.cs4160.trustchain_android.inbox.InboxItem;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.network.CrawlRequestListener;
 import nl.tudelft.cs4160.trustchain_android.network.Network;
+import nl.tudelft.cs4160.trustchain_android.offline.ReceiveOfflineActivity;
+import nl.tudelft.cs4160.trustchain_android.offline.SendOfflineActivity;
 import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.InboxItemStorage;
 import nl.tudelft.cs4160.trustchain_android.util.FileDialog;
@@ -76,6 +78,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
     private File transactionDocument;
     private TextView selectedFilePath;
     private Button sendButton;
+    private CheckBox sendOffline;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,6 +117,10 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
                 Intent chainExplorerActivity = new Intent(this, ChainExplorerActivity.class);
                 startActivity(chainExplorerActivity);
                 return true;
+            case R.id.receive_offline:
+                Intent receiveOfflineActivity = new Intent(this, ReceiveOfflineActivity.class);
+                startActivity(receiveOfflineActivity);
+                return true;
             case R.id.close:
                 if (Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT) {
                     ((ActivityManager) getApplicationContext().getSystemService(ACTIVITY_SERVICE))
@@ -132,13 +139,11 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
      * such as local and external ip
      */
     private void initVariables() {
-        statusText = findViewById(R.id.status);
-        statusText.setMovementMethod(new ScrollingMovementMethod());
-
         messageEditText = findViewById(R.id.message_edit_text);
         mRecyclerView = findViewById(R.id.mutualBlocksRecyclerView);
         selectedFilePath = findViewById(R.id.selected_path);
         sendButton = findViewById(R.id.send_button);
+        sendOffline = findViewById(R.id.send_offline_checkbox);
 
         dbHelper = new TrustChainDBHelper(this);
         network = Network.getInstance(getApplicationContext());
@@ -249,7 +254,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
 
         final MessageProto.TrustChainBlock block = createBlock(transactionData, format, DBHelper, publicKey, null, inboxItemOtherPeer.getPeer().getPublicKeyPair().toBytes());
         final MessageProto.TrustChainBlock signedBlock = TrustChainBlockHelper.sign(block, Key.loadKeys(getApplicationContext()).getSigningKey());
-        Log.d(TAG, "Signed block is " + signedBlock.toByteArray().length + " bytes");
+
         messageEditText.setText("");
         messageEditText.clearFocus();
         InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -257,10 +262,13 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
         // insert the half block in your own chain
         new TrustChainDBHelper(this).insertInDB(signedBlock);
 
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
+        if (sendOffline.isChecked()) {
+            Intent intent = new Intent(this, SendOfflineActivity.class);
+            intent.putExtra("block", signedBlock);
+            intent.putExtra("return", true);
+            startActivity(intent);
+        } else {
+            new Thread(() -> {
                 try {
                     network.sendBlockMessage(inboxItemOtherPeer.getPeer(), signedBlock);
                     Snackbar mySnackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout),"Half block send!", Snackbar.LENGTH_SHORT);
@@ -269,8 +277,8 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
                     e.printStackTrace();
                     Snackbar.make(findViewById(R.id.myCoordinatorLayout),e.getMessage(), Snackbar.LENGTH_LONG);
                 }
-            }
-        }).start();
+            }).start();
+        }
     }
 
     /**
@@ -281,32 +289,23 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
     public void requestSignPermission(final MessageProto.TrustChainBlock block) {
         //just to be sure run it on the ui thread
         //this is not necessary when this function is called from a AsyncTask
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                AlertDialog.Builder builder;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    builder = new AlertDialog.Builder(context, android.R.style.Theme_Material_Dialog_Alert);
-                } else {
-                    builder = new AlertDialog.Builder(context);
-                }
-                String txString = containsBinaryFile(block) ?
-                        getString(R.string.type_file, block.getTransaction().getFormat()) :
-                        block.getTransaction().getUnformatted().toString(UTF_8);
-                builder.setMessage("Do you want to sign Block[ " + txString + " ] from " + inboxItemOtherPeer.getPeer().getName() + "?")
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                signAndSendHalfBlock(block);
-                            }
-                        })
-                        .setNegativeButton("DELETE", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                // do nothing?
-                            }
-                        });
-                builder.create();
-                builder.show();
+        runOnUiThread(() -> {
+            AlertDialog.Builder builder;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                builder = new AlertDialog.Builder(context, android.R.style.Theme_Material_Dialog_Alert);
+            } else {
+                builder = new AlertDialog.Builder(context);
             }
+            String txString = containsBinaryFile(block) ?
+                    getString(R.string.type_file, block.getTransaction().getFormat()) :
+                    block.getTransaction().getUnformatted().toString(UTF_8);
+            builder.setMessage("Do you want to sign Block[ " + txString + " ] from " + inboxItemOtherPeer.getPeer().getName() + "?")
+                    .setPositiveButton("Yes", (dialog, id) -> signAndSendHalfBlock(block))
+                    .setNegativeButton("No", (dialog, id) -> {
+                        // do nothing?
+                    });
+            builder.create();
+            builder.show();
         });
     }
 
@@ -324,17 +323,14 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
 
         //insert the new signed block
         DBHelper.insertInDB(signedBlock); // See read the docs (should be signed though)
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    network.sendBlockMessage(inboxItemOtherPeer.getPeer(), signedBlock);
+        new Thread(() -> {
+            try {
+                network.sendBlockMessage(inboxItemOtherPeer.getPeer(), signedBlock);
 
-                    //show that the block is valid
-                    mAdapter.updateValidationResult(linkedBlock, ValidationResult.VALID);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                //show that the block is valid
+                mAdapter.updateValidationResult(linkedBlock, ValidationResult.VALID);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }).start();
     }
@@ -344,12 +340,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
      * just be sure when calling it from another thread.
      */
     public void mutualBlocksChanged() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mAdapter.notifyDataSetChanged();
-            }
-        });
+        runOnUiThread(() -> mAdapter.notifyDataSetChanged());
     }
 
     /**
@@ -399,20 +390,18 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
 
         File mPath = new File(Environment.getExternalStorageDirectory() + "//DIR//");
         FileDialog fileDialog = new FileDialog(this, mPath);
-        fileDialog.addFileListener(new FileDialog.FileSelectedListener() {
-            public void fileSelected(File file) {
-                messageEditText.setEnabled(false);
-                transactionDocument = file;
-                selectedFilePath.setText(file.getPath());
-                if (file.length() > MAX_ATTACHMENT_SIZE) {
-                    selectedFilePath.requestFocus();
-                    selectedFilePath.setError("Too big (" + Util.readableSize(file.length()) + ") max is " + Util.readableSize(MAX_ATTACHMENT_SIZE));
-                    sendButton.setEnabled(false);
-                } else {
-                    selectedFilePath.setError(null);
-                    sendButton.setEnabled(true);
-                    Snackbar.make(findViewById(R.id.myCoordinatorLayout),getString(R.string.warning_files),Snackbar.LENGTH_LONG).show();
-                }
+        fileDialog.addFileListener(file -> {
+            messageEditText.setEnabled(false);
+            transactionDocument = file;
+            selectedFilePath.setText(file.getPath());
+            if (file.length() > MAX_ATTACHMENT_SIZE) {
+                selectedFilePath.requestFocus();
+                selectedFilePath.setError("Too big (" + Util.readableSize(file.length()) + ") max is " + Util.readableSize(MAX_ATTACHMENT_SIZE));
+                sendButton.setEnabled(false);
+            } else {
+                selectedFilePath.setError(null);
+                sendButton.setEnabled(true);
+                Snackbar.make(findViewById(R.id.myCoordinatorLayout),getString(R.string.warning_files),Snackbar.LENGTH_LONG).show();
             }
         });
         fileDialog.showDialog();

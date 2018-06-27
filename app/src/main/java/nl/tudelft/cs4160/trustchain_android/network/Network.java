@@ -45,6 +45,7 @@ public class Network {
     private int connectionType;
     private InetSocketAddress internalSourceAddress;
     private static Network network;
+    private TrustChainDBHelper dbHelper;
     private PublicKeyPair publicKey;
     private MessageHandler messageHandler;
     private NetworkStatusListener networkStatusListener;
@@ -371,7 +372,7 @@ public class Network {
 
         try {
             Message message = Message.parseFrom(data);
-            Log.i(TAG, "Received " + message.toString());
+            Log.v(TAG, "Received " + message.toString());
 
             if (networkStatusListener != null) {
                 networkStatusListener.updateWan(message);
@@ -464,13 +465,19 @@ public class Network {
     }
 
     /**
-     * Add a block reference to the InboxItem and store this again locally.
+     * Add a block reference to the InboxItem and store this again locally if this block is
+     * addressed to us.
      * @param block the block of which the reference should be stored.
      * @param context needed for storage
      */
-    private static void addBlockToInbox(TrustChainBlock block, Context context) {
-        InboxItemStorage.addHalfBlock(context, new PublicKeyPair(block.getPublicKey().toByteArray())
-                , block.getSequenceNumber());
+    private void addBlockToInbox(TrustChainBlock block, Context context) {
+        PublicKeyPair blockLinkPubKey = new PublicKeyPair(block.getLinkPublicKey().toByteArray());
+        PublicKeyPair blockPubKey = new PublicKeyPair(block.getPublicKey().toByteArray());
+        // check if block is addressed to us and whether or not we have already received it.
+        if(blockLinkPubKey.equals(publicKey) &&
+                dbHelper.getBlock(blockPubKey.toBytes(),block.getSequenceNumber()) == null) {
+            InboxItemStorage.addHalfBlock(context, blockPubKey, block.getSequenceNumber());
+        }
     }
 
     /**
