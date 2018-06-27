@@ -20,6 +20,7 @@ TrustChain Android
    protocolbuffers
    database
    crypto
+   zkp
    maturity-code
    installation-instructions
    contact
