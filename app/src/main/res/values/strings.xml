@@ -13,8 +13,10 @@
     <string name="connect">connect</string>
     <string name="view_chain">View Chain</string>
     <string name="reset_database_button">Clear Database (closes app)</string>
-    <string name="last_received">Received: </string>
-    <string name="last_sent">Sent: </string>
+    <string name="last_received">Received: %s</string>
+    <string name="last_sent">Sent: %s</string>
+    <string name="last_received_hint">Received:</string>
+    <string name="last_sent_hint">Sent: </string>
     <string name="peer_id">peer id</string>
     <string name="snackbar_peer_added">%s added to inbox</string>
     <string name="snackbar_no_pub_key">This peer didn\'t send a public key yet</string>
@@ -57,12 +59,14 @@
     <string name="menu_chainexplorer">My Chain</string>
     <string name="menu_clear_inbox">Clear Entire Inbox</string>
     <string name="menu_info">Info</string>
+    <string name="menu_receive_offline">Receive offline</string>
     <string name="menu_change_bootstrap">Change bootstrap</string>
     <string name="menu_import_tokens">Import Tokens</string>
     <string name="menu_export_tokens">Export Tokens</string>
     <string name="menu_funds">Funds</string>
     <string name="menu_transactions">Transactions</string>
     <string name="menu_scan_passport">Scan Passport</string>
+    <string name="menu_stress_test">Stats / Stress Test</string>
 
     <!--- app to app strings -->
     <string name="start_connection">Attempt connection</string>
@@ -82,6 +86,8 @@
     <string name="outgoing">outgoing</string>
     <string name="left_connections">Active Peers</string>
     <string name="right_connections">New Peers</string>
+    <string name="left_connections_with_count">Active Peers (%d)</string>
+    <string name="right_connections_with_count">New Peers (%d)</string>
     <string name="connection">Connection</string>
     <string name="connectable_ratio">Connectable\nratio</string>
     <string name="connectable_peers">Connectable\nPeers</string>
@@ -94,15 +100,15 @@
 
     <!-- Connection explanation view -->
     <string name="symbolMeaningText">Meaning:</string>
-    <string name="connectionInfoText">Here we provide an explanation of each symbol and their corresponding color.</string>
+    <string name="connectionInfoText">Explanations of texts and symbols of the connection overview.</string>
     <string name="symbolExplanationText">Explanation</string>
     <string name="connected">Connected with peer</string>
     <string name="connecting">Connecting with peer</string>
     <string name="cannot_connect">Cannot connect with peer</string>
     <string name="received_packet">Received a packet from peer</string>
     <string name="sent_packet">Sent a packet to peer</string>
-    <string name="time_since_received">Time since last received message"</string>
-    <string name="time_since_sent">Time since last message sent</string>
+    <string name="time_since_received">Time since last received message, lights up on message received"</string>
+    <string name="time_since_sent">Time since last sent message, lights up on message sent</string>
 
     <!--- info chain explorer -->
     <string name="color_info">Color is based on the hash of the public key.</string>
@@ -174,4 +180,44 @@
 
     <string name="type_file">%s file</string>
     <string name="click_to_open_file">%s file\nClick to open</string>
+
+    <!-- Stress test  -->
+    <string name="nodes_to_start">Start additional peers</string>
+    <string name="nodes_running">Number of additional peers</string>
+    <string name="default_nodes_num">1</string>
+    <string name="button_start_nodes">Start peers</string>
+    <string name="button_stop_nodes">Stop peers</string>
+
+    <!-- Stats -->
+    <string name="stats_received_title">Received Stats</string>
+    <string name="stats_messages_received">Total messages received:</string>
+    <string name="stats_punctures">Punctures:</string>
+    <string name="stats_puncture_requests">Puncture requests:</string>
+    <string name="stats_introduction_requests">Introduction requests:</string>
+    <string name="stats_introduction_responses">Introduction responses:</string>
+    <string name="stats_block_messages">Block messages:</string>
+    <string name="stats_sent">Sent Stats</string>
+    <string name="stats_messages_sent">Total messages sent:</string>
+    <string name="stats_uptime">Uptime:</string>
+    <string name="stats_api_too_low">Stats will not be displayed because your API level is to low!</string>
+
+    <!-- Offline block signing -->
+    <string name="title_activity_send_offline">Send block offline</string>
+    <string name="sending_block_beam">Sending block, hold receiver close</string>
+    <string name="sending_block_beam_complete">Block was sent successfully</string>
+    <string name="send_offline_checkbox_text">Send offline</string>
+    <string name="qr_camera_permission_explanation">Camera permission is required in order to scan a QR code</string>
+    <string name="receive_offline_explanation">Tap a sending device to receive a claim. Or press the button below to scan one from a QR coe</string>
+    <string name="scan_qr_code">Scan a QR code</string>
+    <string name="too_big_for_qr">This block is too big for a QR code! (%d out of max %d bytes)</string>
+    <string name="enable_nfc">Enable NFC in your device settings before you can use Beam</string>
+    <string name="button_send_qr_code">QR Code</string>
+    <string name="button_send_android_beam">Android Beam</string>
+    <string name="block_signed">Block signed and saved!</string>
+    <string name="sign_and_return_block">Sign block and return to sender</string>
+    <string name="title_activity_receive_offline">Receive block offline</string>
+    <string name="receive_completed">Receive completed block</string>
+
+    <string name="deny_permission">Deny</string>
+    <string name="return_home">Return</string>
 </resources>

@@ -4,14 +4,11 @@ Contact and links
 
 Contact
 =======
-For students of the CS4160 Blockchain Engineering course of the TU Delft. You can contact us with questions about the code via e-mail.
-
-* Wilko Meijer (w.k.meijer@student.tudelft.nl)
-* Rico Tubbing (r.tubbing@student.tudelft.nl)
+For questions about the code please use Github.
 
 Useful links
 ============
-* `App source code on GitHub <https://github.com/wkmeijer/CS4160-trustchain-android>`_
+* :repo:`App source code on GitHub <>`
 * `TrustChain source code on IPv8 GitHub <https://github.com/qstokkink/py-ipv8/tree/master/ipv8/attestation/trustchain>`_
 * `Dispersy ReadTheDocs <https://dispersy.readthedocs.io/en/devel/>`_
 * `Tribler GitHub <https://github.com/Tribler/tribler>`_

@@ -123,6 +123,16 @@ public class Key {
     }
 
     /**
+     * Load the public key pair from file
+     * @param context
+     * @param file
+     * @return
+     */
+    public static PublicKeyPair loadPublicKeyPair(Context context) {
+        return loadKeys(context).getPublicKeyPair();
+    }
+
+    /**
      * Load public and private keys from the standard files.
      *
      * @param context The context (needed to read the files)

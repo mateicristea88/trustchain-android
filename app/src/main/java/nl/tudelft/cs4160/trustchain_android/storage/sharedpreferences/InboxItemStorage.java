@@ -95,23 +95,21 @@ public class InboxItemStorage {
     /**
      * Add the link of a half block to the inbox item it concerns.
      * @param context
-     * @param pubKeyPair
+     * @param pubKeyPair The public peer of the to be added block.
      * @param halfBlockSequenceNumber the sequence number of the block that is added.
      */
     public static void addHalfBlock(Context context, PublicKeyPair pubKeyPair, int halfBlockSequenceNumber) {
         try {
-            InboxItem[] array = SharedPreferencesStorage.readSharedPreferences(context, INBOX_ITEM_KEY, InboxItem[].class);
-            if (array == null) {
+            InboxItem[] inboxItems = SharedPreferencesStorage.readSharedPreferences(context, INBOX_ITEM_KEY, InboxItem[].class);
+            if (inboxItems == null) {
                 return;
             } else {
-                for (int i = 0; i < array.length; i++) {
-                    PublicKeyPair p = pubKeyPair;
-                    PublicKeyPair p2 = array[i].getPeer().getPublicKeyPair();
-                    if (array[i].getPeer().getPublicKeyPair().equals(pubKeyPair)) {
-                        InboxItem item = array[i];
+                for (int i = 0; i < inboxItems.length; i++) {
+                    if (inboxItems[i].getPeer().getPublicKeyPair().equals(pubKeyPair)) {
+                        InboxItem item = inboxItems[i];
                         item.addHalfBlocks(halfBlockSequenceNumber);
-                        array[i] = item;
-                        SharedPreferencesStorage.writeSharedPreferences(context, INBOX_ITEM_KEY, array);
+                        inboxItems[i] = item;
+                        SharedPreferencesStorage.writeSharedPreferences(context, INBOX_ITEM_KEY, inboxItems);
                         return;
                     }
                 }

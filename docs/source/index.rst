@@ -3,9 +3,9 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-************
+******************
 TrustChain Android
-************
+******************
 .. toctree::
    :maxdepth: 2
 
@@ -13,11 +13,14 @@ TrustChain Android
    trustchain
    creating-block
    connection
+   inbox
+   chainexplorer
+   wallet
+   passport
    protocolbuffers
    database
-   inbox
    crypto
-   wallet
-   tokens
+   zkp
+   maturity-code
    installation-instructions
    contact

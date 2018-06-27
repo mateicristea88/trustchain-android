@@ -49,16 +49,19 @@ import nl.tudelft.cs4160.trustchain_android.inbox.InboxActivity;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.network.Network;
 import nl.tudelft.cs4160.trustchain_android.network.NetworkStatusListener;
+import nl.tudelft.cs4160.trustchain_android.offline.ReceiveOfflineActivity;
+import nl.tudelft.cs4160.trustchain_android.passport.ocr.camera.CameraActivity;
 import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.peer.PeerHandler;
 import nl.tudelft.cs4160.trustchain_android.peer.PeerListener;
-import nl.tudelft.cs4160.trustchain_android.passport.ocr.camera.CameraActivity;
+import nl.tudelft.cs4160.trustchain_android.statistics.StatisticsServer;
 import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.BootstrapIPStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.SharedPreferencesStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
+import nl.tudelft.cs4160.trustchain_android.util.RequestCode;
 
-import static nl.tudelft.cs4160.trustchain_android.main.UserConfigurationActivity.*;
+import static nl.tudelft.cs4160.trustchain_android.main.UserConfigurationActivity.VERSION_NAME_KEY;
 
 public class OverviewConnectionsActivity extends AppCompatActivity implements NetworkStatusListener, PeerListener {
 
@@ -72,8 +75,11 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
     private TrustChainDBHelper dbHelper;
     private Network network;
     private PeerHandler peerHandler;
+    private TextView activePeersText;
+    private TextView newPeersText;
     private String wan = "";
     private static final String TAG = "OverviewConnections";
+    private boolean networkRunning = true;
 
     /**
      * Initialize views, start send and receive threads if necessary.
@@ -97,7 +103,8 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
             while(true) {
                 updatePeerLists();
                 try {
-                    Thread.sleep(500);
+                    // update every 498 ms, because we want to display a sent/received message cue when a message was received less than 500ms ago.
+                    Thread.sleep(498);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -116,6 +123,7 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
         dbHelper = new TrustChainDBHelper(this);
         initKey();
         peerHandler = new PeerHandler(Key.loadKeys(this).getPublicKeyPair(), UserNameStorage.getUserName(this));
+        StatisticsServer.getInstance().start(this);
 
         if (savedInstanceState != null) {
             ArrayList<Peer> list = (ArrayList<Peer>) savedInstanceState.getSerializable("peers");
@@ -126,7 +134,7 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
         network = Network.getInstance(getApplicationContext());
         network.getMessageHandler().setPeerHandler(getPeerHandler());
         network.setNetworkStatusListener(this);
-        network.updateConnectionType((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE));
+        updateConnectionType(network.getConnectionTypeString((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE)));
     }
 
     /**
@@ -141,6 +149,8 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
             e.printStackTrace();
         }
         ((TextView )findViewById(R.id.version)).setText(getString(R.string.version, versionName));
+        activePeersText = findViewById(R.id.active_peers_text);
+        newPeersText = findViewById(R.id.new_peers_text);
     }
 
     /**
@@ -188,6 +198,11 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
                 Intent chainExplorerActivity = new Intent(this, ChainExplorerActivity.class);
                 startActivity(chainExplorerActivity);
                 return true;
+            case R.id.receive_offline:
+                Intent intent = new Intent(this, ReceiveOfflineActivity.class);
+                intent.putExtra("return", true);
+                startActivity(intent);
+                return true;
             case R.id.connection_explanation_menu:
                 Intent ConnectionExplanationActivity = new Intent(this, ConnectionExplanationActivity.class);
                 startActivity(ConnectionExplanationActivity);
@@ -203,11 +218,11 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
                 return true;
             case R.id.find_peer:
                 Intent bootstrapActivity = new Intent(this, ChangeBootstrapActivity.class);
-                startActivityForResult(bootstrapActivity, 1);
+                startActivityForResult(bootstrapActivity, RequestCode.CHANGE_BOOTSTRAP);
                 return true;
             case R.id.passport_scan:
                 Intent cameraActivity = new Intent(this, CameraActivity.class);
-                startActivityForResult(cameraActivity, 1);
+                startActivity(cameraActivity);
                 return true;
             default:
                 return false;
@@ -259,16 +274,13 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 1) {
-            if (resultCode == Activity.RESULT_OK) {
-                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putString("ConnectableAddress", data.getStringExtra("ConnectableAddress"));
-                editor.apply();
-                String newBootstrap = BootstrapIPStorage.getIP(this);
-                CONNECTABLE_ADDRESS = newBootstrap;
-                addInitialPeer();
-            }
+        if (requestCode == RequestCode.CHANGE_BOOTSTRAP && resultCode == Activity.RESULT_OK) {
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putString("ConnectableAddress", data.getStringExtra("ConnectableAddress"));
+            editor.apply();
+            CONNECTABLE_ADDRESS = BootstrapIPStorage.getIP(this);
+            addInitialPeer();
         }
     }
 
@@ -346,8 +358,11 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
                 t++;
             }
 
-            while(true) {
+            while(!Thread.interrupted() && networkRunning) {
                 try {
+                    // update connection type and internal ip address
+                    updateConnectionType(network.getConnectionTypeString((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE)));
+                    network.showLocalIpAddress();
                     if (peerHandler.size() > 0) {
                         // select 10 random peers to send an introduction request to
                         int limit = 10;
@@ -389,8 +404,10 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
                     e.printStackTrace();
                 }
             }
+            Log.d(TAG, "Send thread stopped");
         });
         sendThread.start();
+//        Looper.getMainLooper().getThread().setUncaughtExceptionHandler(((thread, throwable) -> {}));
         Log.d(TAG, "Send thread started");
     }
 
@@ -404,7 +421,7 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
         Thread listenThread = new Thread(() -> {
             try {
                 ByteBuffer inputBuffer = ByteBuffer.allocate(BUFFER_SIZE);
-                while (!Thread.interrupted()) {
+                while (!Thread.interrupted() && networkRunning) {
                     inputBuffer.clear();
                     SocketAddress address = network.receive(inputBuffer);
                     inputBuffer.flip();
@@ -412,8 +429,8 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                Log.d(TAG, "Listen thread stopped");
             }
+            Log.d(TAG, "Listen thread stopped");
         });
         listenThread.start();
         Log.d(TAG, "Listen thread started");
@@ -430,8 +447,8 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
 
         if (peerHandler.getWanVote().vote(socketAddress)) {
             wan = peerHandler.getWanVote().getAddress().toString();
+            setWanvote(wan.replace("/",""));
         }
-        setWanvote(wan.replace("/",""));
     }
 
     /**
@@ -461,6 +478,8 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
                     peerHandler.splitPeerList();
                     activePeersAdapter.notifyDataSetChanged();
                     newPeersAdapter.notifyDataSetChanged();
+                    activePeersText.setText(getString(R.string.left_connections_with_count,peerHandler.getactivePeersList().size()));
+                    newPeersText.setText(getString(R.string.right_connections_with_count,peerHandler.getnewPeersList().size()));
                 }
             }
         });
@@ -471,6 +490,7 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
      */
     @Override
     protected void onDestroy() {
+        networkRunning = false;
         network.closeChannel();
         super.onDestroy();
     }
@@ -489,14 +509,13 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
     /**
      * Display connectionType
      *
-     * @param connectionType
-     * @param typename
-     * @param subtypename
+     * @param connectionTypeStr String representation of the connection type
      */
     @Override
-    public void updateConnectionType(int connectionType, String typename, String subtypename) {
-        String connectionTypeStr = typename + " " + subtypename;
-        ((TextView) findViewById(R.id.connection_type)).setText(connectionTypeStr);
+    public void updateConnectionType(String connectionTypeStr) {
+        runOnUiThread( () ->{
+            ((TextView) findViewById(R.id.connection_type)).setText(connectionTypeStr);
+        });
     }
 
     /**
@@ -539,6 +558,10 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
         return peerHandler;
     }
 
+    @Override
+    public String getName() {
+        return UserNameStorage.getUserName(this);
+    }
 
     /**
      * Show a toast when the user presses the home button. Since this activity is always running,

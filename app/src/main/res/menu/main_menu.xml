@@ -5,7 +5,10 @@
         android:id="@+id/chain_menu"
         android:title="@string/menu_chainexplorer"
         app:showAsAction="never"/>
-
+    <item
+        android:id="@+id/receive_offline"
+        android:title="@string/menu_receive_offline"
+        app:showAsAction="never"/>
     <item
         android:id="@+id/connection_explanation_menu"
         android:title="@string/menu_info"
@@ -34,5 +37,4 @@
         android:id="@+id/passport_scan"
         android:title="@string/menu_scan_passport"
         app:showAsAction="never"/>
-
 </menu>

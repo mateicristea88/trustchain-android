@@ -38,7 +38,8 @@ extensions = ['sphinx.ext.autodoc',
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
-    'sphinx.ext.viewcode']
+    'sphinx.ext.viewcode',
+	'sphinx.ext.extlinks']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['.templates']
@@ -54,8 +55,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'TrustChain Android'
-copyright = u'2017, Wilko Meijer, Rico Tubbing'
-author = u'Wilko Meijer, Rico Tubbing'
+copyright = u'2018, Wilko Meijer, Rico Tubbing, Jonathan Raes'
+author = u'Wilko Meijer, Rico Tubbing, Jonathan Raes'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -92,7 +93,7 @@ todo_include_todos = True
 #
 # html_theme = 'alabaster'
 html_theme = "sphinx_rtd_theme"
-
+numfig = True
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -152,7 +153,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'TrustChainAndroid.tex', u'TrustChain Android Documentation',
-     u'Wilko Meijer, Rico Tubbing', 'manual'),
+     u'Wilko Meijer, Rico Tubbing, Jonathan Raes', 'manual'),
 ]
 
 
@@ -177,6 +178,16 @@ texinfo_documents = [
      'Miscellaneous'),
 ]
 
+# This config value must be a dictionary of external sites, mapping unique short alias names to a base URL and a prefix. For example, to create an alias for the above mentioned issues, you would add
+# see: http://www.sphinx-doc.org/en/master/ext/extlinks.html
+extlinks = {
+	'base-repo': 
+		('https://github.com/klikooo/CS4160-trustchain-android/blob/master/app/src/main/java/nl/tudelft/cs4160/trustchain_android/%s', 'url'),
+	'repo':
+	('https://github.com/klikooo/CS4160-trustchain-android/%s', 'url'),
+	'ipv8-repo':
+		('https://github.com/qstokkink/py-ipv8/blob/master/%s', 'url')
+}
 
 
 
