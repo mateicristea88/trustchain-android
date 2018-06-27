@@ -2,7 +2,7 @@
 Wallet
 ************
 
-The wallet management works with a new `Tribler <https://www.tribler.org>`_ concept, called the reputation of each user. This reputation is based on the amount of data uploaded and downloaded, and the simple subtraction of these two quantities provides a number representing it. This number gives a positive value when the user is uploading more content than downloading, therefore contributing positively to the overall system. It will be referred in terms of :ref:`tokens <tokens>`, that account for the reputation of the user, and can be transferred.
+The wallet management works with a `Tribler <https://www.tribler.org>`_ concept, called the reputation of each user. This reputation is based on the amount of data uploaded and downloaded, and the simple subtraction of these two quantities provides a number representing it. This number gives a positive value when the user is uploading more content than downloading, therefore contributing positively to the overall system. It will be referred in terms of :ref:`tokens <tokens>`, that account for the reputation of the user, and can be transferred.
 
 .. _tokens:
 

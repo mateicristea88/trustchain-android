@@ -3,9 +3,9 @@
 ****************
 Creating a block
 ****************
-In order to complete a transaction with two parties a block needs to be created. A block in TrustChain is a little different than in bitcoin-style blockchains. In bitcoin-style blockchains, a block is a collection of transactions that happened in the network. A block is created by a node and is propagated through the network. All connected nodes validate the block and the transactions. In TrustChain a block is formed by two peers who wish to agree on a transaction. Therefore a TrustChainBlock only has one transaction.
+In order to complete a transaction between two parties a block needs to be created. A block in TrustChain is a little different than in bitcoin-style blockchains. In bitcoin-style blockchains, a block is a collection of transactions that happened in the network. A block is created by a node and is propagated through the network. All connected nodes validate the block and the transactions. In TrustChain a block is formed by two peers whom wish to agree on a transaction. Therefore a TrustChainBlock only has one transaction.
 
-Both parties need to agree on a transaction, so there has to be some interaction between peers. The way this is done in TrustChain is to first create an incomplete block, called a block proposal. This block proposal is send to the second peer, who completes the block and sends it back to the first peer. This process is explained in more detail below.
+Both parties need to agree on a transaction, so there has to be some interaction. The way this is done in TrustChain is to first create an incomplete block, called a block proposal. This block proposal is send to the second party, whom completes the block and sends it back to the first party. Now both parties have proof that the other party agrees to the transaction. This process is explained in more detail below.
 
 Structure of blocks
 ===================
@@ -31,7 +31,7 @@ To initiate a transaction some information is needed: the bytes of the transacti
 
 Responding to a block proposal
 ------------------------------
-When a block proposal is received the receiving party B can decide whether or not they agree with the transaction in the block and choose to either sign the block or ignore it. After the block is validated, the party B knows that this proposal is consistent with what it known of the sending party A. In order to complete the block, a new block is created. ``public_key`` and ``sequence_number`` from the block proposal will now be ``link_public_key`` and ``link_sequence_number``. ``public_key``, ``sequence_number``, and ``prev_hash`` will be set according to the current state of party B's chain. ``transaction`` will remain the same and a new hash is calculated that will be signed by party B.
+When a block proposal is received the receiving party B can decide whether or not they agree with the transaction in the block and choose to either sign the block or ignore it. After the block is validated, party B knows that this proposal is consistent with what is known of the sending party A. In order to complete the block, a new block is created. ``public_key`` and ``sequence_number`` from the block proposal will now be ``link_public_key`` and ``link_sequence_number``. ``public_key``, ``sequence_number``, and ``prev_hash`` will be set according to the current state of party B's chain. ``transaction`` will remain the same and a new hash is calculated that will be signed by party B.
 
 Validate block
 ==============
