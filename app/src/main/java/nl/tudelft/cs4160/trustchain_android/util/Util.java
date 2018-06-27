@@ -26,6 +26,9 @@ public class Util {
      * @return The content of the file
      */
     public static String readFile(Context context, String fileName) {
+        if(context == null) {
+            return null;
+        }
         File file = context.getFileStreamPath(fileName);
         if(file == null || !file.exists()) {
             return null;
@@ -58,6 +61,9 @@ public class Util {
      * @return True if successful, false if not
      */
     public static boolean writeToFile(Context context, String fileName, String data) {
+        if(context == null || fileName == null || data == null) {
+            return false;
+        }
         FileOutputStream outputStream;
         try {
             outputStream = context.openFileOutput(fileName, Context.MODE_PRIVATE);
@@ -80,6 +86,10 @@ public class Util {
      * @return boolean indicating a successful copy or not
      */
     public static boolean copyFile(InputStream is, File f) throws IOException {
+        if (is == null || f == null) {
+            return false;
+        }
+
         if (!f.exists() && !f.getParentFile().exists()) {
             if (!f.getParentFile().mkdirs()) { // create folder to contain the file
                 Log.e("Util", "Cannot create path!");

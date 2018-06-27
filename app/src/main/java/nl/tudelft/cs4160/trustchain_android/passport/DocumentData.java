@@ -3,12 +3,6 @@ package nl.tudelft.cs4160.trustchain_android.passport;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-
-/**
- * Represents document data.
- * Created by rico on 1-6-17.
- */
-
 public class DocumentData implements Parcelable {
     public final static String identifier = "docData";
     private final static int DOCUMENT_NUMBER_SIZE = 9;
@@ -18,6 +12,12 @@ public class DocumentData implements Parcelable {
     private String dateOfBirth;
 
     public DocumentData() {
+    }
+
+    public DocumentData(String documentNumber, String expiryDate, String dateOfBirth) {
+        this.documentNumber = documentNumber;
+        this.expiryDate = expiryDate;
+        this.dateOfBirth = dateOfBirth;
     }
 
     private DocumentData(Parcel in) {
@@ -68,8 +68,8 @@ public class DocumentData implements Parcelable {
 
     @Override
     public String toString() {
-        return "Exp: " + getExpiryDate() + " Date: " + getDateOfBirth() + "Doc num" +
-                getDocumentNumber() + ", valid: " + isValid();
+        return "Exp date: " + getExpiryDate() + ", Date of birth: " + getDateOfBirth() + ", Doc num: " +
+                getDocumentNumber() + ", Valid: " + isValid();
     }
 
 
