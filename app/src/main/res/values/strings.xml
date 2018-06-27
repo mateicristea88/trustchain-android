@@ -181,11 +181,11 @@
     <string name="click_to_open_file">%s file\nClick to open</string>
 
     <!-- Stress test  -->
-    <string name="nodes_to_start">Start additional nodes</string>
-    <string name="nodes_running">Number of additional nodes</string>
+    <string name="nodes_to_start">Start additional peers</string>
+    <string name="nodes_running">Number of additional peers</string>
     <string name="default_nodes_num">1</string>
-    <string name="button_start_nodes">Start nodes</string>
-    <string name="button_stop_nodes">Stop nodes</string>
+    <string name="button_start_nodes">Start peers</string>
+    <string name="button_stop_nodes">Stop peers</string>
 
     <!-- Stats -->
     <string name="stats_received_title">Received Stats</string>

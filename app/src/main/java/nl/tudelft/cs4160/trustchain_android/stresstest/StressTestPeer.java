@@ -3,11 +3,7 @@ package nl.tudelft.cs4160.trustchain_android.stresstest;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Looper;
-import android.support.design.widget.Snackbar;
 import android.util.Log;
-import android.view.View;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -34,9 +30,9 @@ import nl.tudelft.cs4160.trustchain_android.peer.PeerListener;
 import nl.tudelft.cs4160.trustchain_android.statistics.StatisticsServer;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.BootstrapIPStorage;
 
-public class StressTestNode implements PeerListener, NetworkStatusListener {
+public class StressTestPeer implements PeerListener, NetworkStatusListener {
 
-    private static final String TAG = StressTestNode.class.getName();
+    private static final String TAG = StressTestPeer.class.getName();
     private Network network;
     private PeerHandler peerHandler;
     private String wan = "";
@@ -72,7 +68,7 @@ public class StressTestNode implements PeerListener, NetworkStatusListener {
         new Thread(refreshTask).start();
     }
 
-    public StressTestNode (Context context, int port) {
+    public StressTestPeer(Context context, int port) {
         this.context = context;
         this.userName = UsernameGenerator.getUsername();
         this.keyPair = Key.createNewKeyPair();
@@ -96,18 +92,6 @@ public class StressTestNode implements PeerListener, NetworkStatusListener {
         }
     }
 
-
-//    /**
-//     * Initialize the inboxItem lists.
-//     */
-//    private void initPeerLists() {
-//        ListView incomingPeerConnectionListView = findViewById(R.id.incoming_peer_connection_list_view);
-//        ListView outgoingPeerConnectionListView = findViewById(R.id.outgoing_peer_connection_list_view);
-//        incomingPeerAdapter = new PeerListAdapter(getApplicationContext(), R.layout.peer_connection_list_item, peerHandler.getIncomingList(), (CoordinatorLayout) findViewById(R.id.myCoordinatorLayout));
-//        incomingPeerConnectionListView.setAdapter(incomingPeerAdapter);
-//        outgoingPeerAdapter = new PeerListAdapter(getApplicationContext(), R.layout.peer_connection_list_item, peerHandler.getOutgoingList(), (CoordinatorLayout) findViewById(R.id.myCoordinatorLayout));
-//        outgoingPeerConnectionListView.setAdapter(outgoingPeerAdapter);
-//    }
     /**
      * Initialize all local variables
      * If this activity is opened with a saved instance state
@@ -123,7 +107,6 @@ public class StressTestNode implements PeerListener, NetworkStatusListener {
         network.getMessageHandler().setPeerHandler(getPeerHandler());
         network.setNetworkStatusListener(this);
         updateConnectionType(network.getConnectionTypeString((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE)));
-//        ((TextView) findViewById(R.id.peer_id)).setText(peerHandler.getHashId());
     }
 
     /**
@@ -131,10 +114,6 @@ public class StressTestNode implements PeerListener, NetworkStatusListener {
      */
     private void startSendThread() {
         Thread sendThread = new Thread(() -> {
-            boolean snackbarVisible = false;
-//            View view = findViewById(android.R.id.content);
-//            Snackbar networkUnreachableSnackbar = Snackbar.make(view, "Network unavailable", Snackbar.LENGTH_INDEFINITE);
-
             // wait max one second for the CreateInetSocketAddressTask to finish, indicated by that the bootstrap is added to the peerlist
             int t = 0;
             while(peerHandler.size() == 0 && t < 100) {
@@ -189,22 +168,9 @@ public class StressTestNode implements PeerListener, NetworkStatusListener {
         Log.d(TAG, "Send thread started");
     }
 
-
-    /**
-     * Update the showed inboxItem lists.
-     * First split into new peers and the active list
-     * Then remove the peers that aren't responding for a long time.
-     */
     @Override
     public void updatePeerLists() {
-//        new Handler(Looper.getMainLooper()).post(new Runnable() {
-//            @Override
-//            public void run() {
-//                synchronized (this) {
-//
-//                }
-//            }
-//        });
+
     }
 
     /**
@@ -255,94 +221,6 @@ public class StressTestNode implements PeerListener, NetworkStatusListener {
         // No UI -> do nothing
     }
 
-//
-//    @Override
-//    public void handleIntroductionRequest(Peer peer, MessageProto.IntroductionRequest request) throws IOException {
-//        messagesReceived++;
-//        introductionRequestsReceived++;
-//
-//        peer.setConnectionType((int) request.getConnectionType());
-//        if (getPeerHandler().size() > 1) {
-//            Peer invitee = getPeerHandler().getEligiblePeer(peer);
-//            if (invitee != null) {
-//                network.sendIntroductionResponse(peer, invitee);
-//                messagesSent++;
-//                introductionResponsesSent++;
-//                statistics.messageSent();
-//                network.sendPunctureRequest(invitee, peer);
-//                messagesSent++;
-//                puncturesSent++;
-//                statistics.messageSent();
-//                Log.d("Network", "Introducing " + invitee.getAddress() + " to " + peer.getAddress());
-//            }
-//        } else {
-//            Log.d("Network", "Peerlist too small, can't handle introduction request");
-//            network.sendIntroductionResponse(peer, null);
-//            messagesSent++;
-//            introductionResponsesSent++;
-//            statistics.messageSent();
-//        }
-//    }
-//
-//    @Override
-//    public void handleIntroductionResponse(Peer peer, MessageProto.IntroductionResponse response) throws Exception {
-//        messagesReceived++;
-//        introductionResponsesReceived++;
-//        statistics.messageReceived();
-//
-//        peer.setConnectionType((int) response.getConnectionType());
-//        peer.setNetworkOperator(response.getNetworkOperator());
-//        List<ByteString> pex = response.getPexList();
-//        for (ByteString pexPeer : pex) {
-//            Peer p = Peer.deserialize(pexPeer.toByteArray());
-//            Log.d(TAG, "From " + peer + " | found peer in pexList: " + p);
-//
-//            getPeerHandler().getOrMakePeer(p.getPeerId(), p.getAddress());
-//        }
-//    }
-//
-//    @Override
-//    public void handlePunctureRequest(Peer peer, MessageProto.PunctureRequest request) throws IOException {
-//        messagesReceived++;
-//        puncturesReceived++;
-//        statistics.messageReceived();
-//
-//        Peer puncturePeer = null;
-//        try {
-//            puncturePeer = Peer.deserialize(request.getPuncturePeer().toByteArray());
-//        } catch (ClassNotFoundException e) {
-//            e.printStackTrace();
-//        }
-//        if (!getPeerHandler().peerExistsInList(puncturePeer)) {
-//            network.sendPuncture(puncturePeer);
-//            puncturesSent++;
-//            statistics.messageSent();
-//        }
-//    }
-//
-//    @Override
-//    public void handleReceivedBlock(Peer peer, MessageProto.TrustChainBlock block) throws IOException {
-//        // Blocks are ignored
-//        messagesReceived++;
-//        blockMessagesReceived++;
-//        statistics.messageReceived();
-//    }
-//
-//    @Override
-//    public void handleCrawlRequest(Peer peer, MessageProto.CrawlRequest request) throws IOException {
-//        // Crawl requests are ignored
-//        messagesReceived++;
-//        crawlRequestsReceived++;
-//        statistics.messageReceived();
-//    }
-//
-//    @Override
-//    public void handlePuncture(Peer peer, MessageProto.Puncture puncture) throws IOException {
-//        messagesReceived++;
-//        puncturesReceived++;
-//        statistics.messageReceived();
-//    }
-
     /**
      * Return the peer handler object.
      * @return
@@ -371,16 +249,16 @@ public class StressTestNode implements PeerListener, NetworkStatusListener {
      * Asynctask to create the inetsocketaddress since network stuff can no longer happen on the main thread in android v3 (honeycomb).
      */
     private static class CreateInetSocketAddressTask extends AsyncTask<String, Void, InetSocketAddress> {
-        private WeakReference<StressTestNode> activityReference;
+        private WeakReference<StressTestPeer> activityReference;
 
-        CreateInetSocketAddressTask(StressTestNode context) {
+        CreateInetSocketAddressTask(StressTestPeer context) {
             activityReference = new WeakReference<>(context);
         }
 
         @Override
         protected InetSocketAddress doInBackground(String... params) {
             InetSocketAddress inetSocketAddress = null;
-            StressTestNode activity = activityReference.get();
+            StressTestPeer activity = activityReference.get();
             if (activity == null) return null;
 
             try {

@@ -5,11 +5,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -20,7 +17,6 @@ import java.util.List;
 import nl.tudelft.cs4160.trustchain_android.R;
 import nl.tudelft.cs4160.trustchain_android.main.OverviewConnectionsActivity;
 import nl.tudelft.cs4160.trustchain_android.network.Network;
-import nl.tudelft.cs4160.trustchain_android.statistics.NodeStatistics;
 import nl.tudelft.cs4160.trustchain_android.statistics.StatisticsServer;
 import nl.tudelft.cs4160.trustchain_android.util.Util;
 
@@ -31,7 +27,7 @@ public class StressTestActivity extends AppCompatActivity {
     private Button stopStressTestButton;
     private int port = OverviewConnectionsActivity.DEFAULT_PORT;
 
-    private List<StressTestNode> nodes;
+    private List<StressTestPeer> nodes;
 
     private TextView messagesSent;
     private TextView messagesReceived;
@@ -135,7 +131,7 @@ public class StressTestActivity extends AppCompatActivity {
     }
 
     private void stopNodes() {
-        for (StressTestNode node : nodes) {
+        for (StressTestPeer node : nodes) {
             node.stopNode();
         }
         nodes.clear();
@@ -175,7 +171,7 @@ public class StressTestActivity extends AppCompatActivity {
     public void startStressTest(int amount) {
         for (int i = 0; i < amount; i++) {
             port += 5;
-            StressTestNode node = new StressTestNode(this, port);
+            StressTestPeer node = new StressTestPeer(this, port);
             nodes.add(node);
             node.startNode();
             if (nodes.size() == 1) {
