@@ -3,7 +3,6 @@ package nl.tudelft.cs4160.trustchain_android.network;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.util.Log;
 
 import com.google.protobuf.ByteString;

@@ -1,8 +1,5 @@
 package nl.tudelft.cs4160.trustchain_android.statistics;
 
-import android.os.Build;
-import android.support.annotation.RequiresApi;
-
 import nl.tudelft.cs4160.trustchain_android.network.NetworkStatusListener;
 
 public interface NodeStatistics {
