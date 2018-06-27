@@ -7,7 +7,8 @@ import sys
 import math
 from functools import reduce
 
-FILE_NAME = '10nodes-lg_g4-1650sec-all.txt'
+FILE_NAME = '25nodes-lg_g4-720sec.txt'
+LEGEND_LOC = 'upper center'
 
 # runtime,messagesSent,messagesReceived,introductionRequestsSent,introductionRequestsReceived,
 # introductionResponsesSent,introductionResponsesReceived,puncturesSent,puncturesReceived,
@@ -70,10 +71,10 @@ for i in range(0, len(sys.argv[1:])):
 	ax2.plot(time, deviations, '.-', label=name)
 	ax1.plot(time, averages, '.-', label=name)
 
-ax1.legend(loc='upper center', shadow=False, fontsize='large')
+ax1.legend(loc=LEGEND_LOC, shadow=False, fontsize='large')
 plt.ylim(ymin=0)
 plt.xlim(xmin=0)
 plt.xlabel("time (s)")
-plt.ylabel(sys.argv[1])
+plt.ylabel("number")
 
 plt.show()

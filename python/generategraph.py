@@ -6,7 +6,8 @@ import numpy as np
 import sys
 import math
 
-FILE_NAME = '10nodes-lg_g4-1650sec-one.txt'
+LEGEND_LOC = 'upper center'
+FILE_NAME = '25nodes-lg_g4-720sec.txt'
 # Insert custom ticks on the axes or use default settings
 CUSTOM_TICKS = True
 # Indication of number of ticks that will be put on both axis.
@@ -61,10 +62,10 @@ if CUSTOM_TICKS:
 	maxnum_rounded = firstdigit * (10 ** num_zeros)
 	ax.xaxis.set_ticks(np.arange(0, endx, maxnum_rounded/X_TICK_NUM))
 
-plt.legend(loc='upper center', shadow=False, fontsize='large')
+plt.legend(loc=LEGEND_LOC, shadow=False, fontsize='large')
 plt.ylim(ymin=0)
 plt.xlim(xmin=0)
 plt.xlabel("time (s)")
-plt.ylabel(sys.argv[1])
+plt.ylabel("number")
 
 plt.show()
