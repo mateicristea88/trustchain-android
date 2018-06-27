@@ -20,5 +20,6 @@ TrustChain Android
    protocolbuffers
    database
    crypto
+   zkp
    installation-instructions
    contact
