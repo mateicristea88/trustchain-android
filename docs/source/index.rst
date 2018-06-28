@@ -21,6 +21,7 @@ TrustChain Android
    database
    crypto
    zkp
+   stress-test
    maturity-code
    installation-instructions
    contact
