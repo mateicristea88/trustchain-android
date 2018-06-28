@@ -182,9 +182,9 @@ texinfo_documents = [
 # see: http://www.sphinx-doc.org/en/master/ext/extlinks.html
 extlinks = {
 	'base-repo': 
-		('https://github.com/klikooo/CS4160-trustchain-android/blob/master/app/src/main/java/nl/tudelft/cs4160/trustchain_android/%s', 'url'),
+		('https://github.com/Tribler/trustchain-android/blob/master/app/src/main/java/nl/tudelft/cs4160/trustchain_android/%s', 'url'),
 	'repo':
-	('https://github.com/klikooo/CS4160-trustchain-android/%s', 'url'),
+	('https://github.com/Tribler/trustchain-android/%s', 'url'),
 	'ipv8-repo':
 		('https://github.com/qstokkink/py-ipv8/blob/master/%s', 'url')
 }
