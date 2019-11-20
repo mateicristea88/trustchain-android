@@ -34,7 +34,8 @@
         <activity android:name=".main.ConnectionExplanationActivity" />
         <activity
             android:name=".main.OverviewConnectionsActivity"
-            android:configChanges="orientation|screenLayout|screenSize" />
+            android:configChanges="orientation|screenLayout|screenSize"
+            android:launchMode="singleInstance"/>
         <activity
             android:name=".main.UserConfigurationActivity"
             android:label="@string/app_name"
@@ -79,5 +80,8 @@
         <activity
             android:name=".stresstest.StressTestActivity"
             android:keepScreenOn="true" />
+
+        <service android:name=".service.NetworkConnectionService" />
+        <receiver android:name=".service.CancelNetworkConnectionReceiver" />
     </application>
 </manifest>

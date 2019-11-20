@@ -107,9 +107,9 @@ public class StatisticsServer implements NodeStatistics {
                 .append(",")
                 .append(bytesReceivedCount.get(node))
                 .append(",")
-                .append(node.getPeerHandler().getactivePeersList().size())
+                .append(node.getPeerHandler().getActivePeersList().size())
                 .append(",")
-                .append(node.getPeerHandler().getnewPeersList().size());
+                .append(node.getPeerHandler().getNewPeersList().size());
         Log.i("Statistics-" + node.getName(), sb.toString());
     }
 

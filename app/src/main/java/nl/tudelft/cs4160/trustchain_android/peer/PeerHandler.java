@@ -259,11 +259,11 @@ public class PeerHandler {
         return wanVote;
     }
 
-    public List<Peer> getactivePeersList() {
+    public List<Peer> getActivePeersList() {
         return activePeersList;
     }
 
-    public List<Peer> getnewPeersList() {
+    public List<Peer> getNewPeersList() {
         return newPeersList;
     }
 

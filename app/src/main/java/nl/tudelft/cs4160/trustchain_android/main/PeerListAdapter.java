@@ -21,6 +21,7 @@ import nl.tudelft.cs4160.trustchain_android.R;
 import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
 import nl.tudelft.cs4160.trustchain_android.inbox.InboxItem;
 import nl.tudelft.cs4160.trustchain_android.peer.Peer;
+import nl.tudelft.cs4160.trustchain_android.service.NetworkConnectionService;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.InboxItemStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.PubKeyAndAddressPairStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
@@ -71,7 +72,7 @@ public class PeerListAdapter extends ArrayAdapter<Peer> {
 
         holder.mPeerId.setText(peer.getName() == null ? "" : peer.getName());
         if (peer.getConnectionType() != -1) {
-            if (OverviewConnectionsActivity.CONNECTABLE_ADDRESS.equals(peer.getIpAddress().getHostAddress())) {
+            if (NetworkConnectionService.CONNECTABLE_ADDRESS.equals(peer.getIpAddress().getHostAddress())) {
                 holder.mConnection.setText("Server");
             } else {
                 holder.mConnection.setText(connectionTypeString(peer.getConnectionType()));

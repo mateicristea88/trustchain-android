@@ -18,6 +18,7 @@ import java.util.List;
 import nl.tudelft.cs4160.trustchain_android.R;
 import nl.tudelft.cs4160.trustchain_android.main.OverviewConnectionsActivity;
 import nl.tudelft.cs4160.trustchain_android.network.Network;
+import nl.tudelft.cs4160.trustchain_android.service.NetworkConnectionService;
 import nl.tudelft.cs4160.trustchain_android.statistics.StatisticsServer;
 import nl.tudelft.cs4160.trustchain_android.util.Util;
 
@@ -26,7 +27,7 @@ public class StressTestActivity extends AppCompatActivity {
     private EditText nodesToStart;
     private Button startStressTestButton;
     private Button stopStressTestButton;
-    private int port = OverviewConnectionsActivity.DEFAULT_PORT;
+    private int port = NetworkConnectionService.DEFAULT_PORT;
 
     private List<StressTestPeer> nodes;
 

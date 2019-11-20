@@ -10,6 +10,7 @@ import java.net.UnknownHostException;
 import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
 import nl.tudelft.cs4160.trustchain_android.main.OverviewConnectionsActivity;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
+import nl.tudelft.cs4160.trustchain_android.service.NetworkConnectionService;
 
 /**
  * The peer object that is used to find other connected peers in the network.
@@ -33,7 +34,7 @@ public class Peer implements Serializable {
      */
     public Peer(InetSocketAddress address, PublicKeyPair publicKeyPair, String name) {
         ByteString ipAddress = null;
-        int port = OverviewConnectionsActivity.DEFAULT_PORT;
+        int port = NetworkConnectionService.DEFAULT_PORT;
         ByteString publicKey = ByteString.EMPTY;
         if(address != null && address.getAddress() != null) {
             ipAddress = ByteString.copyFrom(address.getAddress().getAddress());
@@ -116,7 +117,7 @@ public class Peer implements Serializable {
      * @return
      */
     public boolean isBootstrap() {
-        return OverviewConnectionsActivity.CONNECTABLE_ADDRESS.equals(getIpAddress().getHostAddress());
+        return NetworkConnectionService.CONNECTABLE_ADDRESS.equals(getIpAddress().getHostAddress());
     }
 
     /**
@@ -157,7 +158,7 @@ public class Peer implements Serializable {
 
     public void setAddress(InetSocketAddress address) {
         ByteString ipAddress = ByteString.EMPTY;
-        int port = OverviewConnectionsActivity.DEFAULT_PORT;
+        int port = NetworkConnectionService.DEFAULT_PORT;
         if(address != null) {
             ipAddress = ByteString.copyFrom(address.getAddress().getAddress());
             port = address.getPort();

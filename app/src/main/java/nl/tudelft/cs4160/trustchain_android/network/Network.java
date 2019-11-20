@@ -30,6 +30,7 @@ import nl.tudelft.cs4160.trustchain_android.message.MessageProto.TrustChainBlock
 import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.peer.PeerHandler;
 import nl.tudelft.cs4160.trustchain_android.peersummary.PeerSummaryActivity;
+import nl.tudelft.cs4160.trustchain_android.service.NetworkConnectionService;
 import nl.tudelft.cs4160.trustchain_android.statistics.StatisticsServer;
 import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.InboxItemStorage;
@@ -48,7 +49,7 @@ public class Network {
     private PublicKeyPair publicKey;
     private MessageHandler messageHandler;
     private NetworkStatusListener networkStatusListener;
-    private int port = OverviewConnectionsActivity.DEFAULT_PORT;
+    private int port = NetworkConnectionService.DEFAULT_PORT;
     private PeerSummaryActivity mutualBlockListener;
     private StatisticsServer statistics;
 
