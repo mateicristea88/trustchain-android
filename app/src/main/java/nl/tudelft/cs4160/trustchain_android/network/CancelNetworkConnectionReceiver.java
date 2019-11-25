@@ -1,4 +1,4 @@
-package nl.tudelft.cs4160.trustchain_android.service;
+package nl.tudelft.cs4160.trustchain_android.network;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

@@ -1,4 +1,4 @@
-package nl.tudelft.cs4160.trustchain_android.chainExplorer;
+package nl.tudelft.cs4160.trustchain_android.ui.chainexplorer;
 
 import android.content.Context;
 

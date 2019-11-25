@@ -4,7 +4,7 @@ import android.support.test.rule.ActivityTestRule;
 
 import org.junit.Rule;
 
-import nl.tudelft.cs4160.trustchain_android.main.ChangeBootstrapActivity;
+import nl.tudelft.cs4160.trustchain_android.ui.changebootstrap.ChangeBootstrapActivity;
 
 
 /**

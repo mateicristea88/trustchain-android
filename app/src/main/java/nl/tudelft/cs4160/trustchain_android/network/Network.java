@@ -23,14 +23,12 @@ import java.util.List;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
 import nl.tudelft.cs4160.trustchain_android.inbox.InboxItem;
-import nl.tudelft.cs4160.trustchain_android.main.OverviewConnectionsActivity;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto.Message;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto.TrustChainBlock;
 import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.peer.PeerHandler;
-import nl.tudelft.cs4160.trustchain_android.peersummary.PeerSummaryActivity;
-import nl.tudelft.cs4160.trustchain_android.service.NetworkConnectionService;
+import nl.tudelft.cs4160.trustchain_android.ui.peersummary.PeerSummaryActivity;
 import nl.tudelft.cs4160.trustchain_android.statistics.StatisticsServer;
 import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.InboxItemStorage;
@@ -338,12 +336,11 @@ public class Network {
      * @throws IOException
      */
     private synchronized void sendMessage(Message message, Peer peer) throws IOException {
-        ByteBuffer outputBuffer = ByteBuffer.allocate(BUFFER_SIZE);
-        outputBuffer = outputBuffer.wrap(message.toByteArray());
+        ByteBuffer outputBuffer = ByteBuffer.wrap(message.toByteArray());
         channel.send(outputBuffer, peer.getAddress());
         statistics.bytesSent(networkStatusListener, outputBuffer.position());
         statistics.messageSent(networkStatusListener);
-        Log.i(TAG, "Sending to " + peer.getName() + ":\n" + message);
+        Log.i(TAG, "Sending to " + peer.getAddress() + " (" + peer.getName() + "):\n" + message);
         peer.sentData();
     }
 
@@ -404,7 +401,7 @@ public class Network {
      * @param context context which is used to update the inbox
      * @throws Exception
      */
-    public void handleMessage(Peer peer, Message message, PublicKeyPair pubKeyPair, Context context) throws Exception {
+    private void handleMessage(Peer peer, Message message, PublicKeyPair pubKeyPair, Context context) throws Exception {
         switch (message.getType()) {
             case INTRODUCTION_REQUEST_ID:
                 statistics.introductionRequestReceived(networkStatusListener);

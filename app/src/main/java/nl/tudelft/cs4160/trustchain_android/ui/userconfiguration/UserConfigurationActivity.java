@@ -1,4 +1,4 @@
-package nl.tudelft.cs4160.trustchain_android.main;
+package nl.tudelft.cs4160.trustchain_android.ui.userconfiguration;
 
 import android.app.Activity;
 import android.content.Context;
@@ -21,6 +21,7 @@ import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.InboxItemS
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.PubKeyAndAddressPairStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.SharedPreferencesStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
+import nl.tudelft.cs4160.trustchain_android.ui.main.OverviewConnectionsActivity;
 
 /**
  * The user is able to set his/her own username in this class.

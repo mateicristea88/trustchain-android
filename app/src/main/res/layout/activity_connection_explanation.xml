@@ -6,7 +6,7 @@
     android:paddingBottom="0dp"
     android:orientation="vertical"
     android:paddingTop="8dp"
-    tools:context=".main.ConnectionExplanationActivity">
+    tools:context=".ui.connectionexplanation.ConnectionExplanationActivity">
 
     <TextView
         android:id="@+id/connectionInfoHeaderText"

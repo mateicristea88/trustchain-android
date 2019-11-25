@@ -1,4 +1,4 @@
-package nl.tudelft.cs4160.trustchain_android.service;
+package nl.tudelft.cs4160.trustchain_android.network;
 
 import java.util.List;
 

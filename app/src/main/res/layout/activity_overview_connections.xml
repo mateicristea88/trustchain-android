@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     app:statusBarBackground="@color/colorPrimaryDark"
-    tools:context=".main.OverviewConnectionsActivity">
+    tools:context=".ui.main.OverviewConnectionsActivity">
 
     <LinearLayout
         android:layout_width="match_parent"

@@ -1,4 +1,4 @@
-package nl.tudelft.cs4160.trustchain_android.main;
+package nl.tudelft.cs4160.trustchain_android.ui.connectionexplanation;
 
 import android.content.Context;
 import android.view.LayoutInflater;

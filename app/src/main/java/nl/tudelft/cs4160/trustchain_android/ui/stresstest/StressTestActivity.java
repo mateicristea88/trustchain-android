@@ -1,4 +1,4 @@
-package nl.tudelft.cs4160.trustchain_android.stresstest;
+package nl.tudelft.cs4160.trustchain_android.ui.stresstest;
 
 import android.annotation.TargetApi;
 import android.os.Build;
@@ -16,10 +16,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import nl.tudelft.cs4160.trustchain_android.R;
-import nl.tudelft.cs4160.trustchain_android.main.OverviewConnectionsActivity;
 import nl.tudelft.cs4160.trustchain_android.network.Network;
-import nl.tudelft.cs4160.trustchain_android.service.NetworkConnectionService;
+import nl.tudelft.cs4160.trustchain_android.network.NetworkConnectionService;
 import nl.tudelft.cs4160.trustchain_android.statistics.StatisticsServer;
+import nl.tudelft.cs4160.trustchain_android.stresstest.StressTestPeer;
 import nl.tudelft.cs4160.trustchain_android.util.Util;
 
 public class StressTestActivity extends AppCompatActivity {

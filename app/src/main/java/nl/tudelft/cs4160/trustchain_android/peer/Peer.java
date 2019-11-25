@@ -8,9 +8,8 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
 import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
-import nl.tudelft.cs4160.trustchain_android.main.OverviewConnectionsActivity;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
-import nl.tudelft.cs4160.trustchain_android.service.NetworkConnectionService;
+import nl.tudelft.cs4160.trustchain_android.network.NetworkConnectionService;
 
 /**
  * The peer object that is used to find other connected peers in the network.

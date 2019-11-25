@@ -1,4 +1,4 @@
-package nl.tudelft.cs4160.trustchain_android.main;
+package nl.tudelft.cs4160.trustchain_android.ui.main;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -24,21 +24,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 import nl.tudelft.cs4160.trustchain_android.R;
-import nl.tudelft.cs4160.trustchain_android.chainExplorer.ChainExplorerActivity;
+import nl.tudelft.cs4160.trustchain_android.ui.chainexplorer.ChainExplorerActivity;
 import nl.tudelft.cs4160.trustchain_android.funds.FundsActivity;
 import nl.tudelft.cs4160.trustchain_android.funds.qr.ExportWalletQRActivity;
 import nl.tudelft.cs4160.trustchain_android.funds.qr.ScanQRActivity;
-import nl.tudelft.cs4160.trustchain_android.inbox.InboxActivity;
+import nl.tudelft.cs4160.trustchain_android.ui.inbox.InboxActivity;
+import nl.tudelft.cs4160.trustchain_android.ui.changebootstrap.ChangeBootstrapActivity;
 import nl.tudelft.cs4160.trustchain_android.offline.ReceiveOfflineActivity;
 import nl.tudelft.cs4160.trustchain_android.passport.ocr.camera.CameraActivity;
 import nl.tudelft.cs4160.trustchain_android.peer.Peer;
-import nl.tudelft.cs4160.trustchain_android.service.NetworkConnectionListener;
-import nl.tudelft.cs4160.trustchain_android.service.NetworkConnectionService;
+import nl.tudelft.cs4160.trustchain_android.network.NetworkConnectionListener;
+import nl.tudelft.cs4160.trustchain_android.network.NetworkConnectionService;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.SharedPreferencesStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
 import nl.tudelft.cs4160.trustchain_android.util.RequestCode;
 
-import static nl.tudelft.cs4160.trustchain_android.main.UserConfigurationActivity.VERSION_NAME_KEY;
+import static nl.tudelft.cs4160.trustchain_android.ui.userconfiguration.UserConfigurationActivity.VERSION_NAME_KEY;
 
 public class OverviewConnectionsActivity extends AppCompatActivity implements NetworkConnectionListener {
     private static final String TAG = "OverviewConnections";
@@ -164,7 +165,7 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
                 startActivity(intent);
                 return true;
             case R.id.connection_explanation_menu:
-                Intent ConnectionExplanationActivity = new Intent(this, ConnectionExplanationActivity.class);
+                Intent ConnectionExplanationActivity = new Intent(this, nl.tudelft.cs4160.trustchain_android.ui.connectionexplanation.ConnectionExplanationActivity.class);
                 startActivity(ConnectionExplanationActivity);
                 return true;
             case R.id.import_tokens:

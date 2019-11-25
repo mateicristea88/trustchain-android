@@ -1,4 +1,4 @@
-package nl.tudelft.cs4160.trustchain_android.main;
+package nl.tudelft.cs4160.trustchain_android.ui.connectionexplanation;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import nl.tudelft.cs4160.trustchain_android.R;
-import nl.tudelft.cs4160.trustchain_android.stresstest.StressTestActivity;
+import nl.tudelft.cs4160.trustchain_android.ui.stresstest.StressTestActivity;
 
 public class ConnectionExplanationActivity extends AppCompatActivity {
 

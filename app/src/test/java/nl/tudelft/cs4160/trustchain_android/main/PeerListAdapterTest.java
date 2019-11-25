@@ -12,6 +12,7 @@ import org.mockito.junit.MockitoRule;
 import java.util.List;
 
 import nl.tudelft.cs4160.trustchain_android.peer.Peer;
+import nl.tudelft.cs4160.trustchain_android.ui.main.PeerListAdapter;
 import nl.tudelft.cs4160.trustchain_android.util.Util;
 
 import static org.junit.Assert.assertEquals;

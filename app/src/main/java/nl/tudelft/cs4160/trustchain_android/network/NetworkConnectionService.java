@@ -1,5 +1,6 @@
-package nl.tudelft.cs4160.trustchain_android.service;
+package nl.tudelft.cs4160.trustchain_android.network;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -35,10 +36,8 @@ import nl.tudelft.cs4160.trustchain_android.R;
 import nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper;
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
-import nl.tudelft.cs4160.trustchain_android.main.OverviewConnectionsActivity;
+import nl.tudelft.cs4160.trustchain_android.ui.main.OverviewConnectionsActivity;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
-import nl.tudelft.cs4160.trustchain_android.network.Network;
-import nl.tudelft.cs4160.trustchain_android.network.NetworkStatusListener;
 import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.peer.PeerHandler;
 import nl.tudelft.cs4160.trustchain_android.peer.PeerListener;
@@ -173,6 +172,7 @@ public class NetworkConnectionService extends Service {
     @Override
     public void onDestroy() {
         network.closeChannel();
+        networkRunning = false;
         super.onDestroy();
     }
 
@@ -324,7 +324,9 @@ public class NetworkConnectionService extends Service {
                 ByteBuffer inputBuffer = ByteBuffer.allocate(BUFFER_SIZE);
                 while (!Thread.interrupted() && networkRunning) {
                     inputBuffer.clear();
+                    Log.d(TAG, "Receive");
                     SocketAddress address = network.receive(inputBuffer);
+                    Log.d(TAG, "Received from " + address);
                     inputBuffer.flip();
                     network.dataReceived(context, inputBuffer, (InetSocketAddress) address);
                 }
@@ -395,7 +397,7 @@ public class NetworkConnectionService extends Service {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = "Service notifications";
             String description = "Shows when the network connection service is running";
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            int importance = NotificationManager.IMPORTANCE_LOW;
             NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL, name, importance);
             channel.setDescription(description);
             // Register the channel with the system; you can't change the importance

@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
-import nl.tudelft.cs4160.trustchain_android.main.OverviewConnectionsActivity;
+import nl.tudelft.cs4160.trustchain_android.ui.main.OverviewConnectionsActivity;
 
 public class PeerTest extends TestCase {
     String id1;

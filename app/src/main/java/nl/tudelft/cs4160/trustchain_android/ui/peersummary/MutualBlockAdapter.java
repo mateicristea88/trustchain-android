@@ -1,4 +1,4 @@
-package nl.tudelft.cs4160.trustchain_android.peersummary;
+package nl.tudelft.cs4160.trustchain_android.ui.peersummary;
 
 import android.content.Context;
 import android.os.Handler;
@@ -17,7 +17,7 @@ import java.util.Arrays;
 import nl.tudelft.cs4160.trustchain_android.R;
 import nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper;
 import nl.tudelft.cs4160.trustchain_android.block.ValidationResult;
-import nl.tudelft.cs4160.trustchain_android.chainExplorer.ChainColor;
+import nl.tudelft.cs4160.trustchain_android.ui.chainexplorer.ChainColor;
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;

@@ -1,4 +1,4 @@
-package nl.tudelft.cs4160.trustchain_android.inbox;
+package nl.tudelft.cs4160.trustchain_android.ui.inbox;
 
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
@@ -13,8 +13,10 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import nl.tudelft.cs4160.trustchain_android.R;
+import nl.tudelft.cs4160.trustchain_android.inbox.InboxItem;
 import nl.tudelft.cs4160.trustchain_android.peer.Peer;
-import nl.tudelft.cs4160.trustchain_android.peersummary.PeerSummaryActivity;
+import nl.tudelft.cs4160.trustchain_android.ui.peersummary.PeerSummaryActivity;
+
 public class InboxAdapter extends RecyclerView.Adapter<InboxAdapter.ViewHolder> {
     private ArrayList<InboxItem> mDataset;
     private ArrayList<Peer> peerList;

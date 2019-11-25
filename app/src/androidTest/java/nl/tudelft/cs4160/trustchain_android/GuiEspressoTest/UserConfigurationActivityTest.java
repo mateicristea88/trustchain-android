@@ -8,7 +8,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import nl.tudelft.cs4160.trustchain_android.R;
-import nl.tudelft.cs4160.trustchain_android.main.UserConfigurationActivity;
+import nl.tudelft.cs4160.trustchain_android.ui.userconfiguration.UserConfigurationActivity;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
