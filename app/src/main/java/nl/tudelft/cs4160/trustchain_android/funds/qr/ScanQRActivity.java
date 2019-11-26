@@ -30,7 +30,8 @@ import nl.tudelft.cs4160.trustchain_android.funds.qr.exception.QRWalletValidatio
 import nl.tudelft.cs4160.trustchain_android.funds.qr.models.QRTransaction;
 import nl.tudelft.cs4160.trustchain_android.funds.qr.models.QRWallet;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
-import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
+import nl.tudelft.cs4160.trustchain_android.storage.database.AppDatabase;
+import nl.tudelft.cs4160.trustchain_android.storage.repository.BlockRepository;
 import nl.tudelft.cs4160.trustchain_android.util.Util;
 
 
@@ -156,15 +157,15 @@ public class ScanQRActivity extends AppCompatActivity {
         }
 
         DualSecret ownKeyPair = Key.loadKeys(this);
-        TrustChainDBHelper helper = new TrustChainDBHelper(this);
-        MessageProto.TrustChainBlock block = trustChainQRBlockFactory.createBlock(wallet, helper, ownKeyPair);
+        BlockRepository blockRepository = new BlockRepository(AppDatabase.getInstance(this).blockDao());
+        MessageProto.TrustChainBlock block = trustChainQRBlockFactory.createBlock(wallet, blockRepository, ownKeyPair);
 
         try {
 //            TrustChainBlock.validate(block, helper);
             MessageProto.TrustChainBlock halfblock = trustChainQRBlockFactory.reconstructTemporaryIdentityHalfBlock(wallet);
 
-            helper.insertInDB(halfblock);
-            helper.insertInDB(block);
+            blockRepository.insert(halfblock);
+            blockRepository.insert(block);
         } catch (Exception e) {
             throw new QRWalletValidationException(e);
         }

@@ -12,7 +12,7 @@ import java.util.Arrays;
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
-import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
+import nl.tudelft.cs4160.trustchain_android.storage.repository.BlockRepository;
 import nl.tudelft.cs4160.trustchain_android.util.ByteArrayConverter;
 
 import static junit.framework.Assert.assertEquals;
@@ -33,7 +33,7 @@ public class TrustChainBlockHelperTest {
     private byte[] linkKey = new byte[2];
     private MessageProto.TrustChainBlock genesisBlock;
 
-    private TrustChainDBHelper dbHelper = mock(TrustChainDBHelper.class);
+    private BlockRepository blockRepository = mock(BlockRepository.class);
     private String format = "";
 
     @Before
@@ -48,11 +48,11 @@ public class TrustChainBlockHelperTest {
         linkKey[1] = 72;
         genesisBlock = TrustChainBlockHelper.createGenesisBlock(keyPair);
 
-        when(dbHelper.getLatestBlock(null))
+        when(blockRepository.getLatestBlock(null))
                 .thenReturn(MessageProto.TrustChainBlock.newBuilder()
                         .setSequenceNumber(0)
                         .build());
-        when(dbHelper.getLatestBlock(any(byte[].class)))
+        when(blockRepository.getLatestBlock(any(byte[].class)))
                 .thenReturn(MessageProto.TrustChainBlock.newBuilder()
                         .setSequenceNumber(0)
                         .build());
@@ -69,19 +69,19 @@ public class TrustChainBlockHelperTest {
 
     @Test
     public void getSequenceNumberGenesisBlockTest() {
-        MessageProto.TrustChainBlock block = TrustChainBlockHelper.createBlock(transaction, format, dbHelper, pubKey, null, linkKey);
+        MessageProto.TrustChainBlock block = TrustChainBlockHelper.createBlock(transaction, format, blockRepository, pubKey, null, linkKey);
         assertEquals(1, block.getSequenceNumber());
     }
 
     @Test
     public void publicKeyBlockTest() {
-        MessageProto.TrustChainBlock block = TrustChainBlockHelper.createBlock(transaction, format, dbHelper, pubKey, genesisBlock, linkKey);
+        MessageProto.TrustChainBlock block = TrustChainBlockHelper.createBlock(transaction, format, blockRepository, pubKey, genesisBlock, linkKey);
         assertEquals( ByteArrayConverter.bytesToHexString(pubKey),  ByteArrayConverter.bytesToHexString(block.getPublicKey().toByteArray()));
     }
 
     @Test
     public void linkPublicKeyBlockTest() {
-        MessageProto.TrustChainBlock block = TrustChainBlockHelper.createBlock(transaction, format, dbHelper, pubKey, genesisBlock, linkKey);
+        MessageProto.TrustChainBlock block = TrustChainBlockHelper.createBlock(transaction, format, blockRepository, pubKey, genesisBlock, linkKey);
         assertEquals( ByteArrayConverter.bytesToHexString(keyPair.getPublicKeyPair().toBytes()),  ByteArrayConverter.bytesToHexString(block.getLinkPublicKey().toByteArray()));
     }
 

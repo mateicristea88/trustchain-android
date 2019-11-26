@@ -24,7 +24,8 @@ import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
-import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
+import nl.tudelft.cs4160.trustchain_android.storage.database.AppDatabase;
+import nl.tudelft.cs4160.trustchain_android.storage.repository.BlockRepository;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
 
 import static android.view.Gravity.CENTER;
@@ -33,7 +34,7 @@ import static android.view.Gravity.CENTER;
  * This activity will show a chain of a given TrustChain peer.
  */
 public class ChainExplorerActivity extends AppCompatActivity {
-    TrustChainDBHelper dbHelper;
+    BlockRepository blockRepository;
     ChainExplorerAdapter adapter;
     ListView blocksList;
 
@@ -98,11 +99,11 @@ public class ChainExplorerActivity extends AppCompatActivity {
      * Initialize the variables.
      */
     private void init() {
-        dbHelper = new TrustChainDBHelper(this);
+        blockRepository = new BlockRepository(AppDatabase.getInstance(this).blockDao());
         byte[] publicKeyPair = retrievePublicKeyPair();
         Log.i(TAG, "Using " + Arrays.toString(publicKeyPair) + " as public keypair");
         try {
-            List<MessageProto.TrustChainBlock> blocks = dbHelper.getBlocks(publicKeyPair, true);
+            List<MessageProto.TrustChainBlock> blocks = blockRepository.getBlocks(publicKeyPair, true);
             if(blocks.size() > 0) {
                 byte[] ownPubKey = kp.getPublicKeyPair().toBytes();
                 byte[] firstPubKey = blocks.get(0).getPublicKey().toByteArray();

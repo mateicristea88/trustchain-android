@@ -21,7 +21,8 @@ import nl.tudelft.cs4160.trustchain_android.R;
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
-import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
+import nl.tudelft.cs4160.trustchain_android.storage.database.AppDatabase;
+import nl.tudelft.cs4160.trustchain_android.storage.repository.BlockRepository;
 
 import static nl.tudelft.cs4160.trustchain_android.util.Util.readableSize;
 
@@ -33,14 +34,14 @@ public class FundsActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_funds);
-        TrustChainDBHelper helper = new TrustChainDBHelper(this);
+        BlockRepository blockRepository = new BlockRepository(AppDatabase.getInstance(this).blockDao());
 
         DualSecret ownKeyPair = Key.loadKeys(this);
         byte[] myPublicKey = ownKeyPair.getPublicKey().toBytes();
         transactionListView = findViewById(R.id.transaction_listview);
         FundsAdapter adapter = new FundsAdapter(this);
 
-        List<MessageProto.TrustChainBlock> blocks =  helper.getBlocks(myPublicKey, false);
+        List<MessageProto.TrustChainBlock> blocks = blockRepository.getBlocks(myPublicKey, false);
         Collections.reverse(blocks);
 
         adapter.addAll(blocks);
@@ -50,8 +51,7 @@ public class FundsActivity extends AppCompatActivity {
         long total_down = 0;
 
         try {
-
-            MessageProto.TrustChainBlock latestBlock = helper.getLatestBlock(myPublicKey);
+            MessageProto.TrustChainBlock latestBlock = blockRepository.getLatestBlock(myPublicKey);
             String transactionString = latestBlock.getTransaction().getUnformatted().toStringUtf8();
             Log.i("FundsActivity", transactionString);
             JSONObject object = new JSONObject(transactionString); // TODO refactor to some kind of factory

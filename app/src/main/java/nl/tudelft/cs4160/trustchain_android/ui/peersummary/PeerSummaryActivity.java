@@ -38,6 +38,8 @@ import java.util.Arrays;
 import nl.tudelft.cs4160.trustchain_android.R;
 import nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper;
 import nl.tudelft.cs4160.trustchain_android.block.ValidationResult;
+import nl.tudelft.cs4160.trustchain_android.storage.database.AppDatabase;
+import nl.tudelft.cs4160.trustchain_android.storage.repository.BlockRepository;
 import nl.tudelft.cs4160.trustchain_android.ui.chainexplorer.ChainExplorerActivity;
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
@@ -47,7 +49,6 @@ import nl.tudelft.cs4160.trustchain_android.network.CrawlRequestListener;
 import nl.tudelft.cs4160.trustchain_android.network.Network;
 import nl.tudelft.cs4160.trustchain_android.offline.ReceiveOfflineActivity;
 import nl.tudelft.cs4160.trustchain_android.offline.SendOfflineActivity;
-import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.InboxItemStorage;
 import nl.tudelft.cs4160.trustchain_android.util.FileDialog;
 import nl.tudelft.cs4160.trustchain_android.util.Util;
@@ -62,17 +63,15 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
     private final static String TAG = PeerSummaryActivity.class.toString();
     private static final int REQUEST_STORAGE_PERMISSIONS = 1;
     private static final int MAX_ATTACHMENT_SIZE = 61440; //Max file attachment size in bytes, set to 60kbytes leaving 5kb for other block data, as the max message size in UDP is 64KB
-    private Context context;
     private RecyclerView mRecyclerView;
     private MutualBlockAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private Network network;
     private InboxItem inboxItemOtherPeer;
-    private TrustChainDBHelper DBHelper;
+    private BlockRepository blockRepository;
     TextView statusText;
     EditText messageEditText;
     DualSecret kp;
-    TrustChainDBHelper dbHelper;
 
     private File transactionDocument;
     private TextView selectedFilePath;
@@ -83,8 +82,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_peer_overview);
-        this.context = this;
-        DBHelper = new TrustChainDBHelper(this);
+        blockRepository = new BlockRepository(AppDatabase.getInstance(getApplicationContext()).blockDao());
         inboxItemOtherPeer = (InboxItem) getIntent().getSerializableExtra("inboxItem");
         InboxItemStorage.markHalfBlockAsRead(this, inboxItemOtherPeer);
         initVariables();
@@ -144,7 +142,6 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
         sendButton = findViewById(R.id.send_button);
         sendOffline = findViewById(R.id.send_offline_checkbox);
 
-        dbHelper = new TrustChainDBHelper(this);
         network = Network.getInstance(getApplicationContext());
     }
 
@@ -169,8 +166,8 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
         network = Network.getInstance(getApplicationContext());
         network.setMutualBlockListener(this);
 
-        int sq = -5;
-        MessageProto.TrustChainBlock block = dbHelper.getBlock(inboxItemOtherPeer.getPeer().getPublicKeyPair().toBytes(), dbHelper.getMaxSeqNum(inboxItemOtherPeer.getPeer().getPublicKeyPair().toBytes()));
+        int sq ;
+        MessageProto.TrustChainBlock block = blockRepository.getBlock(inboxItemOtherPeer.getPeer().getPublicKeyPair().toBytes(), blockRepository.getMaxSequenceNumber(inboxItemOtherPeer.getPeer().getPublicKeyPair().toBytes()));
         if (block != null) {
             sq = block.getSequenceNumber();
         } else {
@@ -251,7 +248,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
             transactionData = messageEditText.getText().toString().getBytes(UTF_8);
         }
 
-        final MessageProto.TrustChainBlock block = createBlock(transactionData, format, DBHelper, publicKey, null, inboxItemOtherPeer.getPeer().getPublicKeyPair().toBytes());
+        final MessageProto.TrustChainBlock block = createBlock(transactionData, format, blockRepository, publicKey, null, inboxItemOtherPeer.getPeer().getPublicKeyPair().toBytes());
         final MessageProto.TrustChainBlock signedBlock = TrustChainBlockHelper.sign(block, Key.loadKeys(getApplicationContext()).getSigningKey());
 
         messageEditText.setText("");
@@ -259,7 +256,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
         InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         // insert the half block in your own chain
-        new TrustChainDBHelper(this).insertInDB(signedBlock);
+        blockRepository.insert(signedBlock);
 
         if (sendOffline.isChecked()) {
             Intent intent = new Intent(this, SendOfflineActivity.class);
@@ -291,9 +288,9 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
         runOnUiThread(() -> {
             AlertDialog.Builder builder;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                builder = new AlertDialog.Builder(context, android.R.style.Theme_Material_Dialog_Alert);
+                builder = new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert);
             } else {
-                builder = new AlertDialog.Builder(context);
+                builder = new AlertDialog.Builder(this);
             }
             String txString = containsBinaryFile(block) ?
                     getString(R.string.type_file, block.getTransaction().getFormat()) :
@@ -315,13 +312,13 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
     public void signAndSendHalfBlock(final MessageProto.TrustChainBlock linkedBlock) {
         DualSecret keyPair = Key.loadKeys(this);
         MessageProto.TrustChainBlock block = createBlock(null, null, //Setting format and transaction not needed, they are already contained in linkedblock
-                DBHelper, keyPair.getPublicKeyPair().toBytes(),
+                blockRepository, keyPair.getPublicKeyPair().toBytes(),
                 linkedBlock, inboxItemOtherPeer.getPeer().getPublicKeyPair().toBytes());
 
         final MessageProto.TrustChainBlock signedBlock = sign(block, keyPair.getSigningKey());
 
         //insert the new signed block
-        DBHelper.insertInDB(signedBlock); // See read the docs (should be signed though)
+        blockRepository.insert(signedBlock);
         new Thread(() -> {
             try {
                 network.sendBlockMessage(inboxItemOtherPeer.getPeer(), signedBlock);
@@ -357,7 +354,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
         byte[] linkedPublicKey = block.getLinkPublicKey().toByteArray();
         if (Arrays.equals(myPublicKey,linkedPublicKey) && Arrays.equals(peerPublicKey, publicKey)) {
             try {
-                mAdapter.addBlock(block, TrustChainBlockHelper.validate(block, dbHelper).getStatus());
+                mAdapter.addBlock(block, TrustChainBlockHelper.validate(block, blockRepository).getStatus());
             } catch (Exception e) {
                 e.printStackTrace();
             }

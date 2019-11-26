@@ -17,13 +17,14 @@ import java.util.Arrays;
 import nl.tudelft.cs4160.trustchain_android.R;
 import nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper;
 import nl.tudelft.cs4160.trustchain_android.block.ValidationResult;
+import nl.tudelft.cs4160.trustchain_android.storage.database.AppDatabase;
+import nl.tudelft.cs4160.trustchain_android.storage.repository.BlockRepository;
 import nl.tudelft.cs4160.trustchain_android.ui.chainexplorer.ChainColor;
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.peer.Peer;
-import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
 import nl.tudelft.cs4160.trustchain_android.util.ByteArrayConverter;
 import nl.tudelft.cs4160.trustchain_android.util.OpenFileClickListener;
@@ -37,7 +38,7 @@ public class MutualBlockAdapter extends RecyclerView.Adapter<MutualBlockAdapter.
     private Context context;
     private DualSecret keyPair;
     private PublicKeyPair peerPublicKey;
-    private TrustChainDBHelper dbHelper;
+    private BlockRepository blockRepository;
 
     private String myPeerName, peerName;
     private PeerSummaryActivity activity;
@@ -49,7 +50,7 @@ public class MutualBlockAdapter extends RecyclerView.Adapter<MutualBlockAdapter.
     public MutualBlockAdapter(PeerSummaryActivity activity, Peer peer) {
         this.context = activity.getApplicationContext();
         this.keyPair = Key.loadKeys(context);
-        this.dbHelper = new TrustChainDBHelper(context);
+        this.blockRepository = new BlockRepository(AppDatabase.getInstance(context).blockDao());
         this.myPeerName = UserNameStorage.getUserName(context);
         this.peerName = peer.getName();
         this.activity = activity;
@@ -67,13 +68,13 @@ public class MutualBlockAdapter extends RecyclerView.Adapter<MutualBlockAdapter.
             public void run() {
                 DualSecret keyPair = Key.loadKeys(activity);
                 PublicKeyPair myPublicKey = keyPair.getPublicKeyPair();
-                for (MessageProto.TrustChainBlock block : dbHelper.getBlocks(keyPair.getPublicKeyPair().toBytes(), true)) {
+                for (MessageProto.TrustChainBlock block : blockRepository.getBlocks(keyPair.getPublicKeyPair().toBytes(), true)) {
                     byte[] linkedPublicKey = block.getLinkPublicKey().toByteArray();
                     byte[] publicKey = block.getPublicKey().toByteArray();
                     if (Arrays.equals(linkedPublicKey,myPublicKey.toBytes()) && Arrays.equals(publicKey,peerPublicKey.toBytes())) {
                         int validationResultStatus;
                         try {
-                            validationResultStatus = TrustChainBlockHelper.validate(block, dbHelper).getStatus();
+                            validationResultStatus = TrustChainBlockHelper.validate(block, blockRepository).getStatus();
                         } catch (Exception e) {
                             e.printStackTrace();
                             continue;
@@ -154,7 +155,7 @@ public class MutualBlockAdapter extends RecyclerView.Adapter<MutualBlockAdapter.
             //if the linked public key is equal to ours, it means this block is addressed to us.
             //So if we don't have a linked block, we know we still need to sign it.
             if(Arrays.equals(mutualBlock.getLinkPublicKey().toByteArray(), keyPair.getPublicKeyPair().toBytes()) &&
-                    dbHelper.getLinkedBlock(mutualBlock) == null) {
+                    blockRepository.getLinkedBlock(mutualBlock) == null) {
                 if(validationResult == ValidationResult.INVALID) {
                     blockStatTv.setText(context.getResources().getString(R.string.invalid_block));
                     signButton.setVisibility(View.GONE);

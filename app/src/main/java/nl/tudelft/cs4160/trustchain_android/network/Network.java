@@ -28,22 +28,22 @@ import nl.tudelft.cs4160.trustchain_android.message.MessageProto.Message;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto.TrustChainBlock;
 import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.peer.PeerHandler;
+import nl.tudelft.cs4160.trustchain_android.storage.database.AppDatabase;
+import nl.tudelft.cs4160.trustchain_android.storage.repository.BlockRepository;
 import nl.tudelft.cs4160.trustchain_android.ui.peersummary.PeerSummaryActivity;
 import nl.tudelft.cs4160.trustchain_android.statistics.StatisticsServer;
-import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.InboxItemStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.PubKeyAndAddressPairStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
 
 public class Network {
     private final String TAG = this.getClass().getName();
-    private static final int BUFFER_SIZE = 65536;
     private DatagramChannel channel;
     public String name;
     private int connectionType;
     private InetSocketAddress internalSourceAddress;
     private static Network network;
-    private TrustChainDBHelper dbHelper;
+    private BlockRepository blockRepository;
     private PublicKeyPair publicKey;
     private MessageHandler messageHandler;
     private NetworkStatusListener networkStatusListener;
@@ -119,9 +119,9 @@ public class Network {
         this.statistics = StatisticsServer.getInstance();
         if (name == null) name = UserNameStorage.getUserName(context);
         if (publicKey == null) publicKey = Key.loadKeys(context).getPublicKeyPair();
-        dbHelper = new TrustChainDBHelper(context);
+        blockRepository = new BlockRepository(AppDatabase.getInstance(context).blockDao());
         messageHandler = new MessageHandler(this,
-                dbAccess ? dbHelper : null,
+                dbAccess ? blockRepository : null,
                 new PeerHandler(publicKey,name));
         openChannel();
         showLocalIpAddress();
@@ -472,8 +472,8 @@ public class Network {
         PublicKeyPair blockLinkPubKey = new PublicKeyPair(block.getLinkPublicKey().toByteArray());
         PublicKeyPair blockPubKey = new PublicKeyPair(block.getPublicKey().toByteArray());
         // check if block is addressed to us and whether or not we have already received it.
-        if(blockLinkPubKey.equals(publicKey) &&
-                dbHelper.getBlock(blockPubKey.toBytes(),block.getSequenceNumber()) == null) {
+        if (blockLinkPubKey.equals(publicKey) &&
+                blockRepository.getBlock(blockPubKey.toBytes(),block.getSequenceNumber()) == null) {
             InboxItemStorage.addHalfBlock(context, blockPubKey, block.getSequenceNumber());
         }
     }

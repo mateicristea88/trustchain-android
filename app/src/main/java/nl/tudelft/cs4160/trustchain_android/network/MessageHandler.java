@@ -11,17 +11,17 @@ import nl.tudelft.cs4160.trustchain_android.block.ValidationResult;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.peer.PeerHandler;
-import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
+import nl.tudelft.cs4160.trustchain_android.storage.repository.BlockRepository;
 
 public class MessageHandler {
-    private TrustChainDBHelper dbHelper;
+    private BlockRepository blockRepository;
     private Network network;
     private PeerHandler peerHandler;
     final String TAG = "MesssageHandler";
 
-    public MessageHandler(Network network, TrustChainDBHelper dbHelper, PeerHandler peerHandler) {
+    public MessageHandler(Network network, BlockRepository blockRepository, PeerHandler peerHandler) {
         this.network = network;
-        this.dbHelper = dbHelper;
+        this.blockRepository = blockRepository;
         this.peerHandler = peerHandler;
     }
 
@@ -102,11 +102,11 @@ public class MessageHandler {
      */
     public void handleReceivedBlock(Peer peer, MessageProto.TrustChainBlock block) {
         try {
-            if (dbHelper != null && TrustChainBlockHelper.validate(block,dbHelper).getStatus() != ValidationResult.INVALID ) {
-                dbHelper.replaceInDB(block);
-            } else if (dbHelper == null) {
+            if (blockRepository != null && TrustChainBlockHelper.validate(block, blockRepository).getStatus() != ValidationResult.INVALID ) {
+                blockRepository.update(block);
+            } else if (blockRepository == null) {
                 Log.w(TAG, "Not adding block in database because dbHelper is null");
-            } else if (TrustChainBlockHelper.validate(block,dbHelper).getStatus() == ValidationResult.INVALID) {
+            } else if (TrustChainBlockHelper.validate(block, blockRepository).getStatus() == ValidationResult.INVALID) {
                 Log.w(TAG, "Not adding block in database because it is invalid");
             }
         } catch (Exception e) {
@@ -122,8 +122,8 @@ public class MessageHandler {
      */
     public void handleCrawlRequest(Peer peer, MessageProto.CrawlRequest request) throws IOException {
         //ToDo for future application sending the entire chain is a bit too much
-        if (dbHelper != null) {
-            for (MessageProto.TrustChainBlock block : dbHelper.getAllBlocks()) {
+        if (blockRepository != null) {
+            for (MessageProto.TrustChainBlock block : blockRepository.getAllBlocks()) {
                 network.sendBlockMessage(peer, block);
             }
         } else {

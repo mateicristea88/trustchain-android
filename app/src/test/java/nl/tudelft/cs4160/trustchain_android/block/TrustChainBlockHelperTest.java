@@ -67,7 +67,7 @@ public class TrustChainBlockHelperTest {
 
     @Test
     public void testValidateTransaction() throws Exception {
-        assertEquals(ValidationResult.VALID, validateTransaction(block, null).getStatus());
+        assertEquals(ValidationResult.VALID, validateTransaction(block).getStatus());
     }
 
     @Test

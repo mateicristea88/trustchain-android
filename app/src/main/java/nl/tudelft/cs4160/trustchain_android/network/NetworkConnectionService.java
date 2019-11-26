@@ -1,6 +1,5 @@
 package nl.tudelft.cs4160.trustchain_android.network;
 
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -36,13 +35,14 @@ import nl.tudelft.cs4160.trustchain_android.R;
 import nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper;
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
+import nl.tudelft.cs4160.trustchain_android.storage.database.AppDatabase;
+import nl.tudelft.cs4160.trustchain_android.storage.repository.BlockRepository;
 import nl.tudelft.cs4160.trustchain_android.ui.main.OverviewConnectionsActivity;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.peer.PeerHandler;
 import nl.tudelft.cs4160.trustchain_android.peer.PeerListener;
 import nl.tudelft.cs4160.trustchain_android.statistics.StatisticsServer;
-import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.BootstrapIPStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
 
@@ -59,7 +59,7 @@ public class NetworkConnectionService extends Service {
     private static final String NOTIFICATION_CHANNEL = "service_notifications";
     private static final int ONGOING_NOTIFICATION_ID = 1;
 
-    private TrustChainDBHelper dbHelper;
+    private BlockRepository blockRepository;
     private Network network;
     private PeerHandler peerHandler;
     private boolean networkRunning = true;
@@ -149,7 +149,7 @@ public class NetworkConnectionService extends Service {
 
         uiHandler = new Handler();
 
-        dbHelper = new TrustChainDBHelper(this);
+        blockRepository = new BlockRepository(AppDatabase.getInstance(getApplicationContext()).blockDao());
         initKey();
         StatisticsServer.getInstance().start(networkStatusListener);
 
@@ -226,10 +226,10 @@ public class NetworkConnectionService extends Service {
         if (kp == null) {
             kp = Key.createAndSaveKeys(getApplicationContext());
         }
-        int blockCount = dbHelper.getBlockCount();
-        if (blockCount < 1) {
+        int blockCount = blockRepository.getBlockCount();
+        if (blockCount == 0) {
             MessageProto.TrustChainBlock block = TrustChainBlockHelper.createGenesisBlock(kp);
-            dbHelper.insertInDB(block);
+            blockRepository.insert(block);
         }
     }
 
