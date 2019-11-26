@@ -86,7 +86,7 @@ public class Peer implements Serializable {
      * @return
      */
     public boolean canBeRemoved() {
-        if(isBootstrap()) {
+        if (isBootstrap()) {
             return false;
         }
         if (isReceivedFrom()) {
