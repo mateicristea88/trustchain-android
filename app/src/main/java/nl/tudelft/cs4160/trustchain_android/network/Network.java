@@ -51,12 +51,12 @@ public class Network {
     private PeerSummaryActivity mutualBlockListener;
     private StatisticsServer statistics;
 
-    public final static int INTRODUCTION_REQUEST_ID = 1;
-    public final static int INTRODUCTION_RESPONSE_ID = 2;
-    public final static int PUNCTURE_REQUEST_ID = 3;
-    public final static int PUNCTURE_ID = 4;
-    public final static int BLOCK_MESSAGE_ID = 5;
-    public final static int CRAWL_REQUEST_ID = 6;
+    private final static int INTRODUCTION_REQUEST_ID = 1;
+    private final static int INTRODUCTION_RESPONSE_ID = 2;
+    private final static int PUNCTURE_REQUEST_ID = 3;
+    private final static int PUNCTURE_ID = 4;
+    private final static int BLOCK_MESSAGE_ID = 5;
+    private final static int CRAWL_REQUEST_ID = 6;
 
     /**
      * Empty constructor
