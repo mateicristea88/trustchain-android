@@ -17,7 +17,8 @@ package nl.tudelft.cs4160.trustchain_android.passport.ocr.camera;/*
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import nl.tudelft.cs4160.trustchain_android.R;
 

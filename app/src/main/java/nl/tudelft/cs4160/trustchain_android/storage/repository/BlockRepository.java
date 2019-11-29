@@ -18,8 +18,8 @@ public class BlockRepository {
         this.blockDao = blockDao;
     }
 
-    public void insert(MessageProto.TrustChainBlock block) {
-        blockDao.insert(BlockConverter.toDbBlock(block));
+    public void insertOrUpdate(MessageProto.TrustChainBlock block) {
+        blockDao.insertOrUpdate(BlockConverter.toDbBlock(block));
     }
 
     public void update(MessageProto.TrustChainBlock block) {
@@ -79,6 +79,29 @@ public class BlockRepository {
 
     public List<MessageProto.TrustChainBlock> getBlocks(byte[] publicKey, boolean inLinked) {
         return BlockConverter.fromDbBlocks(blockDao.getBlocks(encodeKey(publicKey), inLinked));
+    }
+
+    /**
+     * Returns the number of half blocks created by the peer with the provided public key that
+     * are still waiting to be signed by the peer with the linked public key.
+     */
+    public int getHalfBlockCount(byte[] peerPublicKey, byte[] myPublicKey) {
+        String encPeerPublicKey = encodeKey(peerPublicKey);
+        String encMyPublicKey = encodeKey(myPublicKey);
+        List<DbBlock> blocks = blockDao.getBlocks(encPeerPublicKey, false);
+        int halfBlockCount = 0;
+        for (DbBlock block : blocks) {
+            // Is the first half block
+            if (block.linkSequenceNumber == 0 && block.linkPublicKey.equals(encMyPublicKey)) {
+                DbBlock linkedBlock = blockDao.getLinkedBlock(block.publicKey, block.sequenceNumber,
+                        block.linkPublicKey, block.linkSequenceNumber);
+                if (linkedBlock == null) {
+                    // Is an uncompleted half block
+                    halfBlockCount++;
+                }
+            }
+        }
+        return halfBlockCount;
     }
 
     private String encodeKey(byte[] key) {

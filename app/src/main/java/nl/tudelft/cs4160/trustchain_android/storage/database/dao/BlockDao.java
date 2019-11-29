@@ -2,6 +2,7 @@ package nl.tudelft.cs4160.trustchain_android.storage.database.dao;
 
 import androidx.room.Dao;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
@@ -17,8 +18,8 @@ public interface BlockDao {
     /**
      * Inserts a new block into the database.
      */
-    @Insert
-    void insert(DbBlock block);
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertOrUpdate(DbBlock block);
 
     /**
      * Updates an existing block with the matching primary key. It is used to alter the half

@@ -8,13 +8,14 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -27,6 +28,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.protobuf.ByteString;
 
 import java.io.BufferedInputStream;
@@ -49,7 +51,6 @@ import nl.tudelft.cs4160.trustchain_android.network.CrawlRequestListener;
 import nl.tudelft.cs4160.trustchain_android.network.Network;
 import nl.tudelft.cs4160.trustchain_android.offline.ReceiveOfflineActivity;
 import nl.tudelft.cs4160.trustchain_android.offline.SendOfflineActivity;
-import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.InboxItemStorage;
 import nl.tudelft.cs4160.trustchain_android.util.FileDialog;
 import nl.tudelft.cs4160.trustchain_android.util.Util;
 
@@ -84,7 +85,6 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
         setContentView(R.layout.activity_peer_overview);
         blockRepository = new BlockRepository(AppDatabase.getInstance(getApplicationContext()).blockDao());
         inboxItemOtherPeer = (InboxItem) getIntent().getSerializableExtra("inboxItem");
-        InboxItemStorage.markHalfBlockAsRead(this, inboxItemOtherPeer);
         initVariables();
         initializeMutualBlockRecycleView();
         requestChain();
@@ -255,8 +255,8 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
         messageEditText.clearFocus();
         InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-        // insert the half block in your own chain
-        blockRepository.insert(signedBlock);
+        // insertOrUpdate the half block in your own chain
+        blockRepository.insertOrUpdate(signedBlock);
 
         if (sendOffline.isChecked()) {
             Intent intent = new Intent(this, SendOfflineActivity.class);
@@ -317,8 +317,8 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
 
         final MessageProto.TrustChainBlock signedBlock = sign(block, keyPair.getSigningKey());
 
-        //insert the new signed block
-        blockRepository.insert(signedBlock);
+        //insertOrUpdate the new signed block
+        blockRepository.insertOrUpdate(signedBlock);
         new Thread(() -> {
             try {
                 network.sendBlockMessage(inboxItemOtherPeer.getPeer(), signedBlock);
@@ -397,7 +397,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
             } else {
                 selectedFilePath.setError(null);
                 sendButton.setEnabled(true);
-                Snackbar.make(findViewById(R.id.myCoordinatorLayout),getString(R.string.warning_files),Snackbar.LENGTH_LONG).show();
+                Snackbar.make(findViewById(R.id.myCoordinatorLayout),getString(R.string.warning_files), Snackbar.LENGTH_LONG).show();
             }
         });
         fileDialog.showDialog();

@@ -9,8 +9,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,10 +19,19 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+
+import com.google.android.material.snackbar.Snackbar;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import nl.tudelft.cs4160.trustchain_android.R;
+import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
+import nl.tudelft.cs4160.trustchain_android.storage.database.AppDatabase;
+import nl.tudelft.cs4160.trustchain_android.storage.repository.PeerRepository;
+import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.PubKeyAndAddressPairStorage;
 import nl.tudelft.cs4160.trustchain_android.ui.chainexplorer.ChainExplorerActivity;
 import nl.tudelft.cs4160.trustchain_android.funds.FundsActivity;
 import nl.tudelft.cs4160.trustchain_android.funds.qr.ExportWalletQRActivity;
@@ -49,6 +57,7 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
     private TextView activePeersText;
     private TextView newPeersText;
     private NetworkConnectionService service;
+    private PeerRepository peerRepository;
 
     private List<Peer> activePeersList = new ArrayList<>();
     private List<Peer> newPeersList = new ArrayList<>();
@@ -67,6 +76,33 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
         }
     };
 
+    private PeerListAdapter.OnPeerClickListener onPeerClickListener = peer -> {
+        CoordinatorLayout content = findViewById(R.id.content);
+
+        if (peer.isAlive() && peer.isReceivedFrom()) {
+            PublicKeyPair pubKeyPair = PubKeyAndAddressPairStorage.getPubKeyByAddress(getApplicationContext(), peer.getAddress().getHostString() + ":" + peer.getPort());
+            if (pubKeyPair != null) {
+                peerRepository.insertOrUpdate(peer);
+
+                Snackbar mySnackbar = Snackbar.make(content,
+                        getString(R.string.snackbar_peer_added, peer.getName()), Snackbar.LENGTH_SHORT);
+                // set max lines so long peer names will still display properly
+                TextView snackbarTextView = mySnackbar.getView().findViewById(R.id.snackbar_text);
+                snackbarTextView.setMaxLines(1);
+                snackbarTextView.setEllipsize(TextUtils.TruncateAt.MIDDLE);
+                mySnackbar.show();
+            } else {
+                Snackbar mySnackbar = Snackbar.make(content,
+                        getString(R.string.snackbar_no_pub_key), Snackbar.LENGTH_SHORT);
+                mySnackbar.show();
+            }
+        } else {
+            Snackbar mySnackbar = Snackbar.make(content,
+                    getString(R.string.snackbar_peer_inactive), Snackbar.LENGTH_SHORT);
+            mySnackbar.show();
+        }
+    };
+
     /**
      * Initialize views, start send and receive threads if necessary.
      * Start a thread that refreshes the peers every second.
@@ -76,6 +112,9 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        peerRepository = new PeerRepository(AppDatabase.getInstance(this).peerDao());
+
         setContentView(R.layout.activity_overview_connections);
         initTextViews();
         initExitButton();
@@ -195,10 +234,10 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
      * @param view
      */
     public void onClickOpenInbox(View view) {
-        ArrayList<Peer> peerList = new ArrayList<>();
-        peerList.addAll(activePeersList);
-        peerList.addAll(newPeersList);
-        InboxActivity.peerList = peerList;
+        //ArrayList<Peer> peerList = new ArrayList<>();
+        //peerList.addAll(activePeersList);
+        //peerList.addAll(newPeersList);
+        //InboxActivity.peerList = peerList;
         Intent inboxActivityIntent = new Intent(this, InboxActivity.class);
         startActivity(inboxActivityIntent);
     }
@@ -217,11 +256,14 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
     private void initPeerLists() {
         ListView connectedPeerConnectionListView = findViewById(R.id.active_peers_list_view);
         ListView incomingPeerConnectionListView = findViewById(R.id.new_peers_list_view);
-        CoordinatorLayout content = findViewById(R.id.content);
-        activePeersAdapter = new PeerListAdapter(getApplicationContext(), R.layout.item_peer_connection_list, activePeersList, content);
+        activePeersAdapter = new PeerListAdapter(getApplicationContext(), R.layout.item_peer_connection_list, activePeersList);
         connectedPeerConnectionListView.setAdapter(activePeersAdapter);
-        newPeersAdapter = new PeerListAdapter(getApplicationContext(), R.layout.item_peer_connection_list, newPeersList, content);
+        connectedPeerConnectionListView.setOnItemClickListener((adapterView, view, position, id) ->
+                onPeerClickListener.onPeerClick(activePeersAdapter.getItem(position)));
+        newPeersAdapter = new PeerListAdapter(getApplicationContext(), R.layout.item_peer_connection_list, newPeersList);
         incomingPeerConnectionListView.setAdapter(newPeersAdapter);
+        incomingPeerConnectionListView.setOnItemClickListener((adapterView, view, position, id) ->
+                onPeerClickListener.onPeerClick(newPeersAdapter.getItem(position)));
     }
 
 

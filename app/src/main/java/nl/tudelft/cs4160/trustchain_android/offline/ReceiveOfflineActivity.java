@@ -9,7 +9,6 @@ import android.nfc.NfcAdapter;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -17,6 +16,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -110,6 +111,7 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
      */
     @Override
     protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
         Log.d(TAG, "Tag received");
         processIntent(intent);
     }
@@ -162,7 +164,7 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
         showBlockLayout(convertView);
 
         try {
-            blockRepository.insert(receivedBlock);
+            blockRepository.insertOrUpdate(receivedBlock);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -302,7 +304,7 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
                 receivedBlock, receivedBlock.getPublicKey().toByteArray());
 
         final MessageProto.TrustChainBlock signedBlock = TrustChainBlockHelper.sign(block, keyPair.getSigningKey());
-        blockRepository.insert(signedBlock);
+        blockRepository.insertOrUpdate(signedBlock);
 
         Intent intent = new Intent(this, SendOfflineActivity.class);
         intent.putExtra("block", signedBlock);

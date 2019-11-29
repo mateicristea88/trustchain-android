@@ -12,6 +12,8 @@ import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.storage.database.entity.DbBlock;
 
 public class BlockConverter {
+    private BlockConverter() {}
+
     public static DbBlock toDbBlock(MessageProto.TrustChainBlock block) {
         DbBlock dbBlock = new DbBlock();
         dbBlock.tx = block.getTransaction().getUnformatted().toByteArray();

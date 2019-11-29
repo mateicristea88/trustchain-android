@@ -12,6 +12,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.NFC" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <uses-feature
         android:name="android.hardware.nfc"
@@ -57,7 +58,8 @@
         <activity
             android:name=".ui.changebootstrap.ChangeBootstrapActivity"
             android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".ui.inbox.InboxActivity" />
+        <activity android:name=".ui.inbox.InboxActivity"
+            android:label="@string/inbox" />
         <activity
             android:name=".offline.SendOfflineActivity"
             android:label="@string/title_activity_send_offline"></activity>

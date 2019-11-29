@@ -9,9 +9,11 @@ import androidx.room.TypeConverters;
 
 import nl.tudelft.cs4160.trustchain_android.storage.database.converter.DateConverter;
 import nl.tudelft.cs4160.trustchain_android.storage.database.dao.BlockDao;
+import nl.tudelft.cs4160.trustchain_android.storage.database.dao.PeerDao;
 import nl.tudelft.cs4160.trustchain_android.storage.database.entity.DbBlock;
+import nl.tudelft.cs4160.trustchain_android.storage.database.entity.DbPeer;
 
-@Database(entities = {DbBlock.class}, version = 1, exportSchema = false)
+@Database(entities = {DbBlock.class, DbPeer.class}, version = 2, exportSchema = false)
 @TypeConverters(DateConverter.class)
 public abstract class AppDatabase extends RoomDatabase {
     private static final String DATABASE_NAME = "trustchain";
@@ -28,4 +30,5 @@ public abstract class AppDatabase extends RoomDatabase {
     }
 
     public abstract BlockDao blockDao();
+    public abstract PeerDao peerDao();
 }

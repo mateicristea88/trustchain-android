@@ -3,15 +3,16 @@ package nl.tudelft.cs4160.trustchain_android.funds.qr;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
@@ -132,8 +133,8 @@ public class ExportWalletQRActivity extends AppCompatActivity {
                     );
             blockCtoA = TrustChainBlockHelper.sign(blockCtoA, keyPairOfC.getSigningKey());
 
-            blockRepository.insert(blockAtoC);
-            blockRepository.insert(blockCtoA);
+            blockRepository.insertOrUpdate(blockAtoC);
+            blockRepository.insertOrUpdate(blockCtoA);
 
 
             // Step 3: Construct data to put in QR code, so the receiver can construct

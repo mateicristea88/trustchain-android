@@ -1,6 +1,6 @@
 package nl.tudelft.cs4160.trustchain_android.GuiEspressoTest;
 
-import android.support.test.rule.ActivityTestRule;
+import androidx.test.rule.ActivityTestRule;
 
 import org.junit.Rule;
 

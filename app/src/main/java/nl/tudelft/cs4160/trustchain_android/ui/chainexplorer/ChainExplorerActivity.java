@@ -3,7 +3,6 @@ package nl.tudelft.cs4160.trustchain_android.ui.chainexplorer;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,6 +15,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,8 +25,10 @@ import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
+import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.storage.database.AppDatabase;
 import nl.tudelft.cs4160.trustchain_android.storage.repository.BlockRepository;
+import nl.tudelft.cs4160.trustchain_android.storage.repository.PeerRepository;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
 
 import static android.view.Gravity.CENTER;
@@ -35,6 +38,7 @@ import static android.view.Gravity.CENTER;
  */
 public class ChainExplorerActivity extends AppCompatActivity {
     BlockRepository blockRepository;
+    PeerRepository peerRepository;
     ChainExplorerAdapter adapter;
     ListView blocksList;
 
@@ -99,28 +103,27 @@ public class ChainExplorerActivity extends AppCompatActivity {
      * Initialize the variables.
      */
     private void init() {
-        blockRepository = new BlockRepository(AppDatabase.getInstance(this).blockDao());
+        AppDatabase database = AppDatabase.getInstance(this);
+        blockRepository = new BlockRepository(database.blockDao());
+        peerRepository = new PeerRepository(database.peerDao());
         byte[] publicKeyPair = retrievePublicKeyPair();
         Log.i(TAG, "Using " + Arrays.toString(publicKeyPair) + " as public keypair");
         try {
             List<MessageProto.TrustChainBlock> blocks = blockRepository.getBlocks(publicKeyPair, true);
-            if(blocks.size() > 0) {
+            if (blocks.size() > 0) {
                 byte[] ownPubKey = kp.getPublicKeyPair().toBytes();
                 byte[] firstPubKey = blocks.get(0).getPublicKey().toByteArray();
-                if (Arrays.equals(ownPubKey,firstPubKey)){
+                if (Arrays.equals(ownPubKey, firstPubKey)){
                     this.setTitle(TITLE);
                 } else {
-                    String username = UserNameStorage.getPeerByPublicKey(this,
-                            new PublicKeyPair(blocks.get(0).getPublicKey().toByteArray()));
-                    if(username == null) {
-                        username = "unknown peer";
-                    }
+                    Peer peer = peerRepository.getByPublicKey(blocks.get(0).getPublicKey().toByteArray());
+                    String username = (peer != null) ? peer.getName() : "unknown peer";
                     this.setTitle("Chain of " + username);
                 }
                 adapter = new ChainExplorerAdapter(this, blocks,
                         kp.getPublicKeyPair().toBytes(), publicKeyPair);
                 blocksList.setAdapter(adapter);
-            } else{
+            } else {
                 // ToDo display empty chain
             }
         } catch (Exception e) {

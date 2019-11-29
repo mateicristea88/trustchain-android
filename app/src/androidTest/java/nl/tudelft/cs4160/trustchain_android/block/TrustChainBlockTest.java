@@ -1,7 +1,7 @@
 package nl.tudelft.cs4160.trustchain_android.block;
 
 
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import android.test.ActivityUnitTestCase;
 
 import org.junit.After;
@@ -20,7 +20,6 @@ import nl.tudelft.cs4160.trustchain_android.util.ByteArrayConverter;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.validateMockitoUsage;
-import static org.mockito.Mockito.when;
 
 /**
  * Created by Boning on 12/17/2017.

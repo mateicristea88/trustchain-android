@@ -22,7 +22,6 @@ import java.util.List;
 
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
-import nl.tudelft.cs4160.trustchain_android.inbox.InboxItem;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto.Message;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto.TrustChainBlock;
@@ -30,9 +29,9 @@ import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.peer.PeerHandler;
 import nl.tudelft.cs4160.trustchain_android.storage.database.AppDatabase;
 import nl.tudelft.cs4160.trustchain_android.storage.repository.BlockRepository;
+import nl.tudelft.cs4160.trustchain_android.storage.repository.PeerRepository;
 import nl.tudelft.cs4160.trustchain_android.ui.peersummary.PeerSummaryActivity;
 import nl.tudelft.cs4160.trustchain_android.statistics.StatisticsServer;
-import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.InboxItemStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.PubKeyAndAddressPairStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
 
@@ -44,6 +43,7 @@ public class Network {
     private InetSocketAddress internalSourceAddress;
     private static Network network;
     private BlockRepository blockRepository;
+    private PeerRepository peerRepository;
     private PublicKeyPair publicKey;
     private MessageHandler messageHandler;
     private NetworkStatusListener networkStatusListener;
@@ -119,7 +119,9 @@ public class Network {
         this.statistics = StatisticsServer.getInstance();
         if (name == null) name = UserNameStorage.getUserName(context);
         if (publicKey == null) publicKey = Key.loadKeys(context).getPublicKeyPair();
-        blockRepository = new BlockRepository(AppDatabase.getInstance(context).blockDao());
+        AppDatabase database = AppDatabase.getInstance(context);
+        blockRepository = new BlockRepository(database.blockDao());
+        peerRepository = new PeerRepository(database.peerDao());
         messageHandler = new MessageHandler(this,
                 dbAccess ? blockRepository : null,
                 new PeerHandler(publicKey,name));
@@ -425,7 +427,6 @@ public class Network {
 
                 // update the inbox
                 addPeerToInbox(pubKeyPair, peer, context);
-                addBlockToInbox(block, context);
 
                 messageHandler.handleReceivedBlock(peer, block);
                 if (mutualBlockListener != null) {
@@ -454,28 +455,8 @@ public class Network {
      * @param peer the peer that needs to be added
      * @param context needed for storage
      */
-    private static void addPeerToInbox(PublicKeyPair pubKeyPair, Peer peer, Context context) {
-        if (pubKeyPair != null) {
-            InboxItem i = new InboxItem(peer, new ArrayList<>());
-            InboxItemStorage.addInboxItem(context, i);
-            UserNameStorage.setNewPeerByPublicKey(context, peer.getName(), pubKeyPair);
-        }
-    }
-
-    /**
-     * Add a block reference to the InboxItem and store this again locally if this block is
-     * addressed to us.
-     * @param block the block of which the reference should be stored.
-     * @param context needed for storage
-     */
-    private void addBlockToInbox(TrustChainBlock block, Context context) {
-        PublicKeyPair blockLinkPubKey = new PublicKeyPair(block.getLinkPublicKey().toByteArray());
-        PublicKeyPair blockPubKey = new PublicKeyPair(block.getPublicKey().toByteArray());
-        // check if block is addressed to us and whether or not we have already received it.
-        if (blockLinkPubKey.equals(publicKey) &&
-                blockRepository.getBlock(blockPubKey.toBytes(),block.getSequenceNumber()) == null) {
-            InboxItemStorage.addHalfBlock(context, blockPubKey, block.getSequenceNumber());
-        }
+    private void addPeerToInbox(PublicKeyPair pubKeyPair, Peer peer, Context context) {
+        peerRepository.insertOrUpdate(peer);
     }
 
     /**

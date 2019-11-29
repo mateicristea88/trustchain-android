@@ -25,7 +25,6 @@ import static org.mockito.Mockito.when;
 public class InboxItemTest {
 
     private String userName;
-    private ArrayList<Integer> halfBlockSequenceNumbers = new ArrayList<>();
     private String address;
     @Mock
     private PublicKeyPair publicKey;
@@ -40,16 +39,12 @@ public class InboxItemTest {
     @Before
     public void setUp() {
         userName = "userName";
-        halfBlockSequenceNumbers.add(1);
-        halfBlockSequenceNumbers.add(2);
-        halfBlockSequenceNumbers.add(3);
         when(publicKey.toBytes()).thenReturn(pkpBytes);
         address = "127.0.0.1";
         port = 123;
         Peer peer = new Peer(new InetSocketAddress(address, port),publicKey,userName);
-        ii = new InboxItem(peer, halfBlockSequenceNumbers);
+        ii = new InboxItem(peer, 3);
     }
-
 
     @Test
     public void testConstructorUserName() {
@@ -57,44 +52,8 @@ public class InboxItemTest {
     }
 
     @Test
-    public void testConstructorBlocks() {
-        assertEquals(ii.getHalfBlocks(), halfBlockSequenceNumbers);
-    }
-
-    @Test
     public void testConstructorAddress() {
         assertEquals(ii.getPeer().getIpAddress().getHostAddress(), address);
-    }
-
-
-    @Test
-    public void testAddHalfblock() {
-        int seqBlock = 12;
-        ii.addHalfBlocks(seqBlock);
-        halfBlockSequenceNumbers.add(seqBlock);
-        assertEquals(ii.getHalfBlocks(), halfBlockSequenceNumbers);
-    }
-
-    @Test
-    public void testEqualsFalseAddress() {
-        Peer peer = new Peer(new InetSocketAddress("1.1.1.1",port),publicKey,userName);
-        InboxItem ii2 = new InboxItem(peer, halfBlockSequenceNumbers);
-        assertFalse(ii.equals(ii2));
-    }
-
-    @Test
-    public void testEqualsFalsePort() {
-        Peer peer = new Peer(new InetSocketAddress(address,port + 12),publicKey,userName);
-        InboxItem ii2 = new InboxItem(peer, halfBlockSequenceNumbers);
-        assertFalse(ii.equals(ii2));
-    }
-
-    @Test
-    public void testEqualsFalseHalfBlockSequenceNumbers() {
-        Peer peer = new Peer(new InetSocketAddress(address,port),publicKey,userName);
-        ArrayList<Integer> halfBlockSequenceNumbers2 = new ArrayList<>();
-        InboxItem ii2 = new InboxItem(peer, halfBlockSequenceNumbers2);
-        assertFalse(ii.equals(ii2));
     }
 
     @Test
@@ -105,22 +64,14 @@ public class InboxItemTest {
     }
 
     @Test
-    public void testSetBlocks() {
-        ArrayList<Integer> halfBlockSequenceNumbers2 = new ArrayList<>();
-        halfBlockSequenceNumbers2.add(4);
-        ii.setHalfBlocks(halfBlockSequenceNumbers2);
-        assertEquals(ii.getHalfBlocks(), halfBlockSequenceNumbers2);
-    }
-
-    @Test
     public void testGetAmountUnread() {
-        assertEquals(ii.getAmountUnread(), halfBlockSequenceNumbers.size());
+        assertEquals(3, ii.getAmountUnread());
     }
     @Test
     public void testGetAmountUnreadNull() {
         Peer peer = new Peer(new InetSocketAddress(address,port), publicKey,userName);
-        InboxItem ii2 = new InboxItem(peer, null);
-        assertEquals(ii2.getAmountUnread(),0);
+        InboxItem ii2 = new InboxItem(peer, 0);
+        assertEquals(0, ii2.getAmountUnread());
     }
 
 }

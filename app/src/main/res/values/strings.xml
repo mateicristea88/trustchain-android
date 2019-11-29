@@ -115,7 +115,8 @@
 
     <!--- inbox -->
     <string name="new_user">+ Find new users</string>
-    <string name="inbox">Open Inbox</string>
+    <string name="open_inbox">Open Inbox</string>
+    <string name="inbox">Inbox</string>
 
     <!-- OCR Scanning -->
     <string name="ocr_switch_to_manual">Manual Input</string>

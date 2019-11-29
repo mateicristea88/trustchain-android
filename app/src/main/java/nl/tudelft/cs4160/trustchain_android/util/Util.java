@@ -3,7 +3,7 @@ package nl.tudelft.cs4160.trustchain_android.util;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
-import android.support.v4.app.ActivityCompat;
+import androidx.core.app.ActivityCompat;
 import android.util.Log;
 
 import java.io.BufferedInputStream;
