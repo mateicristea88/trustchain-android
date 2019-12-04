@@ -120,7 +120,7 @@ public class ChainExplorerActivity extends AppCompatActivity {
                     String username = (peer != null) ? peer.getName() : "unknown peer";
                     this.setTitle("Chain of " + username);
                 }
-                adapter = new ChainExplorerAdapter(this, blocks,
+                adapter = new ChainExplorerAdapter(this, peerRepository, blocks,
                         kp.getPublicKeyPair().toBytes(), publicKeyPair);
                 blocksList.setAdapter(adapter);
             } else {

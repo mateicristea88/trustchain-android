@@ -25,8 +25,10 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import nl.tudelft.cs4160.trustchain_android.R;
 import nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper;
 import nl.tudelft.cs4160.trustchain_android.block.ValidationResult;
+import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.storage.database.AppDatabase;
 import nl.tudelft.cs4160.trustchain_android.storage.repository.BlockRepository;
+import nl.tudelft.cs4160.trustchain_android.storage.repository.PeerRepository;
 import nl.tudelft.cs4160.trustchain_android.ui.chainexplorer.ChainColor;
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
@@ -48,6 +50,7 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
     private IntentFilter[] intentFiltersArray;
     private MessageProto.TrustChainBlock receivedBlock;
     private BlockRepository blockRepository;
+    private PeerRepository peerRepository;
 
     private TextView blockSigned;
     private Button signButton;
@@ -59,7 +62,9 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_receive_offline);
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
-        blockRepository = new BlockRepository(AppDatabase.getInstance(this).blockDao());
+        AppDatabase appDatabase = AppDatabase.getInstance(this);
+        blockRepository = new BlockRepository(appDatabase.blockDao());
+        peerRepository = new PeerRepository(appDatabase.peerDao());
         if (mNfcAdapter == null){
             Toast.makeText(this, "No NFC on this device", Toast.LENGTH_LONG).show();
         }
@@ -180,9 +185,10 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
     }
 
     private String getPeerAlias(PublicKeyPair keyPair) {
-        String alias = UserNameStorage.getPeerByPublicKey(getApplicationContext(), keyPair);
-        if (alias == null)
-            alias = "unknown";
+        Peer peer = peerRepository.getByPublicKey(keyPair.toBytes());
+        String alias = "unknown";
+        if (peer != null)
+            alias = peer.getName();
         if (Key.loadKeys(getApplicationContext()).getPublicKeyPair().equals(keyPair))
             alias = "me";
         return alias;

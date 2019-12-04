@@ -28,10 +28,8 @@ import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.storage.database.AppDatabase;
 import nl.tudelft.cs4160.trustchain_android.storage.repository.BlockRepository;
 import nl.tudelft.cs4160.trustchain_android.storage.repository.PeerRepository;
-import nl.tudelft.cs4160.trustchain_android.ui.main.OverviewConnectionsActivity;
 
 public class InboxActivity extends AppCompatActivity {
-    public static ArrayList<Peer> peerList;
     private RecyclerView mRecyclerView;
     private ArrayList<InboxItem> inboxItems = new ArrayList<>();
     private InboxAdapter mAdapter = new InboxAdapter(inboxItems);
@@ -85,7 +83,6 @@ public class InboxActivity extends AppCompatActivity {
      * only the original thread that created a view hierarchy can touch its views.
      */
     private void getInboxItems() {
-        mAdapter.setPeerList(peerList);
         mRecyclerView.setAdapter(mAdapter);
 
         peerRepository.getAllPeers().observe(this, peers -> {

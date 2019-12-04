@@ -236,10 +236,6 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
      * @param view
      */
     public void onClickOpenInbox(View view) {
-        //ArrayList<Peer> peerList = new ArrayList<>();
-        //peerList.addAll(activePeersList);
-        //peerList.addAll(newPeersList);
-        //InboxActivity.peerList = peerList;
         Intent inboxActivityIntent = new Intent(this, InboxActivity.class);
         startActivity(inboxActivityIntent);
     }
