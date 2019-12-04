@@ -20,7 +20,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import nl.tudelft.cs4160.trustchain_android.R;
+import nl.tudelft.cs4160.trustchain_android.TrustchainApplication;
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
@@ -37,8 +40,12 @@ import static android.view.Gravity.CENTER;
  * This activity will show a chain of a given TrustChain peer.
  */
 public class ChainExplorerActivity extends AppCompatActivity {
+    @Inject
     BlockRepository blockRepository;
+
+    @Inject
     PeerRepository peerRepository;
+
     ChainExplorerAdapter adapter;
     ListView blocksList;
 
@@ -52,6 +59,7 @@ public class ChainExplorerActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ((TrustchainApplication) getApplicationContext()).appComponent.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chain_explorer);
         blocksList = findViewById(R.id.blocks_list);
@@ -103,9 +111,6 @@ public class ChainExplorerActivity extends AppCompatActivity {
      * Initialize the variables.
      */
     private void init() {
-        AppDatabase database = AppDatabase.getInstance(this);
-        blockRepository = new BlockRepository(database.blockDao());
-        peerRepository = new PeerRepository(database.peerDao());
         byte[] publicKeyPair = retrievePublicKeyPair();
         Log.i(TAG, "Using " + Arrays.toString(publicKeyPair) + " as public keypair");
         try {

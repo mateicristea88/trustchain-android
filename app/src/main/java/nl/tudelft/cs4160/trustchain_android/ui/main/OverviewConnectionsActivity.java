@@ -27,9 +27,11 @@ import com.google.android.material.snackbar.Snackbar;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import nl.tudelft.cs4160.trustchain_android.R;
+import nl.tudelft.cs4160.trustchain_android.TrustchainApplication;
 import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
-import nl.tudelft.cs4160.trustchain_android.storage.database.AppDatabase;
 import nl.tudelft.cs4160.trustchain_android.storage.repository.PeerRepository;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.PubKeyAndAddressPairStorage;
 import nl.tudelft.cs4160.trustchain_android.ui.chainexplorer.ChainExplorerActivity;
@@ -57,7 +59,9 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
     private TextView activePeersText;
     private TextView newPeersText;
     private NetworkConnectionService service;
-    private PeerRepository peerRepository;
+
+    @Inject
+    PeerRepository peerRepository;
 
     private List<Peer> activePeersList = new ArrayList<>();
     private List<Peer> newPeersList = new ArrayList<>();
@@ -111,9 +115,8 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ((TrustchainApplication) getApplicationContext()).appComponent.inject(this);
         super.onCreate(savedInstanceState);
-
-        peerRepository = new PeerRepository(AppDatabase.getInstance(this).peerDao());
 
         setContentView(R.layout.activity_overview_connections);
         initTextViews();

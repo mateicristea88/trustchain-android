@@ -6,6 +6,8 @@ import androidx.lifecycle.LiveData;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.storage.database.converter.PeerConverter;
 import nl.tudelft.cs4160.trustchain_android.storage.database.dao.PeerDao;
@@ -15,6 +17,7 @@ import static nl.tudelft.cs4160.trustchain_android.util.LiveDataTransformations.
 public class PeerRepository {
     private PeerDao peerDao;
 
+    @Inject
     public PeerRepository(PeerDao peerDao) {
         this.peerDao = peerDao;
     }

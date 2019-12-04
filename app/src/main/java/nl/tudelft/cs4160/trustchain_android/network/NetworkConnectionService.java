@@ -32,7 +32,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import javax.inject.Inject;
+
 import nl.tudelft.cs4160.trustchain_android.R;
+import nl.tudelft.cs4160.trustchain_android.TrustchainApplication;
 import nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper;
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
@@ -60,7 +63,9 @@ public class NetworkConnectionService extends Service {
     private static final String NOTIFICATION_CHANNEL = "service_notifications";
     private static final int ONGOING_NOTIFICATION_ID = 1;
 
-    private BlockRepository blockRepository;
+    @Inject
+    BlockRepository blockRepository;
+
     private Network network;
     private PeerHandler peerHandler;
     private boolean networkRunning = true;
@@ -148,11 +153,11 @@ public class NetworkConnectionService extends Service {
 
     @Override
     public void onCreate() {
+        ((TrustchainApplication) getApplicationContext()).appComponent.inject(this);
         super.onCreate();
 
         uiHandler = new Handler();
 
-        blockRepository = new BlockRepository(AppDatabase.getInstance(getApplicationContext()).blockDao());
         initKey();
         StatisticsServer.getInstance().start(networkStatusListener);
 

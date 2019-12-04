@@ -6,6 +6,8 @@ import androidx.annotation.Nullable;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.storage.database.converter.BlockConverter;
 import nl.tudelft.cs4160.trustchain_android.storage.database.dao.BlockDao;
@@ -14,6 +16,7 @@ import nl.tudelft.cs4160.trustchain_android.storage.database.entity.DbBlock;
 public class BlockRepository {
     private BlockDao blockDao;
 
+    @Inject
     public BlockRepository(BlockDao blockDao) {
         this.blockDao = blockDao;
     }
