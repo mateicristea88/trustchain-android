@@ -1,6 +1,11 @@
 package nl.tudelft.cs4160.trustchain_android.ui.inbox;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -11,14 +16,19 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import nl.tudelft.cs4160.trustchain_android.R;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.inbox.InboxItem;
+import nl.tudelft.cs4160.trustchain_android.network.NetworkConnectionListener;
+import nl.tudelft.cs4160.trustchain_android.network.NetworkConnectionService;
+import nl.tudelft.cs4160.trustchain_android.network.SimpleNetworkConnectionListener;
 import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.storage.database.AppDatabase;
 import nl.tudelft.cs4160.trustchain_android.storage.repository.BlockRepository;
 import nl.tudelft.cs4160.trustchain_android.storage.repository.PeerRepository;
+import nl.tudelft.cs4160.trustchain_android.ui.main.OverviewConnectionsActivity;
 
 public class InboxActivity extends AppCompatActivity {
     public static ArrayList<Peer> peerList;
@@ -27,6 +37,32 @@ public class InboxActivity extends AppCompatActivity {
     private InboxAdapter mAdapter = new InboxAdapter(inboxItems);
     private PeerRepository peerRepository;
     private BlockRepository blockRepository;
+    private NetworkConnectionService service;
+
+    private NetworkConnectionListener networkConnectionListener = new SimpleNetworkConnectionListener() {
+        @Override
+        public void updatePeerLists(List<Peer> activePeersList, List<Peer> newPeersList) {
+            List<Peer> peerList = new ArrayList<>();
+            peerList.addAll(activePeersList);
+            peerList.addAll(newPeersList);
+            mAdapter.setPeerList(peerList);
+            mAdapter.notifyDataSetChanged();
+        }
+    };
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            NetworkConnectionService.LocalBinder binder = (NetworkConnectionService.LocalBinder) iBinder;
+            service = binder.getService();
+            service.addNetworkConnectionListener(networkConnectionListener);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            service = null;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +109,19 @@ public class InboxActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         getInboxItems();
+
+        Intent serviceIntent = new Intent(this, NetworkConnectionService.class);
+        bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        if (service != null) {
+            service.removeNetworkConnectionListener(networkConnectionListener);
+        }
+        unbindService(serviceConnection);
     }
 
     @Override

@@ -132,13 +132,15 @@ public class NetworkConnectionService extends Service {
         @Override
         public void updateActivePeers() {
             Log.d(TAG, "updateActivePeers");
-            notifyListeners(listener -> listener.updateActivePeers(peerHandler.getActivePeersList()));
+            notifyListeners(listener -> listener.updatePeerLists(peerHandler.getActivePeersList(),
+                    peerHandler.getNewPeersList()));
         }
 
         @Override
         public void updateNewPeers() {
             Log.d(TAG, "updateNewPeers");
-            notifyListeners(listener ->listener.updateNewPeers(peerHandler.getNewPeersList()));
+            notifyListeners(listener -> listener.updatePeerLists(peerHandler.getActivePeersList(),
+                    peerHandler.getNewPeersList()));
         }
     };
 

@@ -9,6 +9,4 @@ public interface NetworkConnectionListener {
     void updatePeerLists(List<Peer> activePeersList, List<Peer> newPeersList);
     void updateWan(String ip);
     void updateConnectionType(String connectionTypeStr);
-    void updateActivePeers(List<Peer> activePeers);
-    void updateNewPeers(List<Peer> newPeers);
 }

@@ -150,7 +150,9 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
     protected void onStop() {
         super.onStop();
 
-        service.removeNetworkConnectionListener(this);
+        if (service != null) {
+            service.removeNetworkConnectionListener(this);
+        }
         unbindService(serviceConnection);
     }
 
@@ -289,6 +291,8 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
             if (service != null) {
                 service.addInitialPeer();
             }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
         }
     }
 
@@ -335,27 +339,6 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
         this.activePeersList.addAll(activePeersList);
         this.newPeersList.clear();
         this.newPeersList.addAll(newPeersList);
-        notifyPeerListsChanged();
-    }
-
-    /**
-     * Update the connected peer adapter by notifying that the data has changed.
-     */
-    @Override
-    public void updateActivePeers(List<Peer> peers) {
-        this.activePeersList.clear();
-        this.activePeersList.addAll(peers);
-        notifyPeerListsChanged();
-    }
-
-    /**
-     * Update the incoming peer adapter by notifying that the data has changed. Usually when a new
-     * peer has been found that we are not connected to yet.
-     */
-    @Override
-    public void updateNewPeers(List<Peer> peers) {
-        this.newPeersList.clear();
-        this.newPeersList.addAll(peers);
         notifyPeerListsChanged();
     }
 

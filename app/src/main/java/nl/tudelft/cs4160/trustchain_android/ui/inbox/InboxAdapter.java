@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import nl.tudelft.cs4160.trustchain_android.R;
 import nl.tudelft.cs4160.trustchain_android.inbox.InboxItem;
@@ -20,7 +21,7 @@ import nl.tudelft.cs4160.trustchain_android.ui.peersummary.PeerSummaryActivity;
 
 public class InboxAdapter extends RecyclerView.Adapter<InboxAdapter.ViewHolder> {
     private ArrayList<InboxItem> mDataset;
-    private ArrayList<Peer> peerList;
+    private List<Peer> peerList;
     private static final String TAG = "InboxAdapter";
 
     // Provide a reference to the views for each data item
@@ -162,7 +163,7 @@ public class InboxAdapter extends RecyclerView.Adapter<InboxAdapter.ViewHolder> 
         holder.mWrapperLinearLayout.setOnClickListener(mOnClickListener);
     }
 
-    public void setPeerList(ArrayList<Peer> peerList) {
+    public void setPeerList(List<Peer> peerList) {
         this.peerList = peerList;
     }
 
