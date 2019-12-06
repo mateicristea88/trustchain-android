@@ -1,5 +1,6 @@
 package nl.tudelft.cs4160.trustchain_android.ui.torrent;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -16,6 +17,9 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.frostwire.jlibtorrent.AlertListener;
 import com.frostwire.jlibtorrent.FileStorage;
@@ -53,10 +57,13 @@ public class TorrentActivity extends AppCompatActivity {
     private ProgressBar downloadProgressBar;
     private EditText magnetLinkField;
     private Button downloadButton;
-    private LinearLayout container;
     private TextView progressText;
     private TextView piecesText;
     private TextView pieceSizeText;
+    private RecyclerView recyclerView;
+
+    private File downloadLocation;
+    private TorrentFilesAdapter adapter = new TorrentFilesAdapter();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -68,17 +75,36 @@ public class TorrentActivity extends AppCompatActivity {
         downloadProgressBar = findViewById(R.id.download_progress);
         magnetLinkField = findViewById(R.id.magnet_link);
         downloadButton = findViewById(R.id.btn_download);
-        container = findViewById(R.id.container);
         progressText = findViewById(R.id.txt_progress);
         piecesText = findViewById(R.id.txt_pieces);
         pieceSizeText = findViewById(R.id.txt_piece_size);
+        recyclerView = findViewById(R.id.recycler_view);
 
         uiHandler = new Handler();
+        downloadLocation = getFilesDir();
 
-        String sampleMagnetLink = "magnet:?xt=urn:btih:aaa24996c7fce10a3a9fe8808047bffc3cdec161&dn=Kanye+West+-+JESUS+IS+KING+%282019%29+Mp3+%28320kbps%29+%5BHunter%5D+&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Fopen.demonii.com%3A1337&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Fexodus.desync.com%3A6969";
-        magnetLinkField.setText(sampleMagnetLink);
+        Intent intent = getIntent();
+        if (intent != null && intent.getData() != null) {
+            magnetLinkField.setText(intent.getData().toString());
+        } else {
+            String sampleMagnetLink = "magnet:?xt=urn:btih:aaa24996c7fce10a3a9fe8808047bffc3cdec161&dn=Kanye+West+-+JESUS+IS+KING+%282019%29+Mp3+%28320kbps%29+%5BHunter%5D+&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Fopen.demonii.com%3A1337&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Fexodus.desync.com%3A6969";
+            magnetLinkField.setText(sampleMagnetLink);
+        }
 
         downloadButton.setOnClickListener(v -> startTorrentDownload(magnetLinkField.getText().toString()));
+
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter.setOnItemClickListener(path -> {
+            File file = new File(downloadLocation, path);
+            String contentType = URLConnection.guessContentTypeFromName(file.getName());
+            Intent intent1 = new Intent(Intent.ACTION_VIEW);
+            Uri uri = FileProvider.getUriForFile(getApplicationContext(),
+                    getApplicationContext().getPackageName() + ".provider", file);
+            intent1.setDataAndType(uri, contentType);
+            intent1.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(intent1);
+        });
     }
 
     private void startTorrentDownload(String link) {
@@ -86,7 +112,7 @@ public class TorrentActivity extends AppCompatActivity {
 
         Uri torrentUri = Uri.parse(link);
 
-        TorrentSessionOptions torrentSessionOptions = new TorrentSessionOptions(getFilesDir());
+        TorrentSessionOptions torrentSessionOptions = new TorrentSessionOptions(downloadLocation);
 
         TorrentSession torrentSession = new TorrentSession(torrentSessionOptions);
 
@@ -106,7 +132,7 @@ public class TorrentActivity extends AppCompatActivity {
                 uiHandler.post(() -> {
                     int percentage = (int) (torrentProgress * 100);
                     progressText.setText(percentage + "%");
-                    pieceSizeText.setText("Piece Size: " + pieceLength);
+                    pieceSizeText.setText("Piece Size: " + pieceLength + " B");
                     piecesText.setText(downloadedPieces + "/" + numPieces);
                     downloadProgressBar.setVisibility(View.VISIBLE);
                     downloadProgressBar.setProgress(percentage);
@@ -120,7 +146,7 @@ public class TorrentActivity extends AppCompatActivity {
 
             @Override
             public void onTorrentError(TorrentHandle torrentHandle, TorrentSessionStatus torrentSessionStatus) {
-
+                Log.d("TorrentActivity", "onTorrentError");
             }
 
             @Override
@@ -130,7 +156,7 @@ public class TorrentActivity extends AppCompatActivity {
 
             @Override
             public void onMetadataFailed(TorrentHandle torrentHandle, TorrentSessionStatus torrentSessionStatus) {
-
+                Log.d("TorrentActivity", "onMetadataFailed");
             }
 
             @Override
@@ -185,163 +211,7 @@ public class TorrentActivity extends AppCompatActivity {
 
     private void showMetadata(FileStorage files) {
         metadataProgressBar.setVisibility(View.GONE);
-        container.removeAllViews();
-
-        for (int i = 0; i < files.numFiles(); i++) {
-            String path = files.fileName(i);
-            long offset = files.fileOffset(i);
-            long size = files.fileSize(i);
-            Log.d("TorrentActivity", "file " + i + ": " + path + ", " + offset + ", " + size);
-            TextView itemView = new TextView(this);
-            itemView.setText(path);
-            container.addView(itemView);
-        }
-
+        adapter.setFileStorage(files);
+        adapter.notifyDataSetChanged();
     }
-
-    /*
-    private SessionManager sessionManager = new SessionManager(false);
-
-    private final Object dhtLock = new Object();
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        sessionManager.addListener(new AlertListener() {
-            @Override
-            public int[] types() {
-                return null;
-            }
-
-            @Override
-            public void alert(Alert<?> alert) {
-                Log.d("TorrentActivity", "alert: " + alert.type() + " " + alert.message() + " " + alert);
-
-                switch (alert.type()) {
-                    case ADD_TORRENT:
-                        AddTorrentAlert addTorrentAlert = (AddTorrentAlert) alert;
-                        TorrentHandle handle = addTorrentAlert.handle();
-                        FileStorage fileStorage = handle.torrentFile().files();
-                        List<String> paths = fileStorage.paths();
-                        for (String path : paths) {
-                            Log.d("TorrentActivity", "metadata file: " + path);
-                        }
-                        handle.resume();
-                        break;
-                    case METADATA_RECEIVED:
-                        MetadataReceivedAlert metadataReceivedAlert = (MetadataReceivedAlert) alert;
-                        break;
-                    case PIECE_FINISHED:
-                        PieceFinishedAlert pieceFinishedAlert = (PieceFinishedAlert) alert;
-                        int pieceIndex = pieceFinishedAlert.pieceIndex();
-                        int pieces = pieceFinishedAlert.handle().torrentFile().numPieces();
-                        Log.d("TorrentActivity", "piece finished:" + pieceIndex + " / " + pieces);
-                        long[] progress = pieceFinishedAlert.handle().fileProgress();
-                        Log.d("TorrentActivity", "progress:" + Arrays.toString(progress));
-                        break;
-                    case DHT_BOOTSTRAP:
-                        synchronized (dhtLock) {
-                            dhtLock.notify();
-                        }
-                        break;
-                    case DHT_STATS:
-                        synchronized (dhtLock) {
-                            if (isDhtReady()) {
-                                dhtLock.notify();
-                            }
-                        }
-                        break;
-                }
-            }
-        });
-
-        setContentView(R.layout.activity_torrent);
-
-        EditText magnetLink = findViewById(R.id.magnet_link);
-        Button downloadButton = findViewById(R.id.btn_download);
-
-        downloadButton.setOnClickListener(v -> startTorrentDownload(magnetLink.getText().toString()));
-
-        String sampleMagnetLink = "magnet:?xt=urn:btih:aaa24996c7fce10a3a9fe8808047bffc3cdec161&dn=Kanye+West+-+JESUS+IS+KING+%282019%29+Mp3+%28320kbps%29+%5BHunter%5D+&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Fopen.demonii.com%3A1337&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Fexodus.desync.com%3A6969";
-        magnetLink.setText(sampleMagnetLink);
-        //String sampleTorrentFile = "https://www.frostclick.com/torrents/video/animation/Big_Buck_Bunny_1080p_surround_frostclick.com_frostwire.com.torrent";
-        //magnetLink.setText(sampleTorrentFile);
-    }
-
-    private boolean isDhtReady() {
-        // TODO: check minimum dht nodes
-        return sessionManager.stats().dhtNodes() >= 1;
-    }
-
-    private void startTorrentDownload(String link) {
-        AsyncTask.execute(() -> {
-            if (!sessionManager.isRunning()) {
-                SessionParams params = new SessionParams(new SettingsPack());
-                sessionManager.start(params);
-            }
-
-            if (link.startsWith("magnet")) {
-                try {
-                    synchronized (dhtLock) {
-                        Log.d("TorrentActivity", "waiting for dht lock");
-                        if (!isDhtReady()) {
-                            dhtLock.wait();
-                        }
-                        Log.d("TorrentActivity", "dht is ready");
-                        downloadMagnetLink(link);
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                downloadTorrentFile(link);
-            }
-        });
-
-    }
-
-    private void downloadMagnetLink(String magnetLink) {
-        sessionManager.download(magnetLink, getFilesDir());
-    }
-
-    private void downloadTorrentFile(String torrentFile) {
-        //String torrentFile = "https://now.bt.co/download/torrents/54f90f31025e930500cd5e6e.torrent";
-        //String torrentFile = "http://www.frostclick.com/torrents/video/animation/Big_Buck_Bunny_1080p_surround_frostclick.com_frostwire.com.torrent";
-        //Uri torrentUri = Uri.parse(torrentFile);
-        try {
-            URL url = new URL(torrentFile);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setInstanceFollowRedirects(true);
-            connection.connect();
-
-
-            if (connection.getResponseCode() != 200) {
-                Log.e("TorrentActivity", "response code: " + connection.getResponseCode());
-                return;
-            }
-
-            byte[] bytes = readInputStreamBytes(connection.getInputStream());
-
-            TorrentInfo torrentInfo = TorrentInfo.bdecode(bytes);
-            //sessionManager.download(magnetLink, File.createTempFile("temp", "torrent"));
-            sessionManager.download(torrentInfo, getFilesDir());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private byte[] readInputStreamBytes(InputStream is) throws IOException {
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        int nRead;
-        byte[] data = new byte[1024];
-        while ((nRead = is.read(data, 0, data.length)) != -1) {
-            buffer.write(data, 0, nRead);
-        }
-
-        buffer.flush();
-        return buffer.toByteArray();
-    }
-     */
 }
