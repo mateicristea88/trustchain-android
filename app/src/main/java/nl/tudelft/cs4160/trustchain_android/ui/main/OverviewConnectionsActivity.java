@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -45,11 +47,9 @@ import nl.tudelft.cs4160.trustchain_android.passport.ocr.camera.CameraActivity;
 import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.network.NetworkConnectionListener;
 import nl.tudelft.cs4160.trustchain_android.network.NetworkConnectionService;
-import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.SharedPreferencesStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
 import nl.tudelft.cs4160.trustchain_android.util.RequestCode;
 
-import static nl.tudelft.cs4160.trustchain_android.ui.userconfiguration.UserConfigurationActivity.VERSION_NAME_KEY;
 
 public class OverviewConnectionsActivity extends AppCompatActivity implements NetworkConnectionListener {
     private static final String TAG = "OverviewConnections";
@@ -159,17 +159,22 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
         unbindService(serviceConnection);
     }
 
+    private String getVersionName() {
+        try {
+            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            return pInfo.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return "unknown";
+    }
+
     /**
      * Get stored information and display it in the correct text views.
      */
     private void initTextViews() {
         ((TextView) findViewById(R.id.peer_id)).setText(UserNameStorage.getUserName(this));
-        String versionName = "unknown";
-        try {
-            versionName = SharedPreferencesStorage.readSharedPreferences(this, VERSION_NAME_KEY, String.class);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        String versionName = getVersionName();
         ((TextView )findViewById(R.id.version)).setText(getString(R.string.version, versionName));
         activePeersText = findViewById(R.id.active_peers_text);
         newPeersText = findViewById(R.id.new_peers_text);
