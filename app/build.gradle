@@ -46,7 +46,9 @@ dependencies {
     def lifecycle_version = "2.1.0"
     def dagger_version = "2.24"
 
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    //implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation files('libs/protobuf-java-3.4.1.jar')
+    implementation 'com.github.masterwok:simple-torrent-android:0.5.0'
 
     // AndroidX
     implementation 'androidx.appcompat:appcompat:1.1.0'

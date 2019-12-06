@@ -24,6 +24,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 
+import com.frostwire.jlibtorrent.TorrentInfo;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
@@ -48,6 +49,7 @@ import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.network.NetworkConnectionListener;
 import nl.tudelft.cs4160.trustchain_android.network.NetworkConnectionService;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
+import nl.tudelft.cs4160.trustchain_android.ui.torrent.TorrentActivity;
 import nl.tudelft.cs4160.trustchain_android.util.RequestCode;
 
 
@@ -233,6 +235,10 @@ public class OverviewConnectionsActivity extends AppCompatActivity implements Ne
             case R.id.passport_scan:
                 Intent cameraActivity = new Intent(this, CameraActivity.class);
                 startActivity(cameraActivity);
+                return true;
+            case R.id.torrent:
+                Intent torrentActivity = new Intent(this, TorrentActivity.class);
+                startActivity(torrentActivity);
                 return true;
             default:
                 return false;
