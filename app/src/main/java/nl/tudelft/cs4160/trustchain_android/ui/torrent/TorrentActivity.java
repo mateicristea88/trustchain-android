@@ -49,43 +49,44 @@ import nl.tudelft.cs4160.trustchain_android.R;
 public class TorrentActivity extends AppCompatActivity {
     private Handler uiHandler;
 
+    private ProgressBar metadataProgressBar;
+    private ProgressBar downloadProgressBar;
+    private EditText magnetLinkField;
+    private Button downloadButton;
+    private LinearLayout container;
+    private TextView progressText;
+    private TextView piecesText;
+    private TextView pieceSizeText;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_torrent);
 
+        metadataProgressBar = findViewById(R.id.metadata_progress);
+        downloadProgressBar = findViewById(R.id.download_progress);
+        magnetLinkField = findViewById(R.id.magnet_link);
+        downloadButton = findViewById(R.id.btn_download);
+        container = findViewById(R.id.container);
+        progressText = findViewById(R.id.txt_progress);
+        piecesText = findViewById(R.id.txt_pieces);
+        pieceSizeText = findViewById(R.id.txt_piece_size);
+
         uiHandler = new Handler();
 
-        EditText magnetLink = findViewById(R.id.magnet_link);
-        Button downloadButton = findViewById(R.id.btn_download);
-
         String sampleMagnetLink = "magnet:?xt=urn:btih:aaa24996c7fce10a3a9fe8808047bffc3cdec161&dn=Kanye+West+-+JESUS+IS+KING+%282019%29+Mp3+%28320kbps%29+%5BHunter%5D+&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Fopen.demonii.com%3A1337&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Fexodus.desync.com%3A6969";
-        magnetLink.setText(sampleMagnetLink);
+        magnetLinkField.setText(sampleMagnetLink);
 
-        downloadButton.setOnClickListener(v -> startTorrentDownload(magnetLink.getText().toString()));
+        downloadButton.setOnClickListener(v -> startTorrentDownload(magnetLinkField.getText().toString()));
     }
 
     private void startTorrentDownload(String link) {
-        ProgressBar progress = findViewById(R.id.metadataProgress);
-        progress.setVisibility(View.VISIBLE);
+        metadataProgressBar.setVisibility(View.VISIBLE);
 
         Uri torrentUri = Uri.parse(link);
 
-        TorrentSessionOptions torrentSessionOptions = new TorrentSessionOptions(
-                //Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                getFilesDir(),
-                false,
-                false,
-                false,
-                false,
-                8,
-                0,
-                0,
-                200,
-                10,
-                88
-        );
+        TorrentSessionOptions torrentSessionOptions = new TorrentSessionOptions(getFilesDir());
 
         TorrentSession torrentSession = new TorrentSession(torrentSessionOptions);
 
@@ -94,20 +95,21 @@ public class TorrentActivity extends AppCompatActivity {
             public void onPieceFinished(TorrentHandle torrentHandle, TorrentSessionStatus torrentSessionStatus) {
                 Log.d("TorrentActivity", "onPieceFinished");
                 Log.d("TorrentActivity", "downloaded pieces: " + torrentSessionStatus.getTorrentSessionBuffer().getDownloadedPieceCount());
-                uiHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        TextView downloadedView = findViewById(R.id.downloadedPieces);
-                        //int downloadedCount = torrentSessionStatus.getTorrentSessionBuffer().getDownloadedPieceCount();
-                        //Log.d("TorrentActivity", torrentSessionStatus.getTorrentSessionBuffer().toString());
-                        //int numPieces = torrentHandle.torrentFile().numPieces();
-                        float torrentProgress = torrentSessionStatus.getProgress();
-                        //downloadedView.setText("Progress: " + torrentSessionStatus.getProgress() + " (" + downloadedCount + "/" + numPieces + ")");
-                        downloadedView.setText("Progress: " + torrentProgress);
-                        ProgressBar downloadProgressBar = findViewById(R.id.downloadProgress);
-                        downloadProgressBar.setVisibility(View.VISIBLE);
-                        downloadProgressBar.setProgress((int) (torrentProgress * 100));
-                    }
+
+                float torrentProgress = torrentSessionStatus.getProgress();
+
+                Log.d("TorrentActivity", torrentSessionStatus.getTorrentSessionBuffer().toString());
+                int downloadedPieces = torrentSessionStatus.getTorrentSessionBuffer().getDownloadedPieceCount();
+                int numPieces = torrentHandle.torrentFile().numPieces();
+                int pieceLength = torrentHandle.torrentFile().pieceLength();
+
+                uiHandler.post(() -> {
+                    int percentage = (int) (torrentProgress * 100);
+                    progressText.setText(percentage + "%");
+                    pieceSizeText.setText("Piece Size: " + pieceLength);
+                    piecesText.setText(downloadedPieces + "/" + numPieces);
+                    downloadProgressBar.setVisibility(View.VISIBLE);
+                    downloadProgressBar.setProgress(percentage);
                 });
             }
 
@@ -182,20 +184,9 @@ public class TorrentActivity extends AppCompatActivity {
     }
 
     private void showMetadata(FileStorage files) {
-        ProgressBar progress = findViewById(R.id.metadataProgress);
-        progress.setVisibility(View.GONE);
-
-        LinearLayout container = findViewById(R.id.container);
+        metadataProgressBar.setVisibility(View.GONE);
         container.removeAllViews();
 
-        /*
-        Log.d("TorrentActivity", "torrent:" + torrentHandle.name());
-        Log.d("TorrentActivity", "size:" + torrentHandle.torrentFile().totalSize());
-        Log.d("TorrentActivity", "pieces:" + torrentHandle.torrentFile().numPieces());
-        Log.d("TorrentActivity", "infohash:" + torrentHandle.torrentFile().infoHash());
-        Log.d("TorrentActivity", "origfiles:" + torrentHandle.torrentFile().origFiles().numFiles());
-        Log.d("TorrentActivity", "files:" + torrentHandle.torrentFile().files().numFiles());
-         */
         for (int i = 0; i < files.numFiles(); i++) {
             String path = files.fileName(i);
             long offset = files.fileOffset(i);
