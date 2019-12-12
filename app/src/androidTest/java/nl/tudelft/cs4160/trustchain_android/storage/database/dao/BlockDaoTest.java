@@ -35,7 +35,7 @@ public class BlockDaoTest {
         dbBlock.publicKey = "abc";
         dbBlock.sequenceNumber = 1;
         dbBlock.tx = new byte[]{1, 2, 3};
-        blockDao.insert(dbBlock);
+        blockDao.insertOrUpdate(dbBlock);
         DbBlock result = blockDao.getBlock("abc", 1);
         Assert.assertArrayEquals(dbBlock.tx, result.tx);
     }
@@ -46,7 +46,7 @@ public class BlockDaoTest {
         dbBlock.publicKey = "abc";
         dbBlock.sequenceNumber = 1;
         dbBlock.tx = new byte[]{1, 2, 3};
-        blockDao.insert(dbBlock);
+        blockDao.insertOrUpdate(dbBlock);
         dbBlock.tx = new byte[]{1, 2, 3, 4};
         blockDao.update(dbBlock);
         DbBlock result = blockDao.getBlock("abc", 1);
@@ -61,7 +61,7 @@ public class BlockDaoTest {
         dbBlock.linkPublicKey = "def";
         dbBlock.linkSequenceNumber = 2;
         dbBlock.blockHash = "h1";
-        blockDao.insert(dbBlock);
+        blockDao.insertOrUpdate(dbBlock);
         DbBlock block1 = blockDao.getLinkedBlock("def", 2, "abc", 1);
         Assert.assertEquals("h1", block1.blockHash);
     }
@@ -72,13 +72,13 @@ public class BlockDaoTest {
         block1.publicKey = "abc";
         block1.sequenceNumber = 1;
         block1.blockHash = "h1";
-        blockDao.insert(block1);
+        blockDao.insertOrUpdate(block1);
 
         DbBlock block2 = new DbBlock();
         block2.publicKey = "abc";
         block2.sequenceNumber = 2;
         block2.blockHash = "h2";
-        blockDao.insert(block2);
+        blockDao.insertOrUpdate(block2);
 
         DbBlock before2 = blockDao.getBlockBefore("abc", 2);
         DbBlock before1 = blockDao.getBlockBefore("abc", 1);
@@ -92,13 +92,13 @@ public class BlockDaoTest {
         block1.publicKey = "abc";
         block1.sequenceNumber = 1;
         block1.blockHash = "h1";
-        blockDao.insert(block1);
+        blockDao.insertOrUpdate(block1);
 
         DbBlock block2 = new DbBlock();
         block2.publicKey = "abc";
         block2.sequenceNumber = 2;
         block2.blockHash = "h2";
-        blockDao.insert(block2);
+        blockDao.insertOrUpdate(block2);
 
         DbBlock after2 = blockDao.getBlockAfter("abc", 2);
         DbBlock after1 = blockDao.getBlockAfter("abc", 1);

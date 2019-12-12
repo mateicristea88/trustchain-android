@@ -1,6 +1,7 @@
 package nl.tudelft.cs4160.trustchain_android.inbox;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 
@@ -28,5 +29,19 @@ public class InboxItem implements Serializable {
 
     public Peer getPeer(){
        return peer;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        InboxItem inboxItem = (InboxItem) o;
+        return halfBlockCount == inboxItem.halfBlockCount &&
+                Objects.equals(peer, inboxItem.peer);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(peer, halfBlockCount);
     }
 }

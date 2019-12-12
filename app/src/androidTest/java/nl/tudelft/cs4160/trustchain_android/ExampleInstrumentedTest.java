@@ -19,8 +19,8 @@ public class ExampleInstrumentedTest {
     @Test
     public void useAppContext() throws Exception {
         // Context of the app under test.
-        Context appContext = InstrumentationRegistry.getTargetContext();
+        Context appContext = InstrumentationRegistry.getInstrumentation().getContext();
 
-        assertEquals("nl.tudelft.cs4160.trustchain_android", appContext.getPackageName());
+        assertEquals("nl.tudelft.cs4160.trustchain_android.test", appContext.getPackageName());
     }
 }

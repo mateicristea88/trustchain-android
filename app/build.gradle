@@ -27,6 +27,7 @@ android {
             includeAndroidResources = true
         }
     }
+
     lintOptions {
         abortOnError false
     }
@@ -39,6 +40,8 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
         sourceCompatibility JavaVersion.VERSION_1_8
     }
+
+    useLibrary 'android.test.runner'
 }
 
 dependencies {
@@ -88,4 +91,5 @@ dependencies {
     androidTestImplementation 'androidx.test:core:1.2.0'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test:rules:1.2.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
 }

@@ -3,6 +3,8 @@ package nl.tudelft.cs4160.trustchain_android.GuiEspressoTest;
 import android.content.Intent;
 import androidx.test.rule.ActivityTestRule;
 
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -29,15 +31,15 @@ public class IntegrationGuiTest {
 
     @Rule
     public ActivityTestRule<UserConfigurationActivity> mActivityRule = new ActivityTestRule<>(
-            UserConfigurationActivity.class,
-            true,
-            false);
+            UserConfigurationActivity.class);
+
+    @BeforeClass
+    public static void setup() {
+        emptyUserNamePreferences();
+    }
 
     @Test
-    public void logInAndConnectWithAnUser(){
-        emptyUserNamePreferences();
-        mActivityRule.launchActivity(new Intent());
-
+    public void logInAndConnectWithAnUser() {
         //Set the name of the user.
         onView(withId(R.id.username)).perform(replaceText(user));
         closeSoftKeyboard();
@@ -52,10 +54,10 @@ public class IntegrationGuiTest {
 
     }
 
-    private void emptyUserNamePreferences(){
+    private static void emptyUserNamePreferences() {
         // Check whether it is empty
         // If not, put null in it
-        if(UserNameStorage.getUserName(getInstrumentation().getTargetContext()) != null) {
+        if (UserNameStorage.getUserName(getInstrumentation().getTargetContext()) != null) {
             UserNameStorage.setUserName(getInstrumentation().getTargetContext(), null);
         }
     }

@@ -2,9 +2,9 @@ package nl.tudelft.cs4160.trustchain_android.main;
 
 
 import androidx.test.espresso.ViewInteraction;
+import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import android.test.suitebuilder.annotation.LargeTest;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -62,13 +62,7 @@ public class ChainInfoTest {
 
             //confirm the username and wait
             ViewInteraction appCompatButton = onView(
-                    allOf(withId(R.id.confirm_button), withText("Confirm"),
-                            childAtPosition(
-                                    childAtPosition(
-                                            withClassName(is("android.support.constraint.ConstraintLayout")),
-                                            0),
-                                    3),
-                            isDisplayed()));
+                    allOf(withId(R.id.confirm_button), withText("Confirm"), isDisplayed()));
             appCompatButton.perform(click());
         }
         Thread.sleep(200);
