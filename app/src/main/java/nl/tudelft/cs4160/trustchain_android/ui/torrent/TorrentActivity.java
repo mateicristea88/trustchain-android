@@ -112,6 +112,8 @@ public class TorrentActivity extends AppCompatActivity {
             intent1.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivity(intent1);
         });
+
+        setViewState(ViewState.IDLE);
     }
 
     @Override
@@ -186,9 +188,7 @@ public class TorrentActivity extends AppCompatActivity {
                     progressText.setText(percentage + "%");
                     pieceSizeText.setText("Piece Size: " + pieceLength + " B");
                     piecesText.setText(downloadedPieces + "/" + numPieces);
-                    downloadProgressBar.setVisibility(View.VISIBLE);
                     downloadProgressBar.setProgress(percentage);
-                    downloadProgressInfo.setVisibility(View.VISIBLE);
                 });
             }
 
@@ -211,6 +211,7 @@ public class TorrentActivity extends AppCompatActivity {
             public void onMetadataFailed(TorrentHandle torrentHandle, TorrentSessionStatus torrentSessionStatus) {
                 Log.d("TorrentActivity", "onMetadataFailed");
                 Toast.makeText(getApplicationContext(), "Fetching metadata failed", Toast.LENGTH_SHORT).show();
+                setViewState(ViewState.IDLE);
             }
 
             @Override
@@ -258,9 +259,7 @@ public class TorrentActivity extends AppCompatActivity {
             }
         });
 
-        metadataProgressBar.setVisibility(View.VISIBLE);
-        downloadProgressInfo.setVisibility(View.GONE);
-        downloadProgressBar.setVisibility(View.GONE);
+        setViewState(ViewState.DOWNLOADING_METADATA);
 
         Uri torrentUri = Uri.parse(link);
 
@@ -270,8 +269,34 @@ public class TorrentActivity extends AppCompatActivity {
     }
 
     private void showMetadata(FileStorage files) {
-        metadataProgressBar.setVisibility(View.GONE);
+        setViewState(ViewState.DOWNLOADING_TORRENT);
         adapter.setFileStorage(files);
         adapter.notifyDataSetChanged();
+    }
+
+    private void setViewState(ViewState viewState) {
+        switch (viewState) {
+            case IDLE:
+                metadataProgressBar.setVisibility(View.GONE);
+                downloadProgressBar.setVisibility(View.GONE);
+                downloadProgressInfo.setVisibility(View.GONE);
+                break;
+            case DOWNLOADING_METADATA:
+                metadataProgressBar.setVisibility(View.VISIBLE);
+                downloadProgressBar.setVisibility(View.GONE);
+                downloadProgressInfo.setVisibility(View.GONE);
+                break;
+            case DOWNLOADING_TORRENT:
+                metadataProgressBar.setVisibility(View.GONE);
+                downloadProgressBar.setVisibility(View.VISIBLE);
+                downloadProgressInfo.setVisibility(View.VISIBLE);
+                break;
+        }
+    }
+
+    private enum ViewState {
+        IDLE,
+        DOWNLOADING_METADATA,
+        DOWNLOADING_TORRENT
     }
 }
