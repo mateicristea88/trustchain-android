@@ -11,7 +11,7 @@
 
         <EditText
             android:id="@+id/magnet_link"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Magnet Link" />
 
@@ -23,12 +23,6 @@
             android:text="Download" />
 
         <ProgressBar
-            android:id="@+id/metadata_progress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone" />
-
-        <ProgressBar
             android:id="@+id/download_progress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -37,6 +31,7 @@
             style="@style/Widget.AppCompat.ProgressBar.Horizontal" />
 
         <LinearLayout
+            android:id="@+id/download_progress_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
@@ -60,6 +55,24 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
         </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/metadata_progress"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Fetching metadata..." />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView

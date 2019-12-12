@@ -8,13 +8,18 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.PersistableBundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
@@ -53,17 +58,20 @@ import nl.tudelft.cs4160.trustchain_android.R;
 public class TorrentActivity extends AppCompatActivity {
     private Handler uiHandler;
 
-    private ProgressBar metadataProgressBar;
+    private View metadataProgressBar;
     private ProgressBar downloadProgressBar;
     private EditText magnetLinkField;
     private Button downloadButton;
     private TextView progressText;
     private TextView piecesText;
     private TextView pieceSizeText;
+    private View downloadProgressInfo;
     private RecyclerView recyclerView;
 
     private File downloadLocation;
     private TorrentFilesAdapter adapter = new TorrentFilesAdapter();
+
+    private TorrentSession torrentSession;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -78,17 +86,16 @@ public class TorrentActivity extends AppCompatActivity {
         progressText = findViewById(R.id.txt_progress);
         piecesText = findViewById(R.id.txt_pieces);
         pieceSizeText = findViewById(R.id.txt_piece_size);
+        downloadProgressInfo = findViewById(R.id.download_progress_info);
         recyclerView = findViewById(R.id.recycler_view);
 
         uiHandler = new Handler();
-        downloadLocation = getFilesDir();
+        downloadLocation = new File(getFilesDir(), "torrents");
+        downloadLocation.mkdirs();
 
         Intent intent = getIntent();
         if (intent != null && intent.getData() != null) {
             magnetLinkField.setText(intent.getData().toString());
-        } else {
-            String sampleMagnetLink = "magnet:?xt=urn:btih:aaa24996c7fce10a3a9fe8808047bffc3cdec161&dn=Kanye+West+-+JESUS+IS+KING+%282019%29+Mp3+%28320kbps%29+%5BHunter%5D+&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Fopen.demonii.com%3A1337&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Fexodus.desync.com%3A6969";
-            magnetLinkField.setText(sampleMagnetLink);
         }
 
         downloadButton.setOnClickListener(v -> startTorrentDownload(magnetLinkField.getText().toString()));
@@ -107,14 +114,59 @@ public class TorrentActivity extends AppCompatActivity {
         });
     }
 
-    private void startTorrentDownload(String link) {
-        metadataProgressBar.setVisibility(View.VISIBLE);
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_torrent, menu);
+        return true;
+    }
 
-        Uri torrentUri = Uri.parse(link);
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.clear_torrents:
+                deleteRecursively(downloadLocation);
+                Toast.makeText(getApplicationContext(), "Torrents cleared", Toast.LENGTH_SHORT).show();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void deleteRecursively(File file) {
+        if (file.isDirectory()) {
+            File[] children = file.listFiles();
+            if (children != null) {
+                for (File child : children) {
+                    deleteRecursively(child);
+                }
+            }
+        }
+        file.delete();
+    }
+
+    @Override
+    protected void onDestroy() {
+        stopTorrentSession();
+        super.onDestroy();
+    }
+
+    private void stopTorrentSession() {
+        if (torrentSession != null) {
+            torrentSession.stop();
+            torrentSession = null;
+        }
+    }
+
+    private void startTorrentDownload(String link) {
+        if (link.isEmpty()) {
+            Toast.makeText(getApplicationContext(), "Magnet link is empty", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        stopTorrentSession();
 
         TorrentSessionOptions torrentSessionOptions = new TorrentSessionOptions(downloadLocation);
-
-        TorrentSession torrentSession = new TorrentSession(torrentSessionOptions);
+        torrentSession = new TorrentSession(torrentSessionOptions);
 
         torrentSession.setListener(new TorrentSessionListener() {
             @Override
@@ -136,6 +188,7 @@ public class TorrentActivity extends AppCompatActivity {
                     piecesText.setText(downloadedPieces + "/" + numPieces);
                     downloadProgressBar.setVisibility(View.VISIBLE);
                     downloadProgressBar.setProgress(percentage);
+                    downloadProgressInfo.setVisibility(View.VISIBLE);
                 });
             }
 
@@ -151,12 +204,13 @@ public class TorrentActivity extends AppCompatActivity {
 
             @Override
             public void onTorrentFinished(TorrentHandle torrentHandle, TorrentSessionStatus torrentSessionStatus) {
-
+                Log.d("TorrentActivity", "onTorrentFinished");
             }
 
             @Override
             public void onMetadataFailed(TorrentHandle torrentHandle, TorrentSessionStatus torrentSessionStatus) {
                 Log.d("TorrentActivity", "onMetadataFailed");
+                Toast.makeText(getApplicationContext(), "Fetching metadata failed", Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -203,6 +257,12 @@ public class TorrentActivity extends AppCompatActivity {
 
             }
         });
+
+        metadataProgressBar.setVisibility(View.VISIBLE);
+        downloadProgressInfo.setVisibility(View.GONE);
+        downloadProgressBar.setVisibility(View.GONE);
+
+        Uri torrentUri = Uri.parse(link);
 
         AsyncTask.execute(() -> {
             torrentSession.start(getApplicationContext(), torrentUri); // Invoke on background thread.
