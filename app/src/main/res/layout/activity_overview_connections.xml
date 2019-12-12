@@ -34,7 +34,7 @@
                     android:id="@+id/local_ip_address_view"
                     android:layout_weight="1"
                     android:width="0dp"
-                    android:text="@string/ip" />
+                    android:text="@string/unknown" />
             </TableRow>
 
             <TableRow>

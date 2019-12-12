@@ -168,11 +168,6 @@ public class StressTestPeer implements PeerListener, NetworkStatusListener {
         Log.d(TAG, "Send thread started");
     }
 
-    @Override
-    public void updatePeerLists() {
-
-    }
-
     /**
      * Start the listen thread. The thread opens a new {@link DatagramChannel} and calls {@link Network#dataReceived(Context, ByteBuffer,
      * InetSocketAddress)} for each incoming datagram.
