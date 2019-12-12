@@ -66,7 +66,9 @@ public class NetworkConnectionService extends Service {
     @Inject
     BlockRepository blockRepository;
 
-    private Network network;
+    @Inject
+    Network network;
+
     private PeerHandler peerHandler;
     private boolean networkRunning = true;
 
@@ -148,7 +150,6 @@ public class NetworkConnectionService extends Service {
                 UserNameStorage.getUserName(this));
         peerHandler.setPeerListener(peerListener);
 
-        network = Network.getInstance(getApplicationContext());
         network.getMessageHandler().setPeerHandler(peerHandler);
         network.setNetworkStatusListener(networkStatusListener);
 

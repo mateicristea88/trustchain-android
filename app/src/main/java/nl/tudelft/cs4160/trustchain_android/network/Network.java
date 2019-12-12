@@ -20,6 +20,9 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
@@ -35,13 +38,13 @@ import nl.tudelft.cs4160.trustchain_android.statistics.StatisticsServer;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.PubKeyAndAddressPairStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
 
+@Singleton
 public class Network {
     private final String TAG = this.getClass().getName();
     private DatagramChannel channel;
     public String name;
     private int connectionType;
     private InetSocketAddress internalSourceAddress;
-    private static Network network;
     private BlockRepository blockRepository;
     private PeerRepository peerRepository;
     private PublicKeyPair publicKey;
@@ -61,7 +64,11 @@ public class Network {
     /**
      * Empty constructor
      */
-    private Network() {
+    @Inject
+    public Network(Context context, BlockRepository blockRepository, PeerRepository peerRepository) {
+        this.blockRepository = blockRepository;
+        this.peerRepository = peerRepository;
+        initVariables(context, true);
     }
 
     /**
@@ -72,26 +79,11 @@ public class Network {
      * @param context
      * @param port
      */
-    public Network(String username, PublicKeyPair publicKey, Context context, int port) {
+    public Network(Context context, BlockRepository blockRepository, PeerRepository peerRepository, String username, PublicKeyPair publicKey, int port) {
         this.name = username;
         this.publicKey = publicKey;
         this.port = port;
         initVariables(context, false);
-    }
-
-
-    /**
-     * Get the network instance.
-     * If the network isn't initialized create a network and set the variables.
-     * @param context
-     * @return
-     */
-    public synchronized static Network getInstance(Context context) {
-        if (network == null) {
-            network = new Network();
-            network.initVariables(context, true);
-        }
-        return network;
     }
 
     /**
@@ -119,9 +111,6 @@ public class Network {
         this.statistics = StatisticsServer.getInstance();
         if (name == null) name = UserNameStorage.getUserName(context);
         if (publicKey == null) publicKey = Key.loadKeys(context).getPublicKeyPair();
-        AppDatabase database = AppDatabase.getInstance(context);
-        blockRepository = new BlockRepository(database.blockDao());
-        peerRepository = new PeerRepository(database.peerDao());
         messageHandler = new MessageHandler(this,
                 dbAccess ? blockRepository : null,
                 new PeerHandler(publicKey,name));

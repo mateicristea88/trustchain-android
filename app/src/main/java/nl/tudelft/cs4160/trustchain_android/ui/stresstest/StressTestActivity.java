@@ -16,14 +16,28 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import nl.tudelft.cs4160.trustchain_android.R;
+import nl.tudelft.cs4160.trustchain_android.TrustchainApplication;
 import nl.tudelft.cs4160.trustchain_android.network.Network;
 import nl.tudelft.cs4160.trustchain_android.network.NetworkConnectionService;
 import nl.tudelft.cs4160.trustchain_android.statistics.StatisticsServer;
+import nl.tudelft.cs4160.trustchain_android.storage.repository.BlockRepository;
+import nl.tudelft.cs4160.trustchain_android.storage.repository.PeerRepository;
 import nl.tudelft.cs4160.trustchain_android.stresstest.StressTestPeer;
 import nl.tudelft.cs4160.trustchain_android.util.Util;
 
 public class StressTestActivity extends AppCompatActivity {
+
+    @Inject
+    Network network;
+
+    @Inject
+    BlockRepository blockRepository;
+
+    @Inject
+    PeerRepository peerRepository;
 
     private EditText nodesToStart;
     private Button startStressTestButton;
@@ -62,7 +76,8 @@ public class StressTestActivity extends AppCompatActivity {
         public void run() {
             StatisticsServer stats = StatisticsServer.getInstance();
             runOnUiThread(() -> {
-                long runtime = System.currentTimeMillis() - StatisticsServer.startTime.get(Network.getInstance(getApplicationContext()).getStatusListener());
+                long startTime = StatisticsServer.startTime.get(network.getStatusListener());
+                long runtime = System.currentTimeMillis() - startTime;
                 uptime.setText(Util.timeToString(runtime));
                 messagesSent.setText(String.valueOf(stats.messagesSent.values().stream().mapToInt((i) -> i).sum()));
                 messagesReceived.setText(String.valueOf(stats.messagesReceived.values().stream().mapToInt((i) -> i).sum()));
@@ -85,6 +100,7 @@ public class StressTestActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ((TrustchainApplication) getApplicationContext()).appComponent.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stress_test);
         nodes = new ArrayList<>();
@@ -176,7 +192,7 @@ public class StressTestActivity extends AppCompatActivity {
     public void startStressTest(int amount) {
         for (int i = 0; i < amount; i++) {
             port += 5;
-            StressTestPeer node = new StressTestPeer(this, port);
+            StressTestPeer node = new StressTestPeer(this, blockRepository, peerRepository, port);
             nodes.add(node);
             node.startNode();
             if (nodes.size() == 1) {

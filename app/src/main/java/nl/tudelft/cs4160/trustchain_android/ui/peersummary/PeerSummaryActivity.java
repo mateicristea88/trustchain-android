@@ -37,7 +37,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
+import javax.inject.Inject;
+
 import nl.tudelft.cs4160.trustchain_android.R;
+import nl.tudelft.cs4160.trustchain_android.TrustchainApplication;
 import nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper;
 import nl.tudelft.cs4160.trustchain_android.block.ValidationResult;
 import nl.tudelft.cs4160.trustchain_android.storage.database.AppDatabase;
@@ -64,13 +67,18 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
     private final static String TAG = PeerSummaryActivity.class.toString();
     private static final int REQUEST_STORAGE_PERMISSIONS = 1;
     private static final int MAX_ATTACHMENT_SIZE = 61440; //Max file attachment size in bytes, set to 60kbytes leaving 5kb for other block data, as the max message size in UDP is 64KB
+
+    @Inject
+    Network network;
+
+    @Inject
+    BlockRepository blockRepository;
+
     private RecyclerView mRecyclerView;
     private MutualBlockAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
-    private Network network;
     private InboxItem inboxItemOtherPeer;
-    private BlockRepository blockRepository;
-    TextView statusText;
+
     EditText messageEditText;
     DualSecret kp;
 
@@ -81,6 +89,7 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ((TrustchainApplication) getApplicationContext()).appComponent.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_peer_overview);
         blockRepository = new BlockRepository(AppDatabase.getInstance(getApplicationContext()).blockDao());
@@ -141,8 +150,6 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
         selectedFilePath = findViewById(R.id.selected_path);
         sendButton = findViewById(R.id.send_button);
         sendOffline = findViewById(R.id.send_offline_checkbox);
-
-        network = Network.getInstance(getApplicationContext());
     }
 
     /**
@@ -163,7 +170,6 @@ public class PeerSummaryActivity extends AppCompatActivity implements CrawlReque
      * If this peer receives the crawl request the peer will send his/her chain of blocks back.
      */
     public void requestChain() {
-        network = Network.getInstance(getApplicationContext());
         network.setMutualBlockListener(this);
 
         int sq ;
