@@ -59,7 +59,8 @@ public class StressTestPeer implements PeerListener, NetworkStatusListener {
         StatisticsServer.getInstance().start(this);
 
         Runnable refreshTask = () -> {
-            while(true) {
+            while (true) {
+                // TODO: stop this task in stopNode
                 peerHandler.removeDeadPeers();
                 peerHandler.splitPeerList();
                 try {
