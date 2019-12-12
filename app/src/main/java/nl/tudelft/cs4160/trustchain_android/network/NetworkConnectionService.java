@@ -69,7 +69,6 @@ public class NetworkConnectionService extends Service {
     private Network network;
     private PeerHandler peerHandler;
     private boolean networkRunning = true;
-    private String wan = "";
 
     private Handler uiHandler;
     private boolean isBound;
@@ -82,20 +81,6 @@ public class NetworkConnectionService extends Service {
         }
 
         /**
-         * Update the showed inboxItem lists.
-         * First split into new peers and the active list
-         * Then remove the peers that aren't responding for a long time.
-         */
-        @Override
-        public void updatePeerLists() {
-            Log.d(TAG, "updatePeerList");
-            peerHandler.removeDeadPeers();
-            peerHandler.splitPeerList();
-            notifyListeners(listener -> listener.updatePeerLists(
-                    peerHandler.getActivePeersList(), peerHandler.getNewPeersList()));
-        }
-
-        /**
          * Update wan address
          * @param message a message that was received, the destination is our wan address
          */
@@ -105,13 +90,11 @@ public class NetworkConnectionService extends Service {
             int port = message.getDestinationPort();
             InetSocketAddress socketAddress = new InetSocketAddress(addr, port);
 
-            if (peerHandler.getWanVote().vote(socketAddress)) {
-                wan = peerHandler.getWanVote().getAddress().toString();
+            peerHandler.getWanVote().vote(socketAddress);
+            String wan = peerHandler.getWanVote().getAddress().toString();
+            String address = wan.replace("/","");
 
-                String address = wan.replace("/","");
-
-                notifyListeners(listener -> listener.updateWan(address));
-            }
+            notifyListeners(listener -> listener.updateWan(address));
         }
 
         @Override

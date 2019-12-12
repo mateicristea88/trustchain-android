@@ -47,6 +47,7 @@ dependencies {
     def dagger_version = "2.24"
 
     implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation project(':simpletorrentandroid')
 
     // AndroidX
     implementation 'androidx.appcompat:appcompat:1.1.0'

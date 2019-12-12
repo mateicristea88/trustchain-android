@@ -3,6 +3,7 @@ package nl.tudelft.cs4160.trustchain_android.ui.chainexplorer;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +24,7 @@ import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.storage.repository.PeerRepository;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
+import nl.tudelft.cs4160.trustchain_android.ui.torrent.TorrentActivity;
 import nl.tudelft.cs4160.trustchain_android.util.ByteArrayConverter;
 import nl.tudelft.cs4160.trustchain_android.util.OpenFileClickListener;
 
@@ -143,6 +145,7 @@ public class ChainExplorerAdapter extends BaseAdapter {
 
         signature.setText(ByteArrayConverter.bytesToHexString(block.getSignature().toByteArray()));
 
+        expTransaction.setOnClickListener(null);
         if (TrustChainBlockHelper.containsBinaryFile(block)) {
             // If the block contains a file show the 'click to open' text
             transaction.setText(context.getString(R.string.click_to_open_file, block.getTransaction().getFormat()));
@@ -150,6 +153,15 @@ public class ChainExplorerAdapter extends BaseAdapter {
 
             expTransaction.setText(context.getString(R.string.click_to_open_file, block.getTransaction().getFormat()));
             setOpenFileClickListener(expTransaction, block);
+        } else if (TrustChainBlockHelper.containsMagnetLink(block)) {
+            String link = block.getTransaction().getUnformatted().toStringUtf8();
+            transaction.setText(link);
+            expTransaction.setText(link);
+            expTransaction.setOnClickListener(v -> {
+                Intent intent = new Intent(context, TorrentActivity.class);
+                intent.setData(Uri.parse(link));
+                context.startActivity(intent);
+            });
         } else {
             transaction.setText(block.getTransaction().getUnformatted().toStringUtf8());
             expTransaction.setText(block.getTransaction().getUnformatted().toStringUtf8());

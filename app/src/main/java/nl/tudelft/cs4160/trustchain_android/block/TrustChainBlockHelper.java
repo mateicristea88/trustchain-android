@@ -1,5 +1,7 @@
 package nl.tudelft.cs4160.trustchain_android.block;
 
+import android.text.TextUtils;
+
 import com.google.protobuf.ByteString;
 
 import org.libsodium.jni.Sodium;
@@ -425,6 +427,11 @@ public class TrustChainBlockHelper {
         return block.getTransaction().getFormat() != null
                 && !block.getTransaction().getFormat().equals("");
 //              && !block.getTransaction().getFormat().equals("txt"));
+    }
+
+    public static boolean containsMagnetLink(MessageProto.TrustChainBlock block) {
+        return TextUtils.isEmpty(block.getTransaction().getFormat()) &&
+                block.getTransaction().getUnformatted().toStringUtf8().startsWith("magnet:");
     }
 
 }
