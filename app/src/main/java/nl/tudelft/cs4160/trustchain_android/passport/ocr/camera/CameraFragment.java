@@ -222,7 +222,7 @@ public class CameraFragment extends Fragment {
         } else {
             mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
         }
-        startOCRThreads();
+        scanSegment.post(this::startOCRThreads);
     }
 
     @Override
