@@ -214,10 +214,7 @@ public class NetworkConnectionService extends Service {
      * If no blocks are present in the database, a genesis block is created.
      */
     private void initKey() {
-        DualSecret kp = Key.loadKeys(getApplicationContext());
-        if (kp == null) {
-            kp = Key.createAndSaveKeys(getApplicationContext());
-        }
+        DualSecret kp = Key.ensureKeysExist(getApplicationContext());
         int blockCount = blockRepository.getBlockCount();
         if (blockCount == 0) {
             MessageProto.TrustChainBlock block = TrustChainBlockHelper.createGenesisBlock(kp);

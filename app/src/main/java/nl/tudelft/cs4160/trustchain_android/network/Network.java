@@ -110,7 +110,7 @@ public class Network {
     private void initVariables(Context context, boolean dbAccess) {
         this.statistics = StatisticsServer.getInstance();
         if (name == null) name = UserNameStorage.getUserName(context);
-        if (publicKey == null) publicKey = Key.loadKeys(context).getPublicKeyPair();
+        if (publicKey == null) publicKey = Key.ensureKeysExist(context).getPublicKeyPair();
         messageHandler = new MessageHandler(this,
                 dbAccess ? blockRepository : null,
                 new PeerHandler(publicKey,name));
