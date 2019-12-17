@@ -3,7 +3,6 @@ package nl.tudelft.cs4160.trustchain_android.passport.ocr.camera;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Fragment;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -17,6 +16,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+
 import android.util.Log;
 import android.util.Size;
 import android.view.LayoutInflater;
