@@ -38,7 +38,7 @@ android:
 
 
 script:
-  - ./gradlew clean test build
+  - ./gradlew clean test buildDebug
   - ./gradlew jacocoTestReport
 #  - ./gradlew connectedAndroidTest
 
