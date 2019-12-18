@@ -139,11 +139,9 @@ public class Key {
      * @return A KeyPair with the private and public key.
      */
     public static DualSecret loadKeys(Context context) {
-        try {
-            PrivateKey privateKey = Key.loadPrivateKey(context, Key.DEFAULT_PRIVATE_KEY_FILE);
-            SigningKey signingKey = Key.loadSigningKey(context, Key.DEFAULT_SIGN_KEY_FILE);
-            return new DualSecret(privateKey.toBytes(), signingKey.toBytes());
-        } catch (Throwable t) { return null; }
+        PrivateKey privateKey = Key.loadPrivateKey(context, Key.DEFAULT_PRIVATE_KEY_FILE);
+        SigningKey signingKey = Key.loadSigningKey(context, Key.DEFAULT_SIGN_KEY_FILE);
+        return new DualSecret(privateKey.toBytes(), signingKey.toBytes());
     }
 
     /**

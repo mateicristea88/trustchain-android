@@ -1,8 +1,9 @@
 package nl.tudelft.cs4160.trustchain_android.block;
 
 
-import android.support.test.runner.AndroidJUnit4;
 import android.test.ActivityUnitTestCase;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
@@ -12,40 +13,37 @@ import org.libsodium.jni.NaCl;
 
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
-import nl.tudelft.cs4160.trustchain_android.main.OverviewConnectionsActivity;
+import nl.tudelft.cs4160.trustchain_android.storage.repository.BlockRepository;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
-import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 import nl.tudelft.cs4160.trustchain_android.util.ByteArrayConverter;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.validateMockitoUsage;
-import static org.mockito.Mockito.when;
 
 /**
  * Created by Boning on 12/17/2017.
  */
 @RunWith(AndroidJUnit4.class)
-public class TrustChainBlockTest extends ActivityUnitTestCase<OverviewConnectionsActivity> {
-    public TrustChainBlockTest() {
-        super(OverviewConnectionsActivity.class);
-    }
-
+public class TrustChainBlockTest {
     private DualSecret keyPair;
     private DualSecret keyPair2;
     private byte[] transaction = new byte[2];
     private byte[] pubKey;
     private byte[] linkKey = new byte[2];
     private MessageProto.TrustChainBlock genesisBlock;
-    private TrustChainDBHelper dbHelper;
+    private BlockRepository blockRepository;
 
     @Before
     public void initialization() {
         NaCl.sodium();
         keyPair = Key.createNewKeyPair();
         keyPair2 = Key.createNewKeyPair();
-        dbHelper = mock(TrustChainDBHelper.class);
-        when(dbHelper.getMaxSeqNum(keyPair.getPublicKeyPair().toBytes())).thenReturn(2);
+        blockRepository = mock(BlockRepository.class);
+        //when(blockRepository.getMaxSeqNum(keyPair.getPublicKeyPair().toBytes())).thenReturn(2);
         transaction[0] = 12;
         transaction[1] = 42;
         pubKey = keyPair.getPublicKeyPair().toBytes();
@@ -63,27 +61,27 @@ public class TrustChainBlockTest extends ActivityUnitTestCase<OverviewConnection
 
     @Test
     public void testGetSequenceNumberGenesisBlockTest() {
-        MessageProto.TrustChainBlock block = TrustChainBlockHelper.createBlock(transaction, null, dbHelper, pubKey, genesisBlock, linkKey);
+        MessageProto.TrustChainBlock block = TrustChainBlockHelper.createBlock(transaction, null, blockRepository, pubKey, genesisBlock, linkKey);
         assertEquals(0, block.getSequenceNumber());
     }
 
     @Test
     public void testPublicKeyBlockTest() {
-        MessageProto.TrustChainBlock block = TrustChainBlockHelper.createBlock(transaction, null, dbHelper, pubKey, genesisBlock, linkKey);
+        MessageProto.TrustChainBlock block = TrustChainBlockHelper.createBlock(transaction, null, blockRepository, pubKey, genesisBlock, linkKey);
         assertEquals(ByteArrayConverter.bytesToHexString(pubKey),
                 ByteArrayConverter.bytesToHexString(block.getPublicKey().toByteArray()));
     }
 
     @Test
     public void testLinkPublicKeyBlockTest() {
-        MessageProto.TrustChainBlock block = TrustChainBlockHelper.createBlock(transaction, null, dbHelper, pubKey, genesisBlock, linkKey);
+        MessageProto.TrustChainBlock block = TrustChainBlockHelper.createBlock(transaction, null, blockRepository, pubKey, genesisBlock, linkKey);
         assertEquals(ByteArrayConverter.bytesToHexString(keyPair.getPublicKeyPair().toBytes()),
                 ByteArrayConverter.bytesToHexString(block.getLinkPublicKey().toByteArray()));
     }
 
     @Test
     public void testGetSequenceNumberBlockTest() {
-        MessageProto.TrustChainBlock block = TrustChainBlockHelper.createBlock(transaction, null, dbHelper, pubKey, genesisBlock, linkKey);
+        MessageProto.TrustChainBlock block = TrustChainBlockHelper.createBlock(transaction, null, blockRepository, pubKey, genesisBlock, linkKey);
         assertEquals(0, block.getSequenceNumber());
     }
 

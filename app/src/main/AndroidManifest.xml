@@ -12,6 +12,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.NFC" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <uses-feature
         android:name="android.hardware.nfc"
@@ -25,18 +26,20 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+        android:name=".TrustchainApplication"
         tools:replace="android:allowBackup">
         <activity
-            android:name=".peersummary.PeerSummaryActivity"
+            android:name=".ui.peersummary.PeerSummaryActivity"
             android:configChanges="orientation|screenLayout|screenSize"
             android:windowSoftInputMode="stateUnchanged" />
-        <activity android:name=".chainExplorer.ChainExplorerActivity" />
-        <activity android:name=".main.ConnectionExplanationActivity" />
+        <activity android:name=".ui.chainexplorer.ChainExplorerActivity" />
+        <activity android:name=".ui.connectionexplanation.ConnectionExplanationActivity" />
         <activity
-            android:name=".main.OverviewConnectionsActivity"
-            android:configChanges="orientation|screenLayout|screenSize" />
+            android:name=".ui.main.OverviewConnectionsActivity"
+            android:configChanges="orientation|screenLayout|screenSize"
+            android:launchMode="singleInstance"/>
         <activity
-            android:name=".main.UserConfigurationActivity"
+            android:name=".ui.userconfiguration.UserConfigurationActivity"
             android:label="@string/app_name"
             android:noHistory="true"
             android:windowSoftInputMode="adjustResize">
@@ -51,12 +54,13 @@
         <activity android:name=".funds.qr.ExportWalletQRActivity" />
         <activity android:name=".funds.FundsActivity" />
         <activity
-            android:name=".chainExplorer.ChainExplorerInfoActivity"
+            android:name=".ui.chainexplorer.ChainExplorerInfoActivity"
             android:label="@string/title_activity_info_chain_explorer" />
         <activity
-            android:name=".main.ChangeBootstrapActivity"
+            android:name=".ui.changebootstrap.ChangeBootstrapActivity"
             android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".inbox.InboxActivity" />
+        <activity android:name=".ui.inbox.InboxActivity"
+            android:label="@string/inbox" />
         <activity
             android:name=".offline.SendOfflineActivity"
             android:label="@string/title_activity_send_offline"></activity>
@@ -76,8 +80,23 @@
         <activity android:name=".passport.ocr.ManualInputActivity" />
         <activity android:name=".passport.nfc.PassportConActivity" />
         <activity android:name=".offline.ScanQRActivity" />
+        <activity android:name=".ui.torrent.TorrentActivity"
+            android:label="@string/menu_download_torrent"
+            android:parentActivityName=".ui.main.OverviewConnectionsActivity" />
         <activity
-            android:name=".stresstest.StressTestActivity"
+            android:name=".ui.stresstest.StressTestActivity"
             android:keepScreenOn="true" />
+
+        <service android:name=".network.NetworkConnectionService" />
+        <receiver android:name=".network.CancelNetworkConnectionReceiver" />
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths"/>
+        </provider>
     </application>
 </manifest>

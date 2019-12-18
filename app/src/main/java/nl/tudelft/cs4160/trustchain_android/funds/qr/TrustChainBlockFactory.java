@@ -18,13 +18,13 @@ import nl.tudelft.cs4160.trustchain_android.funds.qr.models.QRTransaction;
 import nl.tudelft.cs4160.trustchain_android.funds.qr.models.QRWallet;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto.TrustChainBlock.Transaction;
-import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
+import nl.tudelft.cs4160.trustchain_android.storage.repository.BlockRepository;
 
 public class TrustChainBlockFactory {
     Moshi moshi = new Moshi.Builder().build();
     JsonAdapter<QRTransaction> transactionAdapter = moshi.adapter(QRTransaction.class);
 
-    public MessageProto.TrustChainBlock createBlock(QRWallet wallet, TrustChainDBHelper helper, DualSecret ownKeyPair) throws QRWalletImportException {
+    public MessageProto.TrustChainBlock createBlock(QRWallet wallet, BlockRepository blockRepository, DualSecret ownKeyPair) throws QRWalletImportException {
         byte[] myPublicKey = ownKeyPair.getPublicKeyPair().toBytes();
 
         // Similar to tribler logic.
@@ -38,7 +38,7 @@ public class TrustChainBlockFactory {
 
         QRTransaction tx;
         try {
-            ByteString tx_data = helper.getLatestBlock(myPublicKey).getTransaction().getUnformatted();
+            ByteString tx_data = blockRepository.getLatestBlock(myPublicKey).getTransaction().getUnformatted();
             String tx_string = tx_data.toStringUtf8();
             tx = transactionAdapter.fromJson( tx_string);
 
@@ -54,7 +54,7 @@ public class TrustChainBlockFactory {
 
         MessageProto.TrustChainBlock identityHalfBlock = reconstructTemporaryIdentityHalfBlock(wallet);
 
-        MessageProto.TrustChainBlock block = TrustChainBlockHelper.createBlock(transactionString.getBytes(), null, helper, myPublicKey, identityHalfBlock, walletKeyPair.getPublicKeyPair().toBytes());
+        MessageProto.TrustChainBlock block = TrustChainBlockHelper.createBlock(transactionString.getBytes(), null, blockRepository, myPublicKey, identityHalfBlock, walletKeyPair.getPublicKeyPair().toBytes());
 
         block = TrustChainBlockHelper.sign(block, ownKeyPair.getSigningKey());
 

@@ -66,6 +66,7 @@
     <string name="menu_funds">Funds</string>
     <string name="menu_transactions">Transactions</string>
     <string name="menu_scan_passport">Scan Passport</string>
+    <string name="menu_download_torrent">Download Torrent</string>
     <string name="menu_stress_test">Stats / Stress Test</string>
 
     <!--- app to app strings -->
@@ -115,7 +116,8 @@
 
     <!--- inbox -->
     <string name="new_user">+ Find new users</string>
-    <string name="inbox">Open Inbox</string>
+    <string name="open_inbox">Open Inbox</string>
+    <string name="inbox">Inbox</string>
 
     <!-- OCR Scanning -->
     <string name="ocr_switch_to_manual">Manual Input</string>

@@ -1,6 +1,6 @@
 package nl.tudelft.cs4160.trustchain_android.util;
 
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import junit.framework.Assert;
 

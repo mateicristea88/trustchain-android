@@ -13,7 +13,8 @@ import java.util.concurrent.TimeUnit;
 
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
-import nl.tudelft.cs4160.trustchain_android.main.OverviewConnectionsActivity;
+import nl.tudelft.cs4160.trustchain_android.network.NetworkConnectionService;
+import nl.tudelft.cs4160.trustchain_android.ui.main.OverviewConnectionsActivity;
 
 public class PeerTest extends TestCase {
     String id1;
@@ -108,7 +109,7 @@ public class PeerTest extends TestCase {
 
     @Test
     public void testIsBootstrap() {
-        Peer bootstrap = new Peer(new InetSocketAddress(OverviewConnectionsActivity.CONNECTABLE_ADDRESS,OverviewConnectionsActivity.DEFAULT_PORT), null, null);
+        Peer bootstrap = new Peer(new InetSocketAddress(NetworkConnectionService.CONNECTABLE_ADDRESS,NetworkConnectionService.DEFAULT_PORT), null, null);
         assertTrue(bootstrap.isBootstrap());
     }
 }

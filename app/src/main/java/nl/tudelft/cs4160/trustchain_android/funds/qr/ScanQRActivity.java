@@ -6,12 +6,13 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Vibrator;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import android.util.Log;
 
 import com.google.zxing.Result;
@@ -30,7 +31,8 @@ import nl.tudelft.cs4160.trustchain_android.funds.qr.exception.QRWalletValidatio
 import nl.tudelft.cs4160.trustchain_android.funds.qr.models.QRTransaction;
 import nl.tudelft.cs4160.trustchain_android.funds.qr.models.QRWallet;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
-import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
+import nl.tudelft.cs4160.trustchain_android.storage.database.AppDatabase;
+import nl.tudelft.cs4160.trustchain_android.storage.repository.BlockRepository;
 import nl.tudelft.cs4160.trustchain_android.util.Util;
 
 
@@ -156,15 +158,15 @@ public class ScanQRActivity extends AppCompatActivity {
         }
 
         DualSecret ownKeyPair = Key.loadKeys(this);
-        TrustChainDBHelper helper = new TrustChainDBHelper(this);
-        MessageProto.TrustChainBlock block = trustChainQRBlockFactory.createBlock(wallet, helper, ownKeyPair);
+        BlockRepository blockRepository = new BlockRepository(AppDatabase.getInstance(this).blockDao());
+        MessageProto.TrustChainBlock block = trustChainQRBlockFactory.createBlock(wallet, blockRepository, ownKeyPair);
 
         try {
 //            TrustChainBlock.validate(block, helper);
             MessageProto.TrustChainBlock halfblock = trustChainQRBlockFactory.reconstructTemporaryIdentityHalfBlock(wallet);
 
-            helper.insertInDB(halfblock);
-            helper.insertInDB(block);
+            blockRepository.insertOrUpdate(halfblock);
+            blockRepository.insertOrUpdate(block);
         } catch (Exception e) {
             throw new QRWalletValidationException(e);
         }

@@ -15,15 +15,16 @@ package nl.tudelft.cs4160.trustchain_android.passport.ocr.camera;/*
  */
 
 
-import android.app.Activity;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import nl.tudelft.cs4160.trustchain_android.R;
 
 import static nl.tudelft.cs4160.trustchain_android.passport.ocr.camera.CameraFragment.REQUEST_WRITE_CAMERA_PERMISSIONS;
 
-public class CameraActivity extends Activity {
+public class CameraActivity extends AppCompatActivity {
     private static final String TAG = "CameraActivity";
     private static final String FRAGMENT_TAG = "cameraFragment";
 
@@ -32,7 +33,7 @@ public class CameraActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
         if (null == savedInstanceState) {
-            getFragmentManager().beginTransaction()
+            getSupportFragmentManager().beginTransaction()
                     .replace(R.id.container, CameraFragment.newInstance(), FRAGMENT_TAG)
                     .commit();
         }
@@ -50,7 +51,7 @@ public class CameraActivity extends Activity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
        if (requestCode == REQUEST_WRITE_CAMERA_PERMISSIONS) {
-           ((CameraFragment) getFragmentManager().findFragmentByTag(FRAGMENT_TAG))
+           getSupportFragmentManager().findFragmentByTag(FRAGMENT_TAG)
                    .onRequestPermissionsResult(requestCode, permissions, grantResults);
         } else {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);

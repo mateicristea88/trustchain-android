@@ -20,49 +20,55 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
-import nl.tudelft.cs4160.trustchain_android.inbox.InboxItem;
-import nl.tudelft.cs4160.trustchain_android.main.OverviewConnectionsActivity;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto.Message;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto.TrustChainBlock;
 import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.peer.PeerHandler;
-import nl.tudelft.cs4160.trustchain_android.peersummary.PeerSummaryActivity;
+import nl.tudelft.cs4160.trustchain_android.storage.database.AppDatabase;
+import nl.tudelft.cs4160.trustchain_android.storage.repository.BlockRepository;
+import nl.tudelft.cs4160.trustchain_android.storage.repository.PeerRepository;
+import nl.tudelft.cs4160.trustchain_android.ui.peersummary.PeerSummaryActivity;
 import nl.tudelft.cs4160.trustchain_android.statistics.StatisticsServer;
-import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
-import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.InboxItemStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.PubKeyAndAddressPairStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
 
+@Singleton
 public class Network {
     private final String TAG = this.getClass().getName();
-    private static final int BUFFER_SIZE = 65536;
     private DatagramChannel channel;
     public String name;
     private int connectionType;
     private InetSocketAddress internalSourceAddress;
-    private static Network network;
-    private TrustChainDBHelper dbHelper;
+    private BlockRepository blockRepository;
+    private PeerRepository peerRepository;
     private PublicKeyPair publicKey;
     private MessageHandler messageHandler;
     private NetworkStatusListener networkStatusListener;
-    private int port = OverviewConnectionsActivity.DEFAULT_PORT;
+    private int port = NetworkConnectionService.DEFAULT_PORT;
     private PeerSummaryActivity mutualBlockListener;
     private StatisticsServer statistics;
 
-    public final static int INTRODUCTION_REQUEST_ID = 1;
-    public final static int INTRODUCTION_RESPONSE_ID = 2;
-    public final static int PUNCTURE_REQUEST_ID = 3;
-    public final static int PUNCTURE_ID = 4;
-    public final static int BLOCK_MESSAGE_ID = 5;
-    public final static int CRAWL_REQUEST_ID = 6;
+    private final static int INTRODUCTION_REQUEST_ID = 1;
+    private final static int INTRODUCTION_RESPONSE_ID = 2;
+    private final static int PUNCTURE_REQUEST_ID = 3;
+    private final static int PUNCTURE_ID = 4;
+    private final static int BLOCK_MESSAGE_ID = 5;
+    private final static int CRAWL_REQUEST_ID = 6;
 
     /**
      * Empty constructor
      */
-    private Network() {
+    @Inject
+    public Network(Context context, BlockRepository blockRepository, PeerRepository peerRepository) {
+        this.blockRepository = blockRepository;
+        this.peerRepository = peerRepository;
+        initVariables(context, true);
     }
 
     /**
@@ -73,26 +79,11 @@ public class Network {
      * @param context
      * @param port
      */
-    public Network(String username, PublicKeyPair publicKey, Context context, int port) {
+    public Network(Context context, BlockRepository blockRepository, PeerRepository peerRepository, String username, PublicKeyPair publicKey, int port) {
         this.name = username;
         this.publicKey = publicKey;
         this.port = port;
         initVariables(context, false);
-    }
-
-
-    /**
-     * Get the network instance.
-     * If the network isn't initialized create a network and set the variables.
-     * @param context
-     * @return
-     */
-    public synchronized static Network getInstance(Context context) {
-        if (network == null) {
-            network = new Network();
-            network.initVariables(context, true);
-        }
-        return network;
     }
 
     /**
@@ -119,10 +110,9 @@ public class Network {
     private void initVariables(Context context, boolean dbAccess) {
         this.statistics = StatisticsServer.getInstance();
         if (name == null) name = UserNameStorage.getUserName(context);
-        if (publicKey == null) publicKey = Key.loadKeys(context).getPublicKeyPair();
-        dbHelper = new TrustChainDBHelper(context);
+        if (publicKey == null) publicKey = Key.ensureKeysExist(context).getPublicKeyPair();
         messageHandler = new MessageHandler(this,
-                dbAccess ? dbHelper : null,
+                dbAccess ? blockRepository : null,
                 new PeerHandler(publicKey,name));
         openChannel();
         showLocalIpAddress();
@@ -337,12 +327,11 @@ public class Network {
      * @throws IOException
      */
     private synchronized void sendMessage(Message message, Peer peer) throws IOException {
-        ByteBuffer outputBuffer = ByteBuffer.allocate(BUFFER_SIZE);
-        outputBuffer = outputBuffer.wrap(message.toByteArray());
+        ByteBuffer outputBuffer = ByteBuffer.wrap(message.toByteArray());
         channel.send(outputBuffer, peer.getAddress());
         statistics.bytesSent(networkStatusListener, outputBuffer.position());
         statistics.messageSent(networkStatusListener);
-        Log.i(TAG, "Sending to " + peer.getName() + ":\n" + message);
+        Log.i(TAG, "Sending to " + peer.getAddress() + " (" + peer.getName() + "):\n" + message);
         peer.sentData();
     }
 
@@ -403,7 +392,7 @@ public class Network {
      * @param context context which is used to update the inbox
      * @throws Exception
      */
-    public void handleMessage(Peer peer, Message message, PublicKeyPair pubKeyPair, Context context) throws Exception {
+    private void handleMessage(Peer peer, Message message, PublicKeyPair pubKeyPair, Context context) throws Exception {
         switch (message.getType()) {
             case INTRODUCTION_REQUEST_ID:
                 statistics.introductionRequestReceived(networkStatusListener);
@@ -427,7 +416,6 @@ public class Network {
 
                 // update the inbox
                 addPeerToInbox(pubKeyPair, peer, context);
-                addBlockToInbox(block, context);
 
                 messageHandler.handleReceivedBlock(peer, block);
                 if (mutualBlockListener != null) {
@@ -456,28 +444,8 @@ public class Network {
      * @param peer the peer that needs to be added
      * @param context needed for storage
      */
-    private static void addPeerToInbox(PublicKeyPair pubKeyPair, Peer peer, Context context) {
-        if (pubKeyPair != null) {
-            InboxItem i = new InboxItem(peer, new ArrayList<>());
-            InboxItemStorage.addInboxItem(context, i);
-            UserNameStorage.setNewPeerByPublicKey(context, peer.getName(), pubKeyPair);
-        }
-    }
-
-    /**
-     * Add a block reference to the InboxItem and store this again locally if this block is
-     * addressed to us.
-     * @param block the block of which the reference should be stored.
-     * @param context needed for storage
-     */
-    private void addBlockToInbox(TrustChainBlock block, Context context) {
-        PublicKeyPair blockLinkPubKey = new PublicKeyPair(block.getLinkPublicKey().toByteArray());
-        PublicKeyPair blockPubKey = new PublicKeyPair(block.getPublicKey().toByteArray());
-        // check if block is addressed to us and whether or not we have already received it.
-        if(blockLinkPubKey.equals(publicKey) &&
-                dbHelper.getBlock(blockPubKey.toBytes(),block.getSequenceNumber()) == null) {
-            InboxItemStorage.addHalfBlock(context, blockPubKey, block.getSequenceNumber());
-        }
+    private void addPeerToInbox(PublicKeyPair pubKeyPair, Peer peer, Context context) {
+        peerRepository.insertOrUpdate(peer);
     }
 
     /**

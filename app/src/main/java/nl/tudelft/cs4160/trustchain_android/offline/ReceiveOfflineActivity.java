@@ -9,7 +9,6 @@ import android.nfc.NfcAdapter;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -18,19 +17,24 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import nl.tudelft.cs4160.trustchain_android.R;
 import nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper;
 import nl.tudelft.cs4160.trustchain_android.block.ValidationResult;
-import nl.tudelft.cs4160.trustchain_android.chainExplorer.ChainColor;
+import nl.tudelft.cs4160.trustchain_android.peer.Peer;
+import nl.tudelft.cs4160.trustchain_android.storage.database.AppDatabase;
+import nl.tudelft.cs4160.trustchain_android.storage.repository.BlockRepository;
+import nl.tudelft.cs4160.trustchain_android.storage.repository.PeerRepository;
+import nl.tudelft.cs4160.trustchain_android.ui.chainexplorer.ChainColor;
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
-import nl.tudelft.cs4160.trustchain_android.main.OverviewConnectionsActivity;
+import nl.tudelft.cs4160.trustchain_android.ui.main.OverviewConnectionsActivity;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
-import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
 import nl.tudelft.cs4160.trustchain_android.util.ByteArrayConverter;
 import nl.tudelft.cs4160.trustchain_android.util.OpenFileClickListener;
@@ -45,6 +49,8 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
     private PendingIntent pendingIntent;
     private IntentFilter[] intentFiltersArray;
     private MessageProto.TrustChainBlock receivedBlock;
+    private BlockRepository blockRepository;
+    private PeerRepository peerRepository;
 
     private TextView blockSigned;
     private Button signButton;
@@ -56,6 +62,9 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_receive_offline);
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+        AppDatabase appDatabase = AppDatabase.getInstance(this);
+        blockRepository = new BlockRepository(appDatabase.blockDao());
+        peerRepository = new PeerRepository(appDatabase.peerDao());
         if (mNfcAdapter == null){
             Toast.makeText(this, "No NFC on this device", Toast.LENGTH_LONG).show();
         }
@@ -107,6 +116,7 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
      */
     @Override
     protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
         Log.d(TAG, "Tag received");
         processIntent(intent);
     }
@@ -141,7 +151,7 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
         View convertView = findViewById(R.id.block_layout);
 
         try {
-            ValidationResult validationResult = TrustChainBlockHelper.validate(block, new TrustChainDBHelper(this));
+            ValidationResult validationResult = TrustChainBlockHelper.validate(block, blockRepository);
             if(validationResult.getStatus() == ValidationResult.INVALID) {
                 signButton.setEnabled(false);
                 signButton.setFocusableInTouchMode(true);
@@ -159,8 +169,9 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
         showBlockLayout(convertView);
 
         try {
-            new TrustChainDBHelper(this).insertInDB(receivedBlock);
-        } catch (Exception ignored) {
+            blockRepository.insertOrUpdate(receivedBlock);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         if (getIntent().getBooleanExtra("return", true)) {
@@ -174,9 +185,10 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
     }
 
     private String getPeerAlias(PublicKeyPair keyPair) {
-        String alias = UserNameStorage.getPeerByPublicKey(getApplicationContext(), keyPair);
-        if (alias == null)
-            alias = "unknown";
+        Peer peer = peerRepository.getByPublicKey(keyPair.toBytes());
+        String alias = "unknown";
+        if (peer != null)
+            alias = peer.getName();
         if (Key.loadKeys(getApplicationContext()).getPublicKeyPair().equals(keyPair))
             alias = "me";
         return alias;
@@ -292,14 +304,13 @@ public class ReceiveOfflineActivity extends AppCompatActivity {
      */
     public void onClickSign(View v) {
         signButton.setEnabled(false);
-        TrustChainDBHelper DBHelper = new TrustChainDBHelper(this);
         DualSecret keyPair = Key.loadKeys(this);
-        MessageProto.TrustChainBlock block = TrustChainBlockHelper.createBlock(null, null, DBHelper,
+        MessageProto.TrustChainBlock block = TrustChainBlockHelper.createBlock(null, null, blockRepository,
                 keyPair.getPublicKeyPair().toBytes(),
                 receivedBlock, receivedBlock.getPublicKey().toByteArray());
 
         final MessageProto.TrustChainBlock signedBlock = TrustChainBlockHelper.sign(block, keyPair.getSigningKey());
-        DBHelper.insertInDB(signedBlock);
+        blockRepository.insertOrUpdate(signedBlock);
 
         Intent intent = new Intent(this, SendOfflineActivity.class);
         intent.putExtra("block", signedBlock);

@@ -37,4 +37,9 @@
         android:id="@+id/passport_scan"
         android:title="@string/menu_scan_passport"
         app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/torrent"
+        android:title="@string/menu_download_torrent"
+        app:showAsAction="never"/>
 </menu>

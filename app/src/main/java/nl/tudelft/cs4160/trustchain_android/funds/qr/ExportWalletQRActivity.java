@@ -3,15 +3,16 @@ package nl.tudelft.cs4160.trustchain_android.funds.qr;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
@@ -32,7 +33,8 @@ import nl.tudelft.cs4160.trustchain_android.funds.qr.models.QRBlock;
 import nl.tudelft.cs4160.trustchain_android.funds.qr.models.QRTransaction;
 import nl.tudelft.cs4160.trustchain_android.funds.qr.models.QRWallet;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
-import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
+import nl.tudelft.cs4160.trustchain_android.storage.database.AppDatabase;
+import nl.tudelft.cs4160.trustchain_android.storage.repository.BlockRepository;
 
 
 public class ExportWalletQRActivity extends AppCompatActivity {
@@ -59,7 +61,7 @@ public class ExportWalletQRActivity extends AppCompatActivity {
         try {
             Moshi moshi = new Moshi.Builder().build();
             JsonAdapter<QRWallet> walletAdapter = moshi.adapter(QRWallet.class);
-            TrustChainDBHelper dbHelper = new TrustChainDBHelper(this);
+            BlockRepository blockRepository = new BlockRepository(AppDatabase.getInstance(this).blockDao());
 
             // Step 1: Create a temporary new identity (we call this C)
             DualSecret keyPairOfC = Key.createNewKeyPair();
@@ -72,7 +74,7 @@ public class ExportWalletQRActivity extends AppCompatActivity {
             // Partly duplicated code from Communication.java
             QRTransaction transaction = new QRTransaction();
             try {
-                MessageProto.TrustChainBlock lastBlock = dbHelper.getLatestBlock(keyPairOfA.getPublicKeyPair().toBytes());
+                MessageProto.TrustChainBlock lastBlock = blockRepository.getLatestBlock(keyPairOfA.getPublicKeyPair().toBytes());
                 JSONObject object = new JSONObject(lastBlock.getTransaction().getUnformatted().toStringUtf8());
                 System.out.println(object.toString());
                 // Pretend that some transfer identity
@@ -113,7 +115,7 @@ public class ExportWalletQRActivity extends AppCompatActivity {
                     TrustChainBlockHelper.createBlock(
                             transactionAdapter.toJson(transaction).getBytes(),
                             null,
-                            dbHelper,
+                            blockRepository,
                             keyPairOfA.getPublicKeyPair().toBytes(),
                             null,
                             keyPairOfC.getPublicKeyPair().toBytes()
@@ -124,15 +126,15 @@ public class ExportWalletQRActivity extends AppCompatActivity {
                     TrustChainBlockHelper.createBlock(
                             transactionAdapter.toJson(transaction).getBytes(),
                             null,
-                            dbHelper,
+                            blockRepository,
                             keyPairOfC.getPublicKeyPair().toBytes(),
                             blockAtoC,
                             keyPairOfA.getPublicKeyPair().toBytes()
                     );
             blockCtoA = TrustChainBlockHelper.sign(blockCtoA, keyPairOfC.getSigningKey());
 
-            dbHelper.insertInDB(blockAtoC);
-            dbHelper.insertInDB(blockCtoA);
+            blockRepository.insertOrUpdate(blockAtoC);
+            blockRepository.insertOrUpdate(blockCtoA);
 
 
             // Step 3: Construct data to put in QR code, so the receiver can construct

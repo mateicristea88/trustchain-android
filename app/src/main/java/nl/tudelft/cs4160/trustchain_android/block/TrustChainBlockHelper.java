@@ -1,6 +1,6 @@
 package nl.tudelft.cs4160.trustchain_android.block;
 
-import android.database.sqlite.SQLiteDatabase;
+import android.text.TextUtils;
 
 import com.google.protobuf.ByteString;
 
@@ -17,7 +17,7 @@ import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
 import nl.tudelft.cs4160.trustchain_android.crypto.SigningKey;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto.TrustChainBlock.Transaction;
-import nl.tudelft.cs4160.trustchain_android.storage.database.TrustChainDBHelper;
+import nl.tudelft.cs4160.trustchain_android.storage.repository.BlockRepository;
 import nl.tudelft.cs4160.trustchain_android.util.ByteArrayConverter;
 
 import static nl.tudelft.cs4160.trustchain_android.util.Util.ellipsize;
@@ -50,17 +50,16 @@ public class TrustChainBlockHelper {
     /**
      * Creates a TrustChainBlockHelper for the given input.
      * @param transaction - Details the message of the block, can be null if there is a linked block
-     * @param dbHelper - database helper for the database in which the previous blocks of this peer can be found
+     * @param blockRepository - database helper for the database in which the previous blocks of this peer can be found
      * @param mypubk - the public key of this peer
      * @param linkedBlock - The halfblock that is linked to this to be created half block, can be null
      * @param linkpubk - The public key of the linked peer
-     * @param claim - Clam object is this block contains a claim, null otherwise
      * @return a new half block
      */
-    public static MessageProto.TrustChainBlock createBlock(byte[] transaction, String format, TrustChainDBHelper dbHelper,
+    public static MessageProto.TrustChainBlock createBlock(byte[] transaction, String format, BlockRepository blockRepository,
                                                          byte[] mypubk, MessageProto.TrustChainBlock linkedBlock,
                                                          byte[] linkpubk) {
-        MessageProto.TrustChainBlock latestBlock = dbHelper.getLatestBlock(mypubk);
+        MessageProto.TrustChainBlock latestBlock = blockRepository.getLatestBlock(mypubk);
 
         MessageProto.TrustChainBlock.Builder builder = MessageProto.TrustChainBlock.newBuilder();
         if(linkedBlock != null) {
@@ -128,11 +127,10 @@ public class TrustChainBlockHelper {
      * Validates this block against what is known in the database in 6 steps.
      * Returns the validation result and errors. Any error will result in a false validation.
      * @param block - block that needs to be validated
-     * @param dbHelper - dbHelper which contains the db to check against
+     * @param blockRepository - dbHelper which contains the db to check against
      * @return a validation result, containing the actual validation result and a list of errors
      */
-    public static ValidationResult validate(MessageProto.TrustChainBlock block, TrustChainDBHelper dbHelper) throws Exception {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
+    public static ValidationResult validate(MessageProto.TrustChainBlock block, BlockRepository blockRepository) throws Exception {
         ValidationResult result = new ValidationResult();
         List<String> errors = new ArrayList<>();
 
@@ -142,10 +140,10 @@ public class TrustChainBlockHelper {
         // inserted into the database. Thus we can assume that all retrieved blocks are all valid
         // themselves. Blocks can get inserted into the database in any order, so we need to find
         // successors, predecessors as well as the block itself and its linked block.
-        MessageProto.TrustChainBlock dbBlock = dbHelper.getBlock(block.getPublicKey().toByteArray(),block.getSequenceNumber());
-        MessageProto.TrustChainBlock linkBlock = dbHelper.getLinkedBlock(block);
-        MessageProto.TrustChainBlock prevBlock = dbHelper.getBlockBefore(block.getPublicKey().toByteArray(),block.getSequenceNumber());
-        MessageProto.TrustChainBlock nextBlock = dbHelper.getBlockAfter(block.getPublicKey().toByteArray(),block.getSequenceNumber());
+        MessageProto.TrustChainBlock dbBlock = blockRepository.getBlock(block.getPublicKey().toByteArray(),block.getSequenceNumber());
+        MessageProto.TrustChainBlock linkBlock = blockRepository.getLinkedBlock(block);
+        MessageProto.TrustChainBlock prevBlock = blockRepository.getBlockBefore(block);
+        MessageProto.TrustChainBlock nextBlock = blockRepository.getBlockAfter(block);
 
         // ** Step 2: Determine the maximum validation level **
         // Depending on the blocks we get from the database, we can decide to reduce the validation
@@ -200,7 +198,7 @@ public class TrustChainBlockHelper {
         // block in code or getting a block from the database. The wire format is such that it is
         // impossible to hit many of these for blocks that went over the network.
 
-        ValidationResult txValidation = validateTransaction(block, db);
+        ValidationResult txValidation = validateTransaction(block);
         if(txValidation.getStatus() != ValidationResult.VALID) {
             result.setStatus(txValidation.getStatus());
             for (String error : txValidation.getErrors()) {
@@ -298,7 +296,7 @@ public class TrustChainBlockHelper {
                 // Self counter signs another block (link). If linkBlock has a linked block that is not
                 // equal to block, then block is fraudulent, since it tries to countersign a block
                 // that is already countersigned.
-                MessageProto.TrustChainBlock linkLinkBlock = dbHelper.getBlock(
+                MessageProto.TrustChainBlock linkLinkBlock = blockRepository.getBlock(
                         linkBlock.getLinkPublicKey().toByteArray(), linkBlock.getLinkSequenceNumber());
                 if(linkLinkBlock != null && !Arrays.equals(hash(linkLinkBlock), hash(block))) {
                     result.setInvalid();
@@ -348,10 +346,9 @@ public class TrustChainBlockHelper {
      * Validates the transaction of a block, for now a transaction can be anything so no validation
      * method is implemented.
      * @param block - The block containing the to-be-checked transaction.
-     * @param db - Database to validate against
      * @return a VALID validation result
      */
-    public static ValidationResult validateTransaction(MessageProto.TrustChainBlock block, SQLiteDatabase db) {
+    public static ValidationResult validateTransaction(MessageProto.TrustChainBlock block) {
         return new ValidationResult();
     }
 
@@ -430,6 +427,11 @@ public class TrustChainBlockHelper {
         return block.getTransaction().getFormat() != null
                 && !block.getTransaction().getFormat().equals("");
 //              && !block.getTransaction().getFormat().equals("txt"));
+    }
+
+    public static boolean containsMagnetLink(MessageProto.TrustChainBlock block) {
+        return TextUtils.isEmpty(block.getTransaction().getFormat()) &&
+                block.getTransaction().getUnformatted().toStringUtf8().startsWith("magnet:");
     }
 
 }
