@@ -264,7 +264,15 @@ public class TorrentActivity extends AppCompatActivity {
         Uri torrentUri = Uri.parse(link);
 
         AsyncTask.execute(() -> {
-            torrentSession.start(getApplicationContext(), torrentUri); // Invoke on background thread.
+            try {
+                torrentSession.start(getApplicationContext(), torrentUri); // Invoke on background thread.
+            } catch (Exception e) {
+                e.printStackTrace();
+                runOnUiThread(() -> {
+                    setViewState(ViewState.IDLE);
+                    Toast.makeText(getApplicationContext(), "Invalid magent link", Toast.LENGTH_SHORT).show();
+                });
+            }
         });
     }
 
