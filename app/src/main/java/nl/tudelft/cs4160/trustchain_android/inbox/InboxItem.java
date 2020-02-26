@@ -1,22 +1,35 @@
 package nl.tudelft.cs4160.trustchain_android.inbox;
 
 import java.io.Serializable;
-import java.util.Objects;
+import java.util.ArrayList;
 
 import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 
 public class InboxItem implements Serializable {
     private Peer peer;
-    private int halfBlockCount;
+    private ArrayList<Integer> halfBlockSequenceNumbers;
+    final static long serialVersionUID = -7045891844696683093L;
 
     /**
      * Inbox item constructor
      * @param peer the peer which this inboxitem will be about
-     * @param halfBlockCount the number of the unread blocks
+     * @param halfBlockSequenceNumbers the list of the sequence numbers of the unread blocks
      */
-    public InboxItem(Peer peer, int halfBlockCount) {
+    public InboxItem(Peer peer, ArrayList<Integer> halfBlockSequenceNumbers) {
         this.peer = peer;
-        this.halfBlockCount = halfBlockCount;
+        this.halfBlockSequenceNumbers = halfBlockSequenceNumbers;
+    }
+
+    public ArrayList<Integer> getHalfBlocks() {
+        return halfBlockSequenceNumbers;
+    }
+
+    public void addHalfBlocks(Integer block) {
+        halfBlockSequenceNumbers.add(block);
+    }
+
+    public void setHalfBlocks(ArrayList<Integer> halfBlocks) {
+        this.halfBlockSequenceNumbers = halfBlocks;
     }
 
     /**
@@ -24,24 +37,25 @@ public class InboxItem implements Serializable {
      * @return
      */
     public int getAmountUnread() {
-        return halfBlockCount;
-    }
-
-    public Peer getPeer(){
-       return peer;
+        if (halfBlockSequenceNumbers != null) {
+            return halfBlockSequenceNumbers.size();
+        }
+        return 0;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        InboxItem inboxItem = (InboxItem) o;
-        return halfBlockCount == inboxItem.halfBlockCount &&
-                Objects.equals(peer, inboxItem.peer);
+
+        InboxItem other = (InboxItem) o;
+
+        if (halfBlockSequenceNumbers != null ? !halfBlockSequenceNumbers.equals(other.halfBlockSequenceNumbers) : other.halfBlockSequenceNumbers != null)
+            return false;
+        return this.peer.equals(other.peer);
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(peer, halfBlockCount);
+    public Peer getPeer(){
+       return peer;
     }
 }

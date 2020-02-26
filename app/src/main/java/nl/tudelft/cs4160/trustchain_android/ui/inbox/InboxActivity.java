@@ -1,77 +1,37 @@
 package nl.tudelft.cs4160.trustchain_android.ui.inbox;
 
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import nl.tudelft.cs4160.trustchain_android.R;
-import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.inbox.InboxItem;
-import nl.tudelft.cs4160.trustchain_android.network.NetworkConnectionListener;
-import nl.tudelft.cs4160.trustchain_android.network.NetworkConnectionService;
-import nl.tudelft.cs4160.trustchain_android.network.SimpleNetworkConnectionListener;
 import nl.tudelft.cs4160.trustchain_android.peer.Peer;
-import nl.tudelft.cs4160.trustchain_android.storage.database.AppDatabase;
-import nl.tudelft.cs4160.trustchain_android.storage.repository.BlockRepository;
-import nl.tudelft.cs4160.trustchain_android.storage.repository.PeerRepository;
+import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.InboxItemStorage;
 
-public class InboxActivity extends AppCompatActivity {
+public class InboxActivity extends AppCompatActivity  {
+    public static ArrayList<Peer> peerList;
     private RecyclerView mRecyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
     private ArrayList<InboxItem> inboxItems = new ArrayList<>();
-    private InboxAdapter mAdapter = new InboxAdapter(inboxItems);
-    private PeerRepository peerRepository;
-    private BlockRepository blockRepository;
-    private NetworkConnectionService service;
-
-    private NetworkConnectionListener networkConnectionListener = new SimpleNetworkConnectionListener() {
-        @Override
-        public void updatePeerLists(List<Peer> activePeersList, List<Peer> newPeersList) {
-            List<Peer> peerList = new ArrayList<>();
-            peerList.addAll(activePeersList);
-            peerList.addAll(newPeersList);
-            mAdapter.setPeerList(peerList);
-            mAdapter.notifyDataSetChanged();
-        }
-    };
-
-    private ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            NetworkConnectionService.LocalBinder binder = (NetworkConnectionService.LocalBinder) iBinder;
-            service = binder.getService();
-            service.addNetworkConnectionListener(networkConnectionListener);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            service = null;
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_inbox);
-        AppDatabase database = AppDatabase.getInstance(this);
-        peerRepository = new PeerRepository(database.peerDao());
-        blockRepository = new BlockRepository(database.blockDao());
         mRecyclerView = findViewById(R.id.my_recycler_view);
         // use a linear layout manager
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
         // specify an adapter (see also next example)
         mAdapter = new InboxAdapter(inboxItems);
         mRecyclerView.setAdapter(mAdapter);
@@ -82,43 +42,21 @@ public class InboxActivity extends AppCompatActivity {
      * which is then set in the recyclerview. This has to run on the main UI thread because
      * only the original thread that created a view hierarchy can touch its views.
      */
-    private void getInboxItems() {
-        mRecyclerView.setAdapter(mAdapter);
+    synchronized private void getInboxItems() {
+        final Context currContext = this;
 
-        peerRepository.getAllPeers().observe(this, peers -> {
-            if (peers != null) {
-                inboxItems.clear();
-                for (Peer peer : peers) {
-                    // get half blocks from block repository
-                    int halfBlockCount = blockRepository.getHalfBlockCount(
-                            peer.getPublicKeyPair().toBytes(),
-                            Key.loadPublicKeyPair(getApplicationContext()).toBytes()
-                    );
-                    inboxItems.add(new InboxItem(peer, halfBlockCount));
-                }
-                Collections.reverse(inboxItems);
-                mAdapter.notifyDataSetChanged();
-            }
-        });
+        inboxItems = new ArrayList<>();
+        inboxItems = InboxItemStorage.getInboxItems(currContext);
+        Collections.reverse(inboxItems);
+        mAdapter = new InboxAdapter(inboxItems);
+        ((InboxAdapter) mAdapter).setPeerList(peerList);
+        mRecyclerView.setAdapter(mAdapter);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         getInboxItems();
-
-        Intent serviceIntent = new Intent(this, NetworkConnectionService.class);
-        bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-
-        if (service != null) {
-            service.removeNetworkConnectionListener(networkConnectionListener);
-        }
-        unbindService(serviceConnection);
     }
 
     @Override
@@ -137,9 +75,11 @@ public class InboxActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.clear_inbox:
-                peerRepository.deleteAllPeers();
-                inboxItems.clear();
-                mAdapter.notifyDataSetChanged();
+                InboxItemStorage.deleteAll(this);
+                inboxItems = new ArrayList<>();
+                mAdapter = new InboxAdapter(inboxItems);
+                ((InboxAdapter) mAdapter).setPeerList(peerList);
+                mRecyclerView.setAdapter(mAdapter);
                 return true;
             default:
                 return true;

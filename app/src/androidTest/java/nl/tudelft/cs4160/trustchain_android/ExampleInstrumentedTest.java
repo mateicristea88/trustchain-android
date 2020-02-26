@@ -1,8 +1,8 @@
 package nl.tudelft.cs4160.trustchain_android;
 
 import android.content.Context;
-import androidx.test.platform.app.InstrumentationRegistry;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,8 +19,8 @@ public class ExampleInstrumentedTest {
     @Test
     public void useAppContext() throws Exception {
         // Context of the app under test.
-        Context appContext = InstrumentationRegistry.getInstrumentation().getContext();
+        Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("nl.tudelft.cs4160.trustchain_android.test", appContext.getPackageName());
+        assertEquals("nl.tudelft.cs4160.trustchain_android", appContext.getPackageName());
     }
 }

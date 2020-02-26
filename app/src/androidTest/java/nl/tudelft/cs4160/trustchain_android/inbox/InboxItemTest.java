@@ -1,7 +1,7 @@
 package nl.tudelft.cs4160.trustchain_android.inbox;
 
 
-import androidx.test.rule.ActivityTestRule;
+import android.support.test.rule.ActivityTestRule;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -21,7 +21,6 @@ import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 
 public class InboxItemTest {
 
@@ -49,7 +48,7 @@ public class InboxItemTest {
         publicKey = new DualSecret().getPublicKeyPair();
         port = 123;
         Peer peer = new Peer(new InetSocketAddress(address, port),publicKey,userName);
-        ii = new InboxItem(peer, halfBlockSequenceNumbers.size());
+        ii = new InboxItem(peer, halfBlockSequenceNumbers);
     }
 
     @Test
@@ -59,22 +58,22 @@ public class InboxItemTest {
 
     @Test
     public void testEquals() {
-        Peer peer = new Peer(new InetSocketAddress(address, port), publicKey, userName);
-        InboxItem ii2 = new InboxItem(peer, halfBlockSequenceNumbers.size());
+        Peer peer = new Peer(new InetSocketAddress(address,port),publicKey,userName);
+        InboxItem ii2 = new InboxItem(peer, halfBlockSequenceNumbers);
         assertEquals(ii, ii2);
     }
 
     @Test
     public void testEqualsFalseUserName() {
-        Peer peer = new Peer(new InetSocketAddress(address, port), publicKey,userName + "r");
-        InboxItem ii2 = new InboxItem(peer, halfBlockSequenceNumbers.size());
-        assertEquals(ii, ii2);
+        Peer peer = new Peer(new InetSocketAddress(address,port),publicKey,userName + "r");
+        InboxItem ii2 = new InboxItem(peer, halfBlockSequenceNumbers);
+        assertTrue(ii.equals(ii2));
     }
 
     @Test
     public void testEqualsFalsePublicKey() {
-        Peer peer = new Peer(new InetSocketAddress(address, port), Key.createNewKeyPair().getPublicKeyPair(), userName);
-        InboxItem ii2 = new InboxItem(peer, halfBlockSequenceNumbers.size());
+        Peer peer = new Peer(new InetSocketAddress(address,port), Key.createNewKeyPair().getPublicKeyPair(),userName);
+        InboxItem ii2 = new InboxItem(peer, halfBlockSequenceNumbers);
         assertFalse(ii.equals(ii2));
     }
 

@@ -20,11 +20,9 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
+import nl.tudelft.cs4160.trustchain_android.inbox.InboxItem;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto.Message;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto.TrustChainBlock;
@@ -32,21 +30,20 @@ import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.peer.PeerHandler;
 import nl.tudelft.cs4160.trustchain_android.storage.database.AppDatabase;
 import nl.tudelft.cs4160.trustchain_android.storage.repository.BlockRepository;
-import nl.tudelft.cs4160.trustchain_android.storage.repository.PeerRepository;
 import nl.tudelft.cs4160.trustchain_android.ui.peersummary.PeerSummaryActivity;
 import nl.tudelft.cs4160.trustchain_android.statistics.StatisticsServer;
+import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.InboxItemStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.PubKeyAndAddressPairStorage;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
 
-@Singleton
 public class Network {
     private final String TAG = this.getClass().getName();
     private DatagramChannel channel;
     public String name;
     private int connectionType;
     private InetSocketAddress internalSourceAddress;
+    private static Network network;
     private BlockRepository blockRepository;
-    private PeerRepository peerRepository;
     private PublicKeyPair publicKey;
     private MessageHandler messageHandler;
     private NetworkStatusListener networkStatusListener;
@@ -64,11 +61,7 @@ public class Network {
     /**
      * Empty constructor
      */
-    @Inject
-    public Network(Context context, BlockRepository blockRepository, PeerRepository peerRepository) {
-        this.blockRepository = blockRepository;
-        this.peerRepository = peerRepository;
-        initVariables(context, true);
+    private Network() {
     }
 
     /**
@@ -79,11 +72,26 @@ public class Network {
      * @param context
      * @param port
      */
-    public Network(Context context, BlockRepository blockRepository, PeerRepository peerRepository, String username, PublicKeyPair publicKey, int port) {
+    public Network(String username, PublicKeyPair publicKey, Context context, int port) {
         this.name = username;
         this.publicKey = publicKey;
         this.port = port;
         initVariables(context, false);
+    }
+
+
+    /**
+     * Get the network instance.
+     * If the network isn't initialized create a network and set the variables.
+     * @param context
+     * @return
+     */
+    public synchronized static Network getInstance(Context context) {
+        if (network == null) {
+            network = new Network();
+            network.initVariables(context, true);
+        }
+        return network;
     }
 
     /**
@@ -110,7 +118,8 @@ public class Network {
     private void initVariables(Context context, boolean dbAccess) {
         this.statistics = StatisticsServer.getInstance();
         if (name == null) name = UserNameStorage.getUserName(context);
-        if (publicKey == null) publicKey = Key.ensureKeysExist(context).getPublicKeyPair();
+        if (publicKey == null) publicKey = Key.loadKeys(context).getPublicKeyPair();
+        blockRepository = new BlockRepository(AppDatabase.getInstance(context).blockDao());
         messageHandler = new MessageHandler(this,
                 dbAccess ? blockRepository : null,
                 new PeerHandler(publicKey,name));
@@ -416,6 +425,7 @@ public class Network {
 
                 // update the inbox
                 addPeerToInbox(pubKeyPair, peer, context);
+                addBlockToInbox(block, context);
 
                 messageHandler.handleReceivedBlock(peer, block);
                 if (mutualBlockListener != null) {
@@ -444,8 +454,28 @@ public class Network {
      * @param peer the peer that needs to be added
      * @param context needed for storage
      */
-    private void addPeerToInbox(PublicKeyPair pubKeyPair, Peer peer, Context context) {
-        peerRepository.insertOrUpdate(peer);
+    private static void addPeerToInbox(PublicKeyPair pubKeyPair, Peer peer, Context context) {
+        if (pubKeyPair != null) {
+            InboxItem i = new InboxItem(peer, new ArrayList<>());
+            InboxItemStorage.addInboxItem(context, i);
+            UserNameStorage.setNewPeerByPublicKey(context, peer.getName(), pubKeyPair);
+        }
+    }
+
+    /**
+     * Add a block reference to the InboxItem and store this again locally if this block is
+     * addressed to us.
+     * @param block the block of which the reference should be stored.
+     * @param context needed for storage
+     */
+    private void addBlockToInbox(TrustChainBlock block, Context context) {
+        PublicKeyPair blockLinkPubKey = new PublicKeyPair(block.getLinkPublicKey().toByteArray());
+        PublicKeyPair blockPubKey = new PublicKeyPair(block.getPublicKey().toByteArray());
+        // check if block is addressed to us and whether or not we have already received it.
+        if (blockLinkPubKey.equals(publicKey) &&
+                blockRepository.getBlock(blockPubKey.toBytes(),block.getSequenceNumber()) == null) {
+            InboxItemStorage.addHalfBlock(context, blockPubKey, block.getSequenceNumber());
+        }
     }
 
     /**

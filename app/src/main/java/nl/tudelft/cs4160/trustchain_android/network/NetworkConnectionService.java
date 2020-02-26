@@ -12,9 +12,8 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-
-import androidx.annotation.Nullable;
-import androidx.core.app.NotificationCompat;
+import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import java.io.IOException;
@@ -32,10 +31,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import javax.inject.Inject;
-
 import nl.tudelft.cs4160.trustchain_android.R;
-import nl.tudelft.cs4160.trustchain_android.TrustchainApplication;
 import nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper;
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
@@ -63,14 +59,11 @@ public class NetworkConnectionService extends Service {
     private static final String NOTIFICATION_CHANNEL = "service_notifications";
     private static final int ONGOING_NOTIFICATION_ID = 1;
 
-    @Inject
-    BlockRepository blockRepository;
-
-    @Inject
-    Network network;
-
+    private BlockRepository blockRepository;
+    private Network network;
     private PeerHandler peerHandler;
     private boolean networkRunning = true;
+    private String wan = "";
 
     private Handler uiHandler;
     private boolean isBound;
@@ -83,6 +76,20 @@ public class NetworkConnectionService extends Service {
         }
 
         /**
+         * Update the showed inboxItem lists.
+         * First split into new peers and the active list
+         * Then remove the peers that aren't responding for a long time.
+         */
+        @Override
+        public void updatePeerLists() {
+            Log.d(TAG, "updatePeerList");
+            peerHandler.removeDeadPeers();
+            peerHandler.splitPeerList();
+            notifyListeners(listener -> listener.updatePeerLists(
+                    peerHandler.getActivePeersList(), peerHandler.getNewPeersList()));
+        }
+
+        /**
          * Update wan address
          * @param message a message that was received, the destination is our wan address
          */
@@ -92,11 +99,13 @@ public class NetworkConnectionService extends Service {
             int port = message.getDestinationPort();
             InetSocketAddress socketAddress = new InetSocketAddress(addr, port);
 
-            peerHandler.getWanVote().vote(socketAddress);
-            String wan = peerHandler.getWanVote().getAddress().toString();
-            String address = wan.replace("/","");
+            if (peerHandler.getWanVote().vote(socketAddress)) {
+                wan = peerHandler.getWanVote().getAddress().toString();
 
-            notifyListeners(listener -> listener.updateWan(address));
+                String address = wan.replace("/","");
+
+                notifyListeners(listener -> listener.updateWan(address));
+            }
         }
 
         @Override
@@ -122,15 +131,13 @@ public class NetworkConnectionService extends Service {
         @Override
         public void updateActivePeers() {
             Log.d(TAG, "updateActivePeers");
-            notifyListeners(listener -> listener.updatePeerLists(peerHandler.getActivePeersList(),
-                    peerHandler.getNewPeersList()));
+            notifyListeners(listener -> listener.updateActivePeers(peerHandler.getActivePeersList()));
         }
 
         @Override
         public void updateNewPeers() {
             Log.d(TAG, "updateNewPeers");
-            notifyListeners(listener -> listener.updatePeerLists(peerHandler.getActivePeersList(),
-                    peerHandler.getNewPeersList()));
+            notifyListeners(listener ->listener.updateNewPeers(peerHandler.getNewPeersList()));
         }
     };
 
@@ -138,11 +145,11 @@ public class NetworkConnectionService extends Service {
 
     @Override
     public void onCreate() {
-        ((TrustchainApplication) getApplicationContext()).appComponent.inject(this);
         super.onCreate();
 
         uiHandler = new Handler();
 
+        blockRepository = new BlockRepository(AppDatabase.getInstance(getApplicationContext()).blockDao());
         initKey();
         StatisticsServer.getInstance().start(networkStatusListener);
 
@@ -150,6 +157,7 @@ public class NetworkConnectionService extends Service {
                 UserNameStorage.getUserName(this));
         peerHandler.setPeerListener(peerListener);
 
+        network = Network.getInstance(getApplicationContext());
         network.getMessageHandler().setPeerHandler(peerHandler);
         network.setNetworkStatusListener(networkStatusListener);
 
@@ -214,11 +222,14 @@ public class NetworkConnectionService extends Service {
      * If no blocks are present in the database, a genesis block is created.
      */
     private void initKey() {
-        DualSecret kp = Key.ensureKeysExist(getApplicationContext());
+        DualSecret kp = Key.loadKeys(getApplicationContext());
+        if (kp == null) {
+            kp = Key.createAndSaveKeys(getApplicationContext());
+        }
         int blockCount = blockRepository.getBlockCount();
         if (blockCount == 0) {
             MessageProto.TrustChainBlock block = TrustChainBlockHelper.createGenesisBlock(kp);
-            blockRepository.insertOrUpdate(block);
+            blockRepository.insert(block);
         }
     }
 

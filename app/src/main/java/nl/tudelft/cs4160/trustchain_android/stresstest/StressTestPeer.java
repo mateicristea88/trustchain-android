@@ -28,8 +28,6 @@ import nl.tudelft.cs4160.trustchain_android.peer.Peer;
 import nl.tudelft.cs4160.trustchain_android.peer.PeerHandler;
 import nl.tudelft.cs4160.trustchain_android.peer.PeerListener;
 import nl.tudelft.cs4160.trustchain_android.statistics.StatisticsServer;
-import nl.tudelft.cs4160.trustchain_android.storage.repository.BlockRepository;
-import nl.tudelft.cs4160.trustchain_android.storage.repository.PeerRepository;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.BootstrapIPStorage;
 
 public class StressTestPeer implements PeerListener, NetworkStatusListener {
@@ -42,8 +40,6 @@ public class StressTestPeer implements PeerListener, NetworkStatusListener {
     public final static int DEFAULT_PORT = 1873;
     private final static int BUFFER_SIZE = 65536;
     private Context context;
-    private BlockRepository blockRepository;
-    private PeerRepository peerRepository;
 
     public String userName;
     private DualSecret keyPair;
@@ -59,8 +55,7 @@ public class StressTestPeer implements PeerListener, NetworkStatusListener {
         StatisticsServer.getInstance().start(this);
 
         Runnable refreshTask = () -> {
-            while (true) {
-                // TODO: stop this task in stopNode
+            while(true) {
                 peerHandler.removeDeadPeers();
                 peerHandler.splitPeerList();
                 try {
@@ -73,10 +68,8 @@ public class StressTestPeer implements PeerListener, NetworkStatusListener {
         new Thread(refreshTask).start();
     }
 
-    public StressTestPeer(Context context, BlockRepository blockRepository, PeerRepository peerRepository, int port) {
+    public StressTestPeer(Context context, int port) {
         this.context = context;
-        this.blockRepository = blockRepository;
-        this.peerRepository = peerRepository;
         this.userName = UsernameGenerator.getUsername();
         this.keyPair = Key.createNewKeyPair();
         this.port = port;
@@ -110,7 +103,7 @@ public class StressTestPeer implements PeerListener, NetworkStatusListener {
         peerHandler = new PeerHandler(keyPair.getPublicKeyPair(), userName);
         getPeerHandler().setPeerListener(this);
 
-        network = new Network(context, blockRepository, peerRepository, userName, keyPair.getPublicKeyPair(), port);
+        network = new Network(userName, keyPair.getPublicKeyPair(), context, port);
         network.getMessageHandler().setPeerHandler(getPeerHandler());
         network.setNetworkStatusListener(this);
         updateConnectionType(network.getConnectionTypeString((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE)));
@@ -173,6 +166,11 @@ public class StressTestPeer implements PeerListener, NetworkStatusListener {
         });
         sendThread.start();
         Log.d(TAG, "Send thread started");
+    }
+
+    @Override
+    public void updatePeerLists() {
+
     }
 
     /**

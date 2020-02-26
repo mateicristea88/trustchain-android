@@ -39,7 +39,7 @@
         app:showAsAction="never"/>
 
     <item
-        android:id="@+id/torrent"
-        android:title="@string/menu_download_torrent"
-        app:showAsAction="never"/>
+            android:id="@+id/dna_learning"
+            android:title="@string/dna_learning"
+            app:showAsAction="never"/>
 </menu>

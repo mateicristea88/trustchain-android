@@ -103,7 +103,7 @@ public class MessageHandler {
     public void handleReceivedBlock(Peer peer, MessageProto.TrustChainBlock block) {
         try {
             if (blockRepository != null && TrustChainBlockHelper.validate(block, blockRepository).getStatus() != ValidationResult.INVALID ) {
-                blockRepository.insertOrUpdate(block);
+                blockRepository.update(block);
             } else if (blockRepository == null) {
                 Log.w(TAG, "Not adding block in database because dbHelper is null");
             } else if (TrustChainBlockHelper.validate(block, blockRepository).getStatus() == ValidationResult.INVALID) {

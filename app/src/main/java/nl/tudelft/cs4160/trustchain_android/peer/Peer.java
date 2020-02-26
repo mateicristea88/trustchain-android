@@ -15,7 +15,7 @@ import nl.tudelft.cs4160.trustchain_android.network.NetworkConnectionService;
  * The peer object that is used to find other connected peers in the network.
  * The peer is identified by its unique public key pair, and keeps track of the last sent and received time.
  */
-public class Peer implements Serializable {
+public class Peer implements Serializable{
     final static int TIMEOUT = 15000;
     final static int REMOVE_TIMEOUT = 25000;
     MessageProto.Peer protoPeer;

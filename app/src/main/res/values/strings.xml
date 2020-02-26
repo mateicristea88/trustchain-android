@@ -1,6 +1,7 @@
 <resources>
     <!-- OverViewConnectionsActivity -->
     <string name="app_name">TrustChain Android</string>
+    <string name="dna_learning">Dna Learning</string>
     <string name="my_external_ip">My external ip is:</string>
     <string name="connect_bootstrap_ip">The IP address of the new bootstrap:</string>
     <string name="change_bootstrap">Change bootstrap</string>
@@ -66,7 +67,6 @@
     <string name="menu_funds">Funds</string>
     <string name="menu_transactions">Transactions</string>
     <string name="menu_scan_passport">Scan Passport</string>
-    <string name="menu_download_torrent">Download Torrent</string>
     <string name="menu_stress_test">Stats / Stress Test</string>
 
     <!--- app to app strings -->
@@ -116,8 +116,7 @@
 
     <!--- inbox -->
     <string name="new_user">+ Find new users</string>
-    <string name="open_inbox">Open Inbox</string>
-    <string name="inbox">Inbox</string>
+    <string name="inbox">Open Inbox</string>
 
     <!-- OCR Scanning -->
     <string name="ocr_switch_to_manual">Manual Input</string>

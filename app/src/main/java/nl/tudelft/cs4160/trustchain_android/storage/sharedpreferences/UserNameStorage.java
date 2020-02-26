@@ -19,4 +19,12 @@ public class UserNameStorage {
     public static String getUserName(Context context) {
         return SharedPreferencesStorage.readSharedPreferences(context, userNameStorage);
     }
+
+    public static void setNewPeerByPublicKey(Context context, String userName, PublicKeyPair pubKeyPair){
+        SharedPreferencesStorage.writeSharedPreferences(context, Base64.encodeToString(pubKeyPair.toBytes(),Base64.DEFAULT), userName);
+    }
+
+    public static String getPeerByPublicKey(Context context, PublicKeyPair pubKeyPair){
+        return SharedPreferencesStorage.readSharedPreferences(context, Base64.encodeToString(pubKeyPair.toBytes(),Base64.DEFAULT));
+    }
 }

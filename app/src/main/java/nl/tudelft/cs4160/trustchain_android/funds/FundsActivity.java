@@ -3,15 +3,14 @@ package nl.tudelft.cs4160.trustchain_android.funds;
 
 import android.animation.ObjectAnimator;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.TextView;
-
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 
 import org.json.JSONObject;
 

@@ -1,9 +1,8 @@
 package nl.tudelft.cs4160.trustchain_android.block;
 
 
+import android.support.test.runner.AndroidJUnit4;
 import android.test.ActivityUnitTestCase;
-
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
@@ -14,21 +13,24 @@ import org.libsodium.jni.NaCl;
 import nl.tudelft.cs4160.trustchain_android.crypto.DualSecret;
 import nl.tudelft.cs4160.trustchain_android.crypto.Key;
 import nl.tudelft.cs4160.trustchain_android.storage.repository.BlockRepository;
+import nl.tudelft.cs4160.trustchain_android.ui.main.OverviewConnectionsActivity;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
 import nl.tudelft.cs4160.trustchain_android.util.ByteArrayConverter;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.validateMockitoUsage;
+import static org.mockito.Mockito.when;
 
 /**
  * Created by Boning on 12/17/2017.
  */
 @RunWith(AndroidJUnit4.class)
-public class TrustChainBlockTest {
+public class TrustChainBlockTest extends ActivityUnitTestCase<OverviewConnectionsActivity> {
+    public TrustChainBlockTest() {
+        super(OverviewConnectionsActivity.class);
+    }
+
     private DualSecret keyPair;
     private DualSecret keyPair2;
     private byte[] transaction = new byte[2];

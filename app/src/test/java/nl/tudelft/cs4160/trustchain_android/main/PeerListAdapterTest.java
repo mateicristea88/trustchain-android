@@ -1,8 +1,7 @@
 package nl.tudelft.cs4160.trustchain_android.main;
 
 import android.content.Context;
-
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import android.support.design.widget.CoordinatorLayout;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -24,8 +23,10 @@ public class PeerListAdapterTest {
     int resource = 0;
     @Mock
     List<Peer> peerList;
+    @Mock
+    CoordinatorLayout coordinatorLayout;
 
-    PeerListAdapter pla = new PeerListAdapter(context, resource, peerList);
+    PeerListAdapter pla = new PeerListAdapter(context, resource, peerList, coordinatorLayout);
 
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule();

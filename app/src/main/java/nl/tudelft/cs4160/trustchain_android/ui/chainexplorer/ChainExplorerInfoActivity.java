@@ -1,8 +1,7 @@
 package nl.tudelft.cs4160.trustchain_android.ui.chainexplorer;
 
 import android.os.Bundle;
-
-import androidx.appcompat.app.AppCompatActivity;
+import android.support.v7.app.AppCompatActivity;
 
 import nl.tudelft.cs4160.trustchain_android.R;
 

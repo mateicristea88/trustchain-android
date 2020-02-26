@@ -13,12 +13,12 @@ import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
 import nl.tudelft.cs4160.trustchain_android.network.WanVote;
 
 public class PeerHandler {
-    private final ArrayList<Peer> peerList;
+    private ArrayList<Peer> peerList;
     private List<Peer> activePeersList = new ArrayList<>();
     private List<Peer> newPeersList = new ArrayList<>();
     private PeerListener peerListener;
     public PublicKeyPair publicKeyPair;
-    private String name;
+    String name;
     private WanVote wanVote;
     private final String TAG = this.getClass().toString();
 
@@ -42,7 +42,7 @@ public class PeerHandler {
     /**
      * Remove duplicate peers from the peerlist.
      */
-    private synchronized void removeDuplicates() {
+    public synchronized void removeDuplicates() {
         for (int i = 0; i < peerList.size(); i++) {
             Peer p1 = peerList.get(i);
             for (int j = 0; j < peerList.size(); j++) {
@@ -58,11 +58,9 @@ public class PeerHandler {
      * Remove all inactive peers.
      */
     public synchronized void removeDeadPeers() {
-        synchronized (peerList) {
-            for (Peer peer : new ArrayList<>(peerList)) {
-                if (peer.canBeRemoved()) {
-                    peerList.remove(peer);
-                }
+        for (Peer peer : new ArrayList<>(peerList)) {
+            if (peer.canBeRemoved()) {
+                peerList.remove(peer);
             }
         }
     }
@@ -73,10 +71,8 @@ public class PeerHandler {
      *
      * @param p
      */
-    public void add(Peer p) {
-        synchronized (peerList) {
-            this.peerList.add(p);
-        }
+    public synchronized void add(Peer p) {
+        this.peerList.add(p);
     }
 
     /**
@@ -85,10 +81,8 @@ public class PeerHandler {
      *
      * @param p
      */
-    public void remove(Peer p) {
-        synchronized (peerList) {
-            this.peerList.remove(p);
-        }
+    public synchronized void remove(Peer p) {
+        this.peerList.remove(p);
     }
 
     /**
@@ -97,10 +91,8 @@ public class PeerHandler {
      *
      * @return
      */
-    public int size() {
-        synchronized (peerList) {
-            return peerList.size();
-        }
+    public synchronized int size() {
+        return peerList.size();
     }
 
     /**
@@ -112,15 +104,11 @@ public class PeerHandler {
      */
     public synchronized boolean peerExistsInList(Peer peer) {
         if (peer.getPublicKeyPair() == null) return false;
-
-        synchronized (peerList) {
-            for (Peer p : this.peerList) {
-                if (peer.getPublicKeyPair().equals(p.getPublicKeyPair())) {
-                    return true;
-                }
+        for (Peer p : this.peerList) {
+            if (peer.getPublicKeyPair().equals(p.getPublicKeyPair())) {
+                return true;
             }
         }
-
         return false;
     }
 
@@ -132,19 +120,17 @@ public class PeerHandler {
      * @param name   the peer's name.
      * @return the added peer.
      */
-    public Peer addPeer(InetSocketAddress address, PublicKeyPair peerPublicKeyPair, String name) {
+    public synchronized Peer addPeer(InetSocketAddress address, PublicKeyPair peerPublicKeyPair, String name) {
         if (publicKeyPair.equals(peerPublicKeyPair)) {
             Log.i(TAG, "Not adding self");
             Peer self = null;
-            synchronized (peerList) {
-                for (Peer p : peerList) {
-                    if (p.getAddress().equals(wanVote.getAddress()))
-                        self = p;
-                }
-                if (self != null) {
-                    peerList.remove(self);
-                    Log.i(TAG, "Removed self");
-                }
+            for (Peer p : peerList) {
+                if (p.getAddress().equals(wanVote.getAddress()))
+                    self = p;
+            }
+            if (self != null) {
+                peerList.remove(self);
+                Log.i(TAG, "Removed self");
             }
             return null;
         }
@@ -152,26 +138,23 @@ public class PeerHandler {
             Log.i(TAG, "Not adding peer with same address as this device");
             return null;
         }
-        synchronized (peerList) {
-            for (Peer peer : peerList) {
-                if (peer.getPublicKeyPair() != null && peer.getPublicKeyPair().equals(peerPublicKeyPair))
-                    return peer;
-                if (peer.getAddress().equals(address)) return peer;
-            }
+        for (Peer peer : peerList) {
+            if (peer.getPublicKeyPair() != null && peer.getPublicKeyPair().equals(peerPublicKeyPair)) return peer;
+            if (peer.getAddress().equals(address)) return peer;
         }
         final Peer peer = new Peer(address, peerPublicKeyPair, name);
 
-        synchronized (peerList) {
-            peerList.add(peer);
-        }
-
-        splitPeerList();
-
-        if (peerListener != null) {
-            peerListener.updateActivePeers();
-            peerListener.updateNewPeers();
-        }
-
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public synchronized void run() {
+                    peerList.add(peer);
+                    splitPeerList();
+                    if (peerListener != null) {
+                        peerListener.updateActivePeers();
+                        peerListener.updateNewPeers();
+                    }
+            }
+        });
         return peer;
     }
 
@@ -180,25 +163,23 @@ public class PeerHandler {
      * Synchronized is to make sure this happens thread safe.
      */
     public synchronized void splitPeerList() {
-        synchronized (peerList) {
-            removeDuplicates();
-            List<Peer> newConnected = new ArrayList<>();
-            List<Peer> newIncoming = new ArrayList<>();
-            for (Peer peer : peerList) {
-                if (peer.isReceivedFrom()) {
-                    newConnected.add(peer);
-                } else {
-                    newIncoming.add(peer);
-                }
+        removeDuplicates();
+        List<Peer> newConnected = new ArrayList<>();
+        List<Peer> newIncoming = new ArrayList<>();
+        for (Peer peer : peerList) {
+            if (peer.isReceivedFrom()) {
+                newConnected.add(peer);
+            } else {
+                newIncoming.add(peer);
             }
-            if (!newConnected.equals(activePeersList)) {
-                activePeersList.clear();
-                activePeersList.addAll(newConnected);
-            }
-            if (!newIncoming.equals(newPeersList)) {
-                newPeersList.clear();
-                newPeersList.addAll(newIncoming);
-            }
+        }
+        if (!newConnected.equals(activePeersList)) {
+            activePeersList.clear();
+            activePeersList.addAll(newConnected);
+        }
+        if (!newIncoming.equals(newPeersList)) {
+            newPeersList.clear();
+            newPeersList.addAll(newIncoming);
         }
     }
 
@@ -212,27 +193,22 @@ public class PeerHandler {
      */
     public synchronized Peer getEligiblePeer(List<Peer> excludePeers) {
         List<Peer> eligiblePeers = new ArrayList<>();
-
-        synchronized (peerList) {
-            for (Peer p : peerList) {
-                boolean excluded = false;
-                for (Peer e : excludePeers) {
-                    if (e.equals(p)) {
-                        excluded = true;
-                        break;
-                    }
-                }
-                if (p.isAlive() && !excluded || p.isBootstrap()) {
-                    eligiblePeers.add(p);
+        for (Peer p : peerList) {
+            boolean excluded = false;
+            for(Peer e : excludePeers) {
+                if(e.equals(p)) {
+                    excluded = true;
+                    break;
                 }
             }
+            if (p.isAlive() && !excluded || p.isBootstrap()) {
+                eligiblePeers.add(p);
+            }
         }
-
         if (eligiblePeers.size() == 0) {
             Log.d(TAG, "No eligible peers!");
             return null;
         }
-
         Random random = new Random();
         return eligiblePeers.get(random.nextInt(eligiblePeers.size()));
     }
@@ -245,34 +221,28 @@ public class PeerHandler {
      * @param name   the peer's name.
      * @return the resolved or created peer.
      */
-    public Peer getOrMakePeer(InetSocketAddress address, PublicKeyPair publicKeyPair, String name) {
+    public synchronized Peer getOrMakePeer(InetSocketAddress address, PublicKeyPair publicKeyPair, String name) {
         if (publicKeyPair != null) {
-            synchronized (peerList) {
-                for (Peer peer : peerList) {
-                    if (publicKeyPair.equals(peer.getPublicKeyPair())) {
-                        if (!address.equals(peer.getAddress())) {
-                            Log.i(TAG, "Peer address differs from known address | address: " + address.toString() + " | peer.getAddress(): " + peer.getAddress().toString() + " | peer's public keys: " + publicKeyPair + " | this device's public keys: " + this.publicKeyPair);
-                            peer.setAddress(address);
-                            peer.setName(name);
-                        }
-                        removeDuplicates();
-                        return peer;
-                    }
-                }
-            }
-        }
-
-        synchronized (peerList) {
             for (Peer peer : peerList) {
-                if (peer.getAddress().equals(address)) {
-                    if (publicKeyPair != null) peer.setPublicKeyPair(publicKeyPair);
-                    peer.setName(name);
+                if (publicKeyPair.equals(peer.getPublicKeyPair())) {
+                    if (!address.equals(peer.getAddress())) {
+                        Log.i(TAG, "Peer address differs from known address | address: " + address.toString() + " | peer.getAddress(): " + peer.getAddress().toString() + " | peer's public keys: " + publicKeyPair + " | this device's public keys: " + this.publicKeyPair);
+                        peer.setAddress(address);
+                        peer.setName(name);
+                    }
                     removeDuplicates();
                     return peer;
                 }
             }
         }
-
+        for (Peer peer : peerList) {
+            if (peer.getAddress().equals(address)) {
+                if (publicKeyPair != null) peer.setPublicKeyPair(publicKeyPair);
+                peer.setName(name);
+                removeDuplicates();
+                return peer;
+            }
+        }
         removeDuplicates();
         return addPeer(address, publicKeyPair, name);
     }
@@ -312,10 +282,7 @@ public class PeerHandler {
      * @param peerList
      */
     public synchronized void setPeerList(ArrayList<Peer> peerList) {
-        synchronized (this.peerList) {
-            this.peerList.clear();
-            this.peerList.addAll(peerList);
-            removeDuplicates();
-        }
+        this.peerList = peerList;
+        removeDuplicates();
     }
 }

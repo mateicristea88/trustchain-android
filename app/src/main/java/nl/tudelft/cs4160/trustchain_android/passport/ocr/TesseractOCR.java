@@ -152,7 +152,7 @@ public class TesseractOCR {
     public void init() {
         baseApi = new TessBaseAPI();
         baseApi.setDebug(true);
-        String path = fragment.requireContext().getFilesDir() + "/" + TesseractOCR.FOLDER_TRAINED_DATA + "/";
+        String path = Environment.getExternalStorageDirectory() + "/" + TesseractOCR.FOLDER_TRAINED_DATA + "/";
         File trainedDataFile = new File(path, TesseractOCR.FOLDER_TESSERACT_DATA + "/" + trainedData);
         try {
             mDeviceStorageAccessLock.acquire();

@@ -3,7 +3,6 @@ package nl.tudelft.cs4160.trustchain_android.ui.chainexplorer;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,10 +20,7 @@ import nl.tudelft.cs4160.trustchain_android.R;
 import nl.tudelft.cs4160.trustchain_android.block.TrustChainBlockHelper;
 import nl.tudelft.cs4160.trustchain_android.crypto.PublicKeyPair;
 import nl.tudelft.cs4160.trustchain_android.message.MessageProto;
-import nl.tudelft.cs4160.trustchain_android.peer.Peer;
-import nl.tudelft.cs4160.trustchain_android.storage.repository.PeerRepository;
 import nl.tudelft.cs4160.trustchain_android.storage.sharedpreferences.UserNameStorage;
-import nl.tudelft.cs4160.trustchain_android.ui.torrent.TorrentActivity;
 import nl.tudelft.cs4160.trustchain_android.util.ByteArrayConverter;
 import nl.tudelft.cs4160.trustchain_android.util.OpenFileClickListener;
 
@@ -34,17 +30,15 @@ public class ChainExplorerAdapter extends BaseAdapter {
     private final static String PEER_NAME_UNKNOWN = "unknown";
 
     private Context context;
-    private PeerRepository peerRepository;
     private List<MessageProto.TrustChainBlock> blocksList;
     private HashMap<ByteString, String> peerList = new HashMap<>();
 
     private byte[] chainPubKey;
     private byte[] myPubKey;
 
-    public ChainExplorerAdapter(Context context, PeerRepository peerRepository, List<MessageProto.TrustChainBlock> blocksList, byte[] myPubKey,
+    public ChainExplorerAdapter(Context context, List<MessageProto.TrustChainBlock> blocksList, byte[] myPubKey,
                                 byte[] chainPubKey) {
         this.context = context;
-        this.peerRepository = peerRepository;
         this.blocksList = blocksList;
         this.chainPubKey = chainPubKey;
         this.myPubKey = myPubKey;
@@ -57,11 +51,11 @@ public class ChainExplorerAdapter extends BaseAdapter {
     }
 
     private String retrievePeerName(byte[] key) {
-        Peer peer = peerRepository.getByPublicKey(key);
-        if (peer == null) {
+        String name = UserNameStorage.getPeerByPublicKey(context, new PublicKeyPair(key));
+        if(name == null) {
             return PEER_NAME_UNKNOWN;
         }
-        return peer.getName();
+        return name;
     }
 
     @Override
@@ -145,7 +139,6 @@ public class ChainExplorerAdapter extends BaseAdapter {
 
         signature.setText(ByteArrayConverter.bytesToHexString(block.getSignature().toByteArray()));
 
-        expTransaction.setOnClickListener(null);
         if (TrustChainBlockHelper.containsBinaryFile(block)) {
             // If the block contains a file show the 'click to open' text
             transaction.setText(context.getString(R.string.click_to_open_file, block.getTransaction().getFormat()));
@@ -153,15 +146,6 @@ public class ChainExplorerAdapter extends BaseAdapter {
 
             expTransaction.setText(context.getString(R.string.click_to_open_file, block.getTransaction().getFormat()));
             setOpenFileClickListener(expTransaction, block);
-        } else if (TrustChainBlockHelper.containsMagnetLink(block)) {
-            String link = block.getTransaction().getUnformatted().toStringUtf8();
-            transaction.setText(link);
-            expTransaction.setText(link);
-            expTransaction.setOnClickListener(v -> {
-                Intent intent = new Intent(context, TorrentActivity.class);
-                intent.setData(Uri.parse(link));
-                context.startActivity(intent);
-            });
         } else {
             transaction.setText(block.getTransaction().getUnformatted().toStringUtf8());
             expTransaction.setText(block.getTransaction().getUnformatted().toStringUtf8());
@@ -200,11 +184,11 @@ public class ChainExplorerAdapter extends BaseAdapter {
     }
 
     private String checkUserNameStorage(byte[] pubKey) {
-        Peer peer = peerRepository.getByPublicKey(pubKey);
-        if (peer == null) {
+        String name = UserNameStorage.getPeerByPublicKey(context, new PublicKeyPair(pubKey));
+        if(name == null) {
             return "peer " + (peerList.size()-1);
         }
-        return peer.getName();
+        return name;
     }
 
     private void showToast(String text) {
