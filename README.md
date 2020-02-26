@@ -9,3 +9,9 @@ Documentation
 =============
 The documentation for this project can be found at [ReadTheDocs](http://trustchain.readthedocs.org).
 
+Machine Learning
+=============
+We have added the basic structure of distributed machine learning. For now we take some 2d points, try to fit a line through them. We don't send any data about the specific points to other entities: we create a model, we update it locally (with linear regression) and send the model to a random peer that has its own data points. So far, we do it locally (having issues with using trustchain for sending messages) but we virtually separate our data. 
+
+<img src="https://user-images.githubusercontent.com/11733226/75343056-ea27bc00-5897-11ea-96ee-efca931ed632.png" height="500">
+
